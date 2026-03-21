@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CertAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0d0d;--bg2:#141414;--bg3:#1a1a1a;--bg4:#222;--bg5:#2a2a2a;
+  --border:#2e2e2e;--border2:#3a3a3a;
+  --blue:#3b6ef8;--blue2:#2d5ce8;--blue-dim:rgba(59,110,248,.12);--blue-glow:rgba(59,110,248,.25);
+  --text:#f0f0f0;--text2:#a0a0a0;--text3:#606060;
+  --green:#22c55e;--green-dim:rgba(34,197,94,.12);
+  --red:#ef4444;--red-dim:rgba(239,68,68,.12);
+  --amber:#f59e0b;--amber-dim:rgba(245,158,11,.12);
+  --orange:#f97316;--orange-dim:rgba(249,115,22,.12);
+  --c1:#ef4444;--c2:#f97316;--c3:#f59e0b;--fi:#38bdf8;
+  --radius:8px;--radius-sm:5px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;overflow-x:hidden}
+
+/* ── TOP NAV ── */
+.top-nav{position:fixed;top:0;left:0;right:0;height:56px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;z-index:300;padding:0 1rem;gap:.5rem}
+.nav-logo{display:flex;align-items:center;gap:.5rem;margin-right:1rem;flex-shrink:0}
+.nav-logo-icon{width:28px;height:28px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff}
+.nav-logo-text{font-weight:700;font-size:.95rem;color:var(--text)}
+.nav-tabs{display:flex;align-items:center;gap:2px;overflow-x:auto;flex:1;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:.4rem .75rem;border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;white-space:nowrap;border:none;background:none;color:var(--text2);font-size:.72rem;font-weight:500;position:relative;flex-shrink:0}
+.nav-tab:hover{background:var(--bg4);color:var(--text)}
+.nav-tab.active{background:var(--blue-dim);color:var(--blue)}
+.nav-tab-icon{font-size:1rem}
+.nav-tab-badge{position:absolute;top:4px;right:4px;background:var(--blue);color:#fff;border-radius:10px;font-size:.55rem;padding:0 4px;font-weight:700;min-width:14px;text-align:center}
+.nav-right{display:flex;align-items:center;gap:.5rem;margin-left:auto;flex-shrink:0}
+.cert-ref{font-size:.65rem;color:var(--text3);font-family:monospace;padding:.2rem .5rem;background:var(--bg4);border-radius:4px}
+.status-pill{display:flex;align-items:center;gap:.35rem;padding:.25rem .65rem;border-radius:20px;font-size:.68rem;font-weight:600;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,.25)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ── MAIN LAYOUT ── */
+.app{margin-top:56px;display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:280px;background:var(--bg2);border-right:1px solid var(--border);padding:1rem;display:flex;flex-direction:column;gap:.75rem;overflow-y:auto;max-height:calc(100vh - 56px);position:sticky;top:56px;flex-shrink:0}
+.main{flex:1;min-width:0;overflow-y:auto;max-height:calc(100vh - 56px)}
+
+/* ── SIDEBAR ── */
+.sb-section{margin-bottom:.5rem}
+.sb-label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:.4rem}
+.cert-type-grid{display:flex;flex-direction:column;gap:.3rem}
+.cert-type-btn{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;width:100%;text-align:left}
+.cert-type-btn:hover{border-color:var(--border2);background:var(--bg4)}
+.cert-type-btn.active{background:var(--blue-dim);border-color:var(--blue);color:var(--blue)}
+.cert-type-icon{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.cert-type-icon.eicr{background:rgba(239,68,68,.15)}
+.cert-type-icon.eic{background:rgba(34,197,94,.12)}
+.cert-type-icon.mwc{background:rgba(245,158,11,.12)}
+.cert-type-name{font-weight:600;font-size:.82rem}
+.cert-type-desc{font-size:.62rem;color:var(--text2);margin-top:1px}
+.divider{height:1px;background:var(--border);margin:.25rem 0}
+
+/* CONNECTION */
+.conn-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:.6rem}
+.conn-tab{padding:.38rem;text-align:center;font-size:.68rem;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text2);transition:all .15s}
+.conn-tab.active{background:var(--blue);color:#fff}
+.conn-panel{display:none}.conn-panel.active{display:flex;flex-direction:column;gap:.4rem}
+.field{display:flex;flex-direction:column;gap:.2rem}
+.field label{font-size:.62rem;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select,.field textarea{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:var(--radius-sm);font-size:.75rem;outline:none;font-family:'Inter',sans-serif;transition:border-color .15s;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue)}
+.field textarea{resize:vertical;min-height:70px;line-height:1.5}
+
+/* SCAN BOX */
+.scan-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.scan-box-hdr{display:flex;align-items:center;justify-content:space-between;padding:.5rem .75rem;background:var(--bg4);border-bottom:1px solid var(--border)}
+.scan-box-title{font-size:.75rem;font-weight:600;color:var(--fi)}
+.ai-badge{background:var(--blue);color:#fff;font-size:.55rem;font-weight:700;padding:.1rem .35rem;border-radius:4px;display:inline-flex;align-items:center;gap:.2rem}
+.scan-box-body{padding:.75rem;display:flex;flex-direction:column;gap:.5rem}
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius-sm);padding:.85rem;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--bg)}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--blue);background:var(--blue-dim)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-zone-icon{font-size:1.5rem;margin-bottom:.25rem}
+.upload-zone-text{font-size:.65rem;color:var(--text2);line-height:1.4}
+.upload-zone-text strong{color:var(--fi)}
+.preview-wrap{display:none;position:relative}
+.preview-wrap.show{display:block}
+.preview-img{width:100%;border-radius:var(--radius-sm);border:1px solid var(--border);max-height:160px;object-fit:contain;background:#000;display:block}
+.scan-overlay{position:absolute;inset:0;background:rgba(13,13,13,.85);border-radius:var(--radius-sm);display:none;flex-direction:column;align-items:center;justify-content:center;gap:.5rem}
+.scan-overlay.show{display:flex}
+.scan-line{width:80%;height:2px;background:linear-gradient(90deg,transparent,var(--fi),transparent);animation:scanmove 1.5s ease-in-out infinite}
+@keyframes scanmove{0%{transform:translateY(-40px);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:translateY(40px);opacity:0}}
+.scan-overlay-txt{font-size:.65rem;color:var(--fi);animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.preview-actions{display:flex;gap:.3rem;margin-top:.3rem}
+.cam-section{display:none}
+.cam-section.show{display:block}
+#cameraFeed{width:100%;border-radius:var(--radius-sm);border:1px solid var(--border);max-height:160px;object-fit:cover}
+.cam-actions{display:flex;gap:.3rem;margin-top:.3rem}
+#captureCanvas{display:none}
+.extracted{background:var(--bg);border:1px solid rgba(56,189,248,.2);border-radius:var(--radius-sm);padding:.6rem;display:none}
+.extracted.show{display:block}
+.extracted-title{font-size:.65rem;font-weight:600;color:var(--fi);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.06em}
+.extracted-row{display:flex;justify-content:space-between;padding:.18rem 0;border-bottom:1px solid var(--border);font-size:.62rem}
+.extracted-row:last-child{border-bottom:none}
+.extracted-k{color:var(--text2)}.extracted-v{color:var(--text);text-align:right}
+.pills{display:flex;flex-wrap:wrap;gap:.2rem;margin-top:.3rem}
+.pill{padding:.1rem .38rem;border-radius:3px;font-size:.55rem;background:var(--blue-dim);color:var(--fi);border:1px solid rgba(56,189,248,.2)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.3rem;padding:.42rem .85rem;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:.78rem;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue2)}
+.btn-primary:disabled{background:var(--bg5);color:var(--text3);cursor:not-allowed}
+.btn-secondary{background:var(--bg4);color:var(--text2);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--bg5);color:var(--text)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.btn-danger:hover{background:rgba(239,68,68,.2)}
+.btn-sm{font-size:.7rem;padding:.3rem .6rem}
+.btn-xs{font-size:.65rem;padding:.2rem .45rem}
+.btn-blue-outline{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-glow)}
+.btn-blue-outline:hover{background:rgba(59,110,248,.2)}
+.btn-block{width:100%}
+.btn-group{display:flex;gap:.3rem}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.35rem}
+.chip{padding:.2rem .42rem;background:var(--bg3);border:1px solid var(--border);border-radius:3px;font-size:.6rem;color:var(--text2);cursor:pointer;transition:all .12s}
+.chip:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+
+/* ── PAGE CONTENT ── */
+.page{display:none;padding:1.5rem;animation:fadein .2s ease}
+.page.active{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* PAGE HEADER */
+.page-header{margin-bottom:1.25rem}
+.page-title{font-size:1.3rem;font-weight:700;color:var(--text)}
+.page-sub{font-size:.75rem;color:var(--text2);margin-top:2px}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1rem;background:var(--bg3);border-bottom:1px solid var(--border)}
+.card-header-left{display:flex;align-items:center;gap:.5rem}
+.card-title{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--blue)}
+.card-body{padding:1rem}
+
+/* FORM GRID */
+.form-grid{display:grid;gap:.5rem}
+.form-grid.g2{grid-template-columns:1fr 1fr}
+.form-grid.g3{grid-template-columns:1fr 1fr 1fr}
+.form-grid.g4{grid-template-columns:1fr 1fr 1fr 1fr}
+
+/* EDITABLE FIELD */
+.ef{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.4rem .6rem;cursor:text;transition:border-color .15s}
+.ef:hover{border-color:var(--border2)}
+.ef.img-src{border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.05)}
+.ef-label{font-size:.58rem;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.15rem;display:flex;align-items:center;gap:.25rem;pointer-events:none}
+.ef-img-badge{background:rgba(56,189,248,.2);color:var(--fi);font-size:.5rem;padding:.02rem .25rem;border-radius:2px}
+.ef-val{font-size:.78rem;color:var(--text);font-weight:500;outline:none;min-height:1.1em;word-break:break-word}
+.ef-val:focus{color:var(--blue)}
+.ef-val.hi{color:var(--amber)}
+.ef-val.ok{color:var(--green)}
+.ef-val.bad{color:var(--red)}
+
+/* TOGGLE BUTTONS */
+.toggle-group{display:flex;gap:.25rem;flex-wrap:wrap}
+.toggle-btn{padding:.28rem .55rem;border-radius:4px;font-size:.68rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text2);transition:all .12s}
+.toggle-btn:hover{border-color:var(--border2);color:var(--text)}
+.toggle-btn.active-pass{background:var(--green-dim);border-color:rgba(34,197,94,.4);color:var(--green)}
+.toggle-btn.active-fail{background:var(--red-dim);border-color:rgba(239,68,68,.4);color:var(--red)}
+.toggle-btn.active-lim{background:var(--amber-dim);border-color:rgba(245,158,11,.4);color:var(--amber)}
+.toggle-btn.active-na{background:var(--bg5);border-color:var(--border2);color:var(--text2)}
+.toggle-btn.active-c1{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:var(--c1)}
+.toggle-btn.active-c2{background:rgba(249,115,22,.15);border-color:rgba(249,115,22,.4);color:var(--c2)}
+.toggle-btn.active-c3{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:var(--c3)}
+.toggle-btn.active-fi{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.3);color:var(--fi)}
+.toggle-btn.active-nv{background:var(--bg5);border-color:var(--border2);color:var(--text3)}
+
+/* SUPPLY CHARACTERISTICS */
+.earth-btns{display:flex;gap:.3rem;flex-wrap:wrap}
+.earth-btn{padding:.3rem .7rem;border-radius:4px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text2);transition:all .12s}
+.earth-btn:hover{border-color:var(--border2)}
+.earth-btn.active{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* OVERALL RESULT */
+.result-banner{display:flex;align-items:center;gap:1rem;padding:.75rem 1rem;border-radius:var(--radius);margin-bottom:1rem;flex-wrap:wrap}
+.result-banner.sat{background:var(--green-dim);border:1px solid rgba(34,197,94,.3)}
+.result-banner.unsat{background:var(--red-dim);border:1px solid rgba(239,68,68,.3)}
+.result-text{font-weight:700;font-size:1rem}
+.result-banner.sat .result-text{color:var(--green)}
+.result-banner.unsat .result-text{color:var(--red)}
+
+/* INSPECTION SCHEDULE */
+.insp-section{margin-bottom:.5rem;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.insp-section-hdr{display:flex;align-items:center;justify-content:space-between;padding:.55rem .85rem;background:var(--bg3);cursor:pointer;user-select:none}
+.insp-section-num{width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;font-size:.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.insp-section-title{font-size:.75rem;font-weight:600;flex:1;margin:0 .65rem;color:var(--text)}
+.insp-section-actions{display:flex;gap:.3rem}
+.insp-item{display:flex;align-items:center;justify-content:space-between;padding:.45rem .85rem;border-top:1px solid var(--border);gap:.5rem;flex-wrap:wrap}
+.insp-item-ref{font-size:.65rem;font-weight:600;color:var(--text3);min-width:35px}
+.insp-item-desc{font-size:.72rem;color:var(--text2);flex:1}
+.insp-item-btns{display:flex;gap:.2rem;flex-shrink:0}
+.insp-code-btn{width:32px;height:26px;border-radius:4px;font-size:.62rem;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text3);transition:all .12s;display:flex;align-items:center;justify-content:center}
+.insp-code-btn:hover{border-color:var(--border2);color:var(--text)}
+.insp-code-btn.sel-pass{background:var(--green-dim);border-color:rgba(34,197,94,.4);color:var(--green)}
+.insp-code-btn.sel-c1{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:var(--c1)}
+.insp-code-btn.sel-c2{background:rgba(249,115,22,.15);border-color:rgba(249,115,22,.4);color:var(--c2)}
+.insp-code-btn.sel-c3{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:var(--c3)}
+.insp-code-btn.sel-fi{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.3);color:var(--fi)}
+.insp-code-btn.sel-lim{background:var(--amber-dim);border-color:rgba(245,158,11,.4);color:var(--amber)}
+.insp-code-btn.sel-nv{background:var(--bg5);border-color:var(--border2);color:var(--text3)}
+.insp-code-btn.sel-na{background:var(--bg5);border-color:var(--border2);color:var(--text3)}
+
+/* BOARDS PAGE */
+.board-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all .15s;margin-bottom:.5rem}
+.board-card:hover{border-color:var(--border2);background:var(--bg3)}
+.board-card-left{display:flex;align-items:center;gap:.75rem}
+.board-icon{width:36px;height:36px;background:var(--bg4);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.board-name{font-weight:600;font-size:.88rem}
+.board-meta{font-size:.65rem;color:var(--text2);margin-top:2px}
+.board-status{padding:.2rem .55rem;border-radius:12px;font-size:.65rem;font-weight:600;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,.25)}
+.add-board-btn{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.85rem;background:var(--bg3);border:2px dashed var(--border2);border-radius:var(--radius);cursor:pointer;color:var(--text2);font-size:.8rem;font-weight:500;transition:all .15s;width:100%}
+.add-board-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+
+/* CIRCUIT TABLE */
+.circuit-toolbar{display:flex;align-items:center;gap:.4rem;padding:.65rem .85rem;background:var(--bg3);border-bottom:1px solid var(--border);overflow-x:auto;flex-wrap:nowrap;flex-shrink:0}
+.circuit-toolbar::-webkit-scrollbar{display:none}
+.circuit-count{font-size:.72rem;color:var(--text2);margin-left:.25rem;white-space:nowrap}
+.schedule-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.schedule-table{border-collapse:collapse;font-size:.62rem;min-width:1600px;width:100%;font-family:'Inter',sans-serif}
+.schedule-table th{background:#1a1a1a;color:var(--text3);padding:.3rem .4rem;text-align:center;font-size:.55rem;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--border);font-weight:600;white-space:nowrap;position:sticky;top:0;z-index:10}
+.schedule-table th.grp-hdr{background:#151515;color:var(--blue);font-size:.58rem;letter-spacing:.07em}
+.schedule-table td{padding:.25rem .35rem;border:1px solid var(--border);color:var(--text2);text-align:center;vertical-align:middle}
+.schedule-table td.td-desc{text-align:left;color:var(--text);font-weight:500;min-width:140px}
+.schedule-table tr:hover td{background:rgba(255,255,255,.015)}
+.schedule-table tr.img-src td{background:rgba(56,189,248,.04)}
+.td-e{outline:none;display:block;width:100%;text-align:center;padding:1px 3px;border-radius:3px;min-width:38px;font-family:'Inter',sans-serif;font-size:.62rem}
+.td-e:focus{color:var(--blue);background:rgba(59,110,248,.08)}
+td.ok{color:var(--green)!important}
+td.bad{color:var(--red)!important}
+td.warn{color:var(--amber)!important}
+.no-circuits{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:1rem;color:var(--text2)}
+.no-circuits-icon{font-size:2.5rem;opacity:.3}
+.no-circuits-text{font-size:.82rem;text-align:center}
+.quick-add-nums{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:.25rem}
+.quick-add-num{width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .12s;color:var(--text2)}
+.quick-add-num:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* BOARD DETAIL */
+.board-detail{padding:1.25rem}
+.board-detail-hdr{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.board-detail-name{font-size:1.3rem;font-weight:700}
+.board-detail-meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+
+/* OBSERVATIONS */
+.obs-table{width:100%;border-collapse:collapse;font-size:.72rem}
+.obs-table th{background:var(--bg3);color:var(--text2);padding:.4rem .6rem;text-align:left;font-size:.62rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.obs-table td{padding:.45rem .6rem;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+.obs-table tr:last-child td{border-bottom:none}
+.obs-code-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:22px;border-radius:4px;font-size:.65rem;font-weight:700}
+.obs-code-badge.c1{background:rgba(239,68,68,.15);color:var(--c1)}
+.obs-code-badge.c2{background:rgba(249,115,22,.15);color:var(--c2)}
+.obs-code-badge.c3{background:rgba(245,158,11,.15);color:var(--c3)}
+.obs-code-badge.fi{background:rgba(56,189,248,.12);color:var(--fi)}
+
+/* LOADING */
+.loading-wrap{display:none;flex-direction:column;align-items:center;justify-content:center;padding:4rem;gap:1.5rem}
+.loading-wrap.show{display:flex}
+.loading-bar{width:200px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.loading-bar::after{content:'';display:block;height:100%;width:40%;background:var(--blue);animation:loadslide 1s ease-in-out infinite}
+@keyframes loadslide{0%{margin-left:-40%}100%{margin-left:140%}}
+.loading-txt{font-size:.75rem;color:var(--text2);font-weight:500}
+
+/* ERROR / OK */
+.alert{display:none;padding:.6rem .85rem;border-radius:var(--radius-sm);font-size:.72rem;font-weight:500;margin-bottom:.85rem;line-height:1.5;white-space:pre-wrap}
+.alert.show{display:block}
+.alert.err{background:var(--red-dim);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.alert.ok{background:var(--green-dim);border:1px solid rgba(34,197,94,.3);color:var(--green)}
+
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:40vh;color:var(--text2);text-align:center;gap:.85rem}
+.empty-icon{font-size:3rem;opacity:.2}
+.empty-txt{font-size:.8rem;max-width:280px;line-height:1.6}
+
+/* APPENDIX */
+.appendix-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.75rem;margin-top:.75rem}
+.appendix-photo{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.appendix-photo img{width:100%;height:140px;object-fit:cover;display:block}
+.appendix-photo-cap{padding:.4rem .5rem;font-size:.65rem;color:var(--text2)}
+.photo-drop-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:2rem;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.photo-drop-zone:hover{border-color:var(--blue);background:var(--blue-dim)}
+.photo-drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+
+/* DECLARATION */
+.team-member-sel{display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s}
+.team-member-sel:hover{border-color:var(--border2)}
+.member-avatar{width:28px;height:28px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0}
+.member-name{font-size:.78rem;font-weight:500}
+.company-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.65rem .85rem;display:flex;align-items:center;gap:.65rem}
+.company-icon{width:36px;height:36px;background:var(--bg4);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.company-name{font-weight:600;font-size:.88rem}
+.company-phone{font-size:.7rem;color:var(--text2)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* MOBILE */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .app{flex-direction:column}
+  .form-grid.g3,.form-grid.g4{grid-template-columns:1fr 1fr}
+  .form-grid.g2{grid-template-columns:1fr}
+}
+
+/* PRINT */
+@media print{
+  body{background:#fff!important;color:#000!important}
+  .top-nav,.sidebar,.circuit-toolbar,.btn,.chips,.no-circuits,.quick-add-nums,.alert{display:none!important}
+  .app,.main{display:block!important}
+  .page{display:block!important;padding:.5cm!important}
+  .card{border:1px solid #ccc!important;break-inside:avoid;margin-bottom:.3cm}
+  .card-header{background:#eee!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .ef{background:#fafafa!important;border:1px solid #ddd!important}
+  .ef-val{color:#000!important;font-size:8pt!important}
+  .schedule-table{font-size:6.5pt!important;min-width:unset!important}
+  .schedule-table th{background:#ddd!important;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .schedule-table td{color:#222!important}
+  .schedule-wrap{overflow:visible!important}
+  @page{size:A4 landscape;margin:1cm}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOP NAV ═══ -->
+<nav class="top-nav">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">⚡</div>
+    <div class="nav-logo-text">CertAI</div>
+  </div>
+  <div class="nav-tabs" id="navTabs">
+    <button class="nav-tab active" data-page="installation" onclick="goPage('installation',this)">
+      <span class="nav-tab-icon">📋</span>Installation details
+    </button>
+    <button class="nav-tab" id="tab-observations" data-page="observations" onclick="goPage('observations',this)">
+      <span class="nav-tab-icon">👁</span>Observations
+    </button>
+    <button class="nav-tab" data-page="supply" onclick="goPage('supply',this)">
+      <span class="nav-tab-icon">⚙️</span>Supply characteristics
+    </button>
+    <button class="nav-tab" data-page="inspection" onclick="goPage('inspection',this)">
+      <span class="nav-tab-icon">📋</span>Inspection schedule
+    </button>
+    <button class="nav-tab" data-page="boards" onclick="goPage('boards',this)">
+      <span class="nav-tab-icon">🔌</span>Boards &amp; circuits
+      <span class="nav-tab-badge" id="boardsBadge">0</span>
+    </button>
+    <button class="nav-tab" data-page="declaration" onclick="goPage('declaration',this)">
+      <span class="nav-tab-icon">✍️</span>Declaration
+    </button>
+    <button class="nav-tab" data-page="appendix" onclick="goPage('appendix',this)">
+      <span class="nav-tab-icon">📎</span>Appendix
+    </button>
+  </div>
+  <div class="nav-right">
+    <div class="cert-ref" id="certRef">—</div>
+    <div class="status-pill"><div class="status-dot"></div><span id="statusTxt">IN PROGRESS</span></div>
+  </div>
+</nav>
+
+<div class="app">
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sb-section">
+    <div class="sb-label">Certificate Type</div>
+    <div class="cert-type-grid">
+      <button class="cert-type-btn active" onclick="setCert('eicr',this)">
+        <div class="cert-type-icon eicr">🔍</div>
+        <div><div class="cert-type-name">EICR</div><div class="cert-type-desc">Condition Report</div></div>
+      </button>
+      <button class="cert-type-btn" onclick="setCert('eic',this)">
+        <div class="cert-type-icon eic">⚡</div>
+        <div><div class="cert-type-name">EIC</div><div class="cert-type-desc">Installation Certificate</div></div>
+      </button>
+      <button class="cert-type-btn" onclick="setCert('mwc',this)">
+        <div class="cert-type-icon mwc">🔧</div>
+        <div><div class="cert-type-name">Minor Works</div><div class="cert-type-desc">Minor Works Certificate</div></div>
+      </button>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">Ollama Connection</div>
+    <div class="conn-tabs">
+      <button class="conn-tab" onclick="setConn('direct',this)">Direct</button>
+      <button class="conn-tab active" onclick="setConn('proxy',this)">Proxy</button>
+    </div>
+    <div class="conn-panel" id="cp-direct">
+      <div class="field"><label>Ollama URL</label><input id="ollamaUrl" value="http://localhost:11434" type="text"></div>
+      <div class="field"><label>Text Model</label><input id="modelDirect" value="gemma3:27b" type="text"></div>
+      <button class="btn btn-secondary btn-sm btn-block" onclick="testConn()">⚡ Test Connection</button>
+    </div>
+    <div class="conn-panel active" id="cp-proxy">
+      <div class="field"><label>Proxy URL</label><input id="proxyUrl" placeholder="https://192.168.1.53:3001" type="text"></div>
+      <div class="field"><label>Text Model</label><input id="modelProxy" value="gemma3:27b" type="text"></div>
+      <button class="btn btn-secondary btn-sm btn-block" onclick="testProxy()">⚡ Test Proxy</button>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="scan-box">
+    <div class="scan-box-hdr">
+      <div class="scan-box-title">Board Scan</div>
+      <div class="ai-badge">⚡ AI</div>
+    </div>
+    <div class="scan-box-body">
+      <div class="field"><label>Vision Model</label><input id="visionModel" value="llava" placeholder="llava, minicpm-v..."></div>
+      <div class="btn-group">
+        <button class="btn btn-blue-outline btn-sm" style="flex:1" onclick="openCam()">📷 Camera</button>
+        <button class="btn btn-secondary btn-sm" style="flex:1" onclick="document.getElementById('bfi').click()">📁 Upload</button>
+      </div>
+      <input type="file" id="bfi" accept="image/*" style="display:none" onchange="handleFile(event)">
+      <div class="cam-section" id="camSec">
+        <video id="camFeed" autoplay playsinline muted style="width:100%;border-radius:5px;border:1px solid var(--border);max-height:160px;object-fit:cover"></video>
+        <canvas id="capCanvas" style="display:none"></canvas>
+        <div class="btn-group" style="margin-top:.3rem">
+          <button class="btn btn-blue-outline btn-sm" style="flex:1" onclick="capPhoto()">📸 Capture</button>
+          <button class="btn btn-secondary btn-sm" onclick="closeCam()">✕</button>
+        </div>
+      </div>
+      <div class="upload-zone" id="uploadZone" ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+        <input type="file" accept="image/*" onchange="handleFile(event)">
+        <div class="upload-zone-icon">🔌</div>
+        <div class="upload-zone-text"><strong>Drop board photo here</strong><br>or click to browse</div>
+      </div>
+      <div class="preview-wrap" id="previewWrap">
+        <img id="boardImg" class="preview-img" src="" alt="">
+        <div class="scan-overlay" id="scanOv"><div class="scan-line"></div><div class="scan-overlay-txt">ANALYSING BOARD...</div></div>
+        <div class="preview-actions">
+          <button class="btn btn-blue-outline btn-sm" style="flex:1" onclick="scanBoard()" id="scanBtn">🔍 Scan Board</button>
+          <button class="btn btn-secondary btn-sm" onclick="clearImg()">✕</button>
+        </div>
+      </div>
+      <div class="extracted" id="extractedBox">
+        <div class="extracted-title">Extracted from image</div>
+        <div id="extractedRows"></div>
+      </div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">Job Brief</div>
+    <div class="field"><textarea id="jobBrief" placeholder="Address, client, installation details, any observations..."></textarea></div>
+    <div class="chips" id="exChips"></div>
+  </div>
+  <button class="btn btn-primary btn-block" id="genBtn" onclick="generate()">⚡ Generate Certificate</button>
+  <button class="btn btn-secondary btn-block btn-sm" onclick="clearAll()">Clear All</button>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+
+<!-- INSTALLATION DETAILS -->
+<div class="page active" id="page-installation">
+  <div style="padding:1.5rem">
+    <div class="alert err" id="errMsg"></div>
+    <div class="alert ok" id="okMsg"></div>
+    <div class="loading-wrap" id="loadWrap">
+      <div class="loading-bar"></div>
+      <div class="loading-txt" id="loadTxt">Generating certificate...</div>
+    </div>
+    <div class="empty" id="emptyInstall">
+      <div class="empty-icon">📋</div>
+      <div class="empty-txt">Select a certificate type, describe the job in the sidebar and hit Generate — or scan a board photo first to auto-populate circuits.</div>
+    </div>
+    <div id="installContent" style="display:none"></div>
+  </div>
+</div>
+
+<!-- OBSERVATIONS (EICR only) -->
+<div class="page" id="page-observations">
+  <div style="padding:1.5rem">
+    <div class="empty" id="emptyObs"><div class="empty-icon">👁</div><div class="empty-txt">Generate an EICR first to see observations here.</div></div>
+    <div id="obsContent" style="display:none"></div>
+  </div>
+</div>
+
+<!-- SUPPLY CHARACTERISTICS -->
+<div class="page" id="page-supply">
+  <div style="padding:1.5rem">
+    <div class="empty" id="emptySupply"><div class="empty-icon">⚙️</div><div class="empty-txt">Generate a certificate first to populate supply characteristics.</div></div>
+    <div id="supplyContent" style="display:none"></div>
+  </div>
+</div>
+
+<!-- INSPECTION SCHEDULE -->
+<div class="page" id="page-inspection">
+  <div style="padding:1.5rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+      <div>
+        <div style="font-size:1.1rem;font-weight:700">Inspection Schedule <span style="font-size:.7rem;font-weight:500;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:.1rem .4rem;color:var(--text2);margin-left:.35rem">STANDARD</span></div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-secondary btn-sm" onclick="setAllInsp('pass')">✓ Set all Pass</button>
+        <button class="btn btn-secondary btn-sm" onclick="setAllInsp('na')">N/A Set all N/A</button>
+        <button class="btn btn-secondary btn-sm" onclick="setAllInsp(null)">Clear all</button>
+      </div>
+    </div>
+    <div id="inspContent"></div>
+  </div>
+</div>
+
+<!-- BOARDS & CIRCUITS -->
+<div class="page" id="page-boards">
+  <div id="boardsList" style="padding:1.5rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div style="font-size:1.1rem;font-weight:700">Boards</div>
+      <button class="btn btn-primary btn-sm" onclick="addBoard()">+ Add Board</button>
+    </div>
+    <div id="boardsListContent">
+      <div class="empty"><div class="empty-icon">🔌</div><div class="empty-txt">No boards added yet. Add a board or generate a certificate first.</div></div>
+    </div>
+  </div>
+  <div id="boardDetail" style="display:none"></div>
+  <div id="circuitView" style="display:none"></div>
+</div>
+
+<!-- DECLARATION -->
+<div class="page" id="page-declaration">
+  <div style="padding:1.5rem">
+    <div class="empty" id="emptyDecl"><div class="empty-icon">✍️</div><div class="empty-txt">Generate a certificate first to complete the declaration.</div></div>
+    <div id="declContent" style="display:none"></div>
+  </div>
+</div>
+
+<!-- APPENDIX -->
+<div class="page" id="page-appendix">
+  <div style="padding:1.5rem">
+    <div style="font-size:1.1rem;font-weight:700;margin-bottom:1rem">Appendix</div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">✏️ Additional Page</div></div>
+      <div class="card-body">
+        <div class="field"><label>Any additional content</label><textarea id="appendixText" rows="6" placeholder="Enter additional page content here...&#10;&#10;This text will appear on an additional page at the end of the certificate."></textarea></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">📷 Appendix Photos</div><button class="btn btn-secondary btn-sm" onclick="document.getElementById('appendixPhotoInput').click()">Add photo</button></div>
+      <div class="card-body">
+        <input type="file" id="appendixPhotoInput" accept="image/*" multiple style="display:none" onchange="addAppendixPhotos(event)">
+        <p style="font-size:.72rem;color:var(--text2);margin-bottom:.75rem">You can add photos to the appendix of the certificate here, for example photos of the installation or any issues found.</p>
+        <div class="appendix-photo-grid" id="appendixPhotos">
+          <div class="photo-drop-zone">
+            <input type="file" accept="image/*" multiple onchange="addAppendixPhotos(event)">
+            <div style="font-size:1.5rem;margin-bottom:.5rem">📷</div>
+            <div style="font-size:.72rem;color:var(--text2)">Drop photos here or click to browse</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+// ══ STATE ══════════════════════════════════════════════════════════════════════
+let certType='eicr', connMode='proxy', lastResult=null;
+let imgB64=null, imgMime='image/jpeg', boardData=null, camStream=null;
+let boards=[], appendixPhotos=[], inspState={};
+let currentBoard=null;
+
+const certRef=genRef();
+document.getElementById('certRef').textContent=certRef;
+
+function genRef(){
+  const d=new Date(),pad=n=>String(n).padStart(2,'0');
+  const dt=`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const rand=Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join('');
+  return `${certType?.toUpperCase()||'EICR'}-${dt}-${rand}`;
+}
+
+// ══ EXAMPLES ══════════════════════════════════════════════════════════════════
+const examples={
+  eicr:['1980s semi-detached, rewirable fuseboard, no RCDs, overheating on lighting fuse','3-bed flat, Hager RCBO board, 10 circuits, ring main + lighting + cooker tested','Commercial unit, 3-phase supply, worn cable insulation on socket circuits, TN-C-S'],
+  eic:['New Hager RCBO consumer unit, 10 circuits, full rewire 4-bed house TN-C-S','EV charger added 7kW, 10mm T&E, 32A type B RCBO, new circuit from CU','New build, 18th edition RCBO board, all circuits new, AFDDs fitted bedrooms'],
+  mwc:['Added double socket to ring final living room, 2.5mm T&E spur from existing socket','Replaced bathroom shaver light, IP65 LED fitting, same circuit','New fused spur from existing socket for panel heater, 13A fuse']
+};
+
+// ══ INSPECTION SCHEDULE DATA ═══════════════════════════════════════════════════
+const INSP_SCHEDULE=[
+  {num:1,title:'EXTERNAL CONDITION OF INTAKE EQUIPMENT (VISUAL INSPECTION ONLY)',items:[
+    {ref:'1.1',desc:'Intake equipment (service cable, head, earthing, meter tails, metering, isolator)'},
+    {ref:'1.1.1',desc:'Person ordering work / duty holder notified',btns:['YES','NO','N/A']},
+    {ref:'1.2',desc:"Consumer's isolator (where present)"},
+    {ref:'1.3',desc:"Consumer's meter tails"},
+  ]},
+  {num:2,title:'PRESENCE OF ADEQUATE ARRANGEMENTS FOR OTHER SOURCES (551.6; 551.7)',items:[
+    {ref:'2.0',desc:'Presence of adequate arrangements for other sources such as microgenerators (551.6; 551.7)'},
+  ]},
+  {num:3,title:'AUTOMATIC DISCONNECTION OF SUPPLY (ADS)',items:[
+    {ref:'3.1',desc:'Presence and adequacy of earthing conductor (542.3)'},
+    {ref:'3.2',desc:'Presence and adequacy of main bonding conductors (544.1)'},
+    {ref:'3.3',desc:'Accessibility and condition of all connections (543.3)'},
+    {ref:'3.4',desc:'Adequacy of earthing and bonding arrangements (411)'},
+  ]},
+  {num:4,title:'BASIC PROTECTION (CHAPTER 41)',items:[
+    {ref:'4.1',desc:'Presence of adequate protection by insulation (416.1)'},
+    {ref:'4.2',desc:'Presence of adequate protection by barriers or enclosures (416.2)'},
+  ]},
+  {num:5,title:'ADDITIONAL PROTECTION',items:[
+    {ref:'5.1',desc:'Presence of RCD(s), rated ≤30mA, for protection of socket outlets ≤32A (411.3.3)'},
+    {ref:'5.2',desc:'Presence of RCD(s), rated ≤30mA, for protection of cables concealed in walls (522.6.202)'},
+    {ref:'5.3',desc:'Presence of RCD(s), rated ≤30mA, for final circuits of mobile equipment ≤32A used outdoors (411.3.3)'},
+  ]},
+  {num:6,title:'DISTRIBUTION EQUIPMENT (CONSUMER UNIT / DISTRIBUTION BOARD)',items:[
+    {ref:'6.1',desc:'Adequacy of working space/accessibility (132.12; 513.1)'},
+    {ref:'6.2',desc:'Security of fixing (134.1.1)'},
+    {ref:'6.3',desc:'Condition of enclosure(s) in terms of IP rating (416.2)'},
+    {ref:'6.4',desc:'Condition of enclosure(s) in terms of fire rating (526.5)'},
+    {ref:'6.5',desc:'Presence and effectiveness of barriers (526.5)'},
+    {ref:'6.6',desc:'Presence of main switch(es) (462.1.201)'},
+    {ref:'6.7',desc:'Operation of main switch(es) (functional check) (612.13.2)'},
+    {ref:'6.8',desc:'Manual operation of circuit breakers to prove operation (functional check) (612.13.2)'},
+    {ref:'6.9',desc:'Correct identification of circuit breakers (514.8)'},
+    {ref:'6.10',desc:'Presence of RCD(s) (where required) (411.3.3; 411.3.4)'},
+    {ref:'6.11',desc:'Operation of RCD(s) (functional check) (612.13.2)'},
+    {ref:'6.12',desc:'Confirmation that ALL conductors are connected to the correct terminals (526)'},
+    {ref:'6.13',desc:'No evidence of overheating (421)'},
+    {ref:'6.14',desc:'Condition of insulation of conductors (521.5)'},
+  ]},
+  {num:7,title:'CIRCUITS (DISTRIBUTION AND FINAL)',items:[
+    {ref:'7.1',desc:'Identification of conductors (514.3)'},
+    {ref:'7.2',desc:'Cables correctly supported throughout their length (522.8)'},
+    {ref:'7.3',desc:'Condition of insulation (521)'},
+    {ref:'7.4',desc:'Non-sheathed cables protected throughout by conduit/trunking (521.10.1)'},
+    {ref:'7.5',desc:'Wiring system adequate for external influences (522)'},
+    {ref:'7.6',desc:'Cables correctly enclosed in chases (522.6.202)'},
+    {ref:'7.7',desc:'No evidence of any DIY wiring (651.2)'},
+  ]},
+  {num:8,title:'ISOLATION AND SWITCHING',items:[
+    {ref:'8.1',desc:'Presence and adequacy of isolators (537.2)'},
+    {ref:'8.2',desc:'Presence of circuit breakers where required (536)'},
+    {ref:'8.3',desc:'Isolators clearly identified by position or durable marking (537.2.6)'},
+  ]},
+  {num:9,title:'CURRENT-USING EQUIPMENT (PERMANENTLY CONNECTED)',items:[
+    {ref:'9.1',desc:'Condition of equipment in terms of IP rating (416.2)'},
+    {ref:'9.2',desc:'Presence of fire barriers where required (527)'},
+    {ref:'9.3',desc:'Adequacy of connections (526.1)'},
+  ]},
+  {num:10,title:'LOCATION CONTAINING A BATH OR SHOWER',items:[
+    {ref:'10.1',desc:'Additional protection by RCD ≤30mA provided for circuits in zones (701.411.3.3)'},
+    {ref:'10.2',desc:'SELV used for supplementary bonding — not required where all circuits RCD protected (701.415.2)'},
+    {ref:'10.3',desc:'Suitability of equipment for external influences — IP rating (701.512.2)'},
+  ]},
+  {num:11,title:'IDENTIFICATION AND NOTICES',items:[
+    {ref:'11.1',desc:'Presence of circuit chart / schedule at consumer unit (514.9)'},
+    {ref:'11.2',desc:'Presence of RCD test notice (612.13.1)'},
+    {ref:'11.3',desc:'Presence of periodic inspection notice (514.12.2)'},
+  ]},
+];
+
+// ══ VISION PROMPT ═══════════════════════════════════════════════════════════════
+const VISION_PROMPT=`You are an expert UK electrician analysing a consumer unit photo. Extract all visible information precisely.
+Return ONLY valid JSON — no markdown, no text:
+{"board_make":"Hager/Wylex/MK/Schneider/Crabtree/Lewden or Unknown","board_type":"RCBO board/Split RCD/Main switch only/Rewirable","board_rating":"e.g. 100A","supply_type":"TN-C-S/TN-S/TT/Unknown","rcd_protection":"Full RCBO/Split RCD/None/Unknown","main_switch_rating":"e.g. 100A","ipf_rating":"e.g. 6kA","circuits":[{"position":"1","label":"EXACT text as written","breaker_type":"MCB/RCBO/Fuse","breaker_make":"Hager/MK/Unknown","rating_amps":"32","mcb_type":"B/C/D","notes":""}],"board_condition":"Good/Fair/Poor","observations":"visible issues, overheating, damage","confidence":"High/Medium/Low"}
+Copy label text EXACTLY as written. Return ONLY the JSON.`;
+
+// ══ AI PROMPTS ═══════════════════════════════════════════════════════════════════
+function buildPrompt(type,bd){
+  const today=new Date().toLocaleDateString('en-GB');
+  const bdCtx=bd?`\n\nBOARD DATA FROM PHOTO (use directly for all relevant fields — this takes priority):\n${JSON.stringify(bd,null,2)}\n`:'';
+  const base=`You are a qualified UK electrical engineer completing a ${type.toUpperCase()} to BS 7671:2018+A2:2022.${bdCtx}
+Generate a complete, realistic certificate with technically accurate UK test values.
+Rules: Zs values must be BELOW maximum permitted. IR values >200MΩ for satisfactory. R1+R2 realistic. RCD times <300ms at Iₙ. Use realistic addresses and names. Generate at least 6 realistic circuits. Return ONLY valid JSON — no markdown fences, no text before or after.`;
+
+  if(type==='eicr') return base+`
+JSON structure:
+{"client":"","address":"","description":"Domestic installation","installation_age":"1985 approx","date_of_inspection":"${today}","inspector":"J. Steele","reg_number":"NICEIC-54321","supply_type":"TN-C-S","earthing_conductor":"16mm² copper","bonding_conductor":"10mm² copper","main_switch_rating":"100A","prospective_fault_current":"1.2kA","external_ze":"0.35","phases":"Single Phase","frequency":"50Hz","nominal_voltage":"230","max_demand":"60A","number_of_circuits":8,"rcd_present":"Yes","rcd_type":"Type AC","rcd_rating":"100mA","rcd_trip_time":"18","overall_condition":"Unsatisfactory","recommended_next_inspection":"Further investigation required","means_of_earthing":"Distributor's facility","circuit_details":[{"circuit_number":"1","description":"Ring Final — Ground Floor Sockets","circuit_type":"Ring final","wiring_type":"2.5mm² T&E","ref_method":"C","live_csa":"2.5","cpc_csa":"1.5","max_disconnect_time":"0.4","no_points":"8","mcb_bs":"BS EN 60898","mcb_type":"B","mcb_rating":"32","mcb_breaking_capacity":"6","max_zs":"1.37","rcd_bs":"N/A","rcd_type":"N/A","rcd_operating_current":"N/A","rcd_rating":"N/A","r1_live":"0.22","r1_neutral":"0.22","r2_cpc":"0.36","r1_plus_r2":"0.45","r2":"0.72","insulation_test_voltage":"500","insulation_ll":">200","insulation_le":">200","polarity":"Pass","measured_zs":"0.52","disconnection_time":"N/A","image_sourced":false,"notes":""},{"circuit_number":"2","description":"Lighting — Ground Floor","circuit_type":"Radial","wiring_type":"1.5mm² T&E","ref_method":"C","live_csa":"1.5","cpc_csa":"1.0","max_disconnect_time":"5","no_points":"6","mcb_bs":"BS EN 60898","mcb_type":"B","mcb_rating":"6","mcb_breaking_capacity":"6","max_zs":"8.00","rcd_bs":"N/A","rcd_type":"N/A","rcd_operating_current":"N/A","rcd_rating":"N/A","r1_live":"0.41","r1_neutral":"0.00","r2_cpc":"0.65","r1_plus_r2":"0.82","r2":"1.30","insulation_test_voltage":"500","insulation_ll":">200","insulation_le":">200","polarity":"Pass","measured_zs":"1.17","disconnection_time":"N/A","image_sourced":false,"notes":""},{"circuit_number":"3","description":"Lighting — First Floor","circuit_type":"Radial","wiring_type":"1.5mm² T&E","ref_method":"C","live_csa":"1.5","cpc_csa":"1.0","max_disconnect_time":"5","no_points":"5","mcb_bs":"BS EN 60898","mcb_type":"B","mcb_rating":"6","mcb_breaking_capacity":"6","max_zs":"8.00","rcd_bs":"N/A","rcd_type":"N/A","rcd_operating_current":"N/A","rcd_rating":"N/A","r1_live":"0.48","r1_neutral":"0.00","r2_cpc":"0.77","r1_plus_r2":"0.95","r2":"1.52","insulation_test_voltage":"500","insulation_ll":">200","insulation_le":">200","polarity":"Pass","measured_zs":"1.30","disconnection_time":"N/A","image_sourced":false,"notes":""},{"circuit_number":"4","description":"Ring Final — First Floor Sockets","circuit_type":"Ring final","wiring_type":"2.5mm² T&E","ref_method":"C","live_csa":"2.5","cpc_csa":"1.5","max_disconnect_time":"0.4","no_points":"6","mcb_bs":"BS EN 60898","mcb_type":"B","mcb_rating":"32","mcb_breaking_capacity":"6","max_zs":"1.37","rcd_bs":"N/A","rcd_type":"N/A","rcd_operating_current":"N/A","rcd_rating":"N/A","r1_live":"0.25","r1_neutral":"0.25","r2_cpc":"0.40","r1_plus_r2":"0.50","r2":"0.80","insulation_test_voltage":"500","insulation_ll":">200","insulation_le":">200","polarity":"Pass","measured_zs":"0.58","disconnection_time":"N/A","image_sourced":false,"notes":""},{"circuit_number":"5","description":"Cooker — Kitchen","circuit_type":"Radial","wiring_type":"6mm² T&E","ref_method":"C","live_csa":"6.0","cpc_csa":"2.5","max_disconnect_time":"5","no_points":"1","mcb_bs":"BS EN 60898","mcb_type":"B","mcb_rating":"32","mcb_breaking_capacity":"6","max_zs":"1.37","rcd_bs":"N/A","rcd_type":"N/A","rcd_operating_current":"N/A","rcd_rating":"N/A","r1_live":"0.12","r1_neutral":"0.00","r2_cpc":"0.29","r1_plus_r2":"0.29","r2":"0.64","insulation_test_voltage":"500","insulation_ll":">200","insulation_le":">200","polarity":"Pass","measured_zs":"0.64","disconnection_time":"N/A","image_sourced":false,"notes":""},{"circuit_number":"6","description":"Immersion Heater","circuit_type":"Radial","wiring_type":"2.5mm² T&E","ref_method":"C","live_csa":"2.5","cpc_csa":"1.5","max_disconnect_time":"5","no_points":"1","mcb_bs":"BS EN 60898","mcb_type":"B","mcb_rating":"16","mcb_breaking_capacity":"6","max_zs":"2.74","rcd_bs":"N/A","rcd_type":"N/A","rcd_operating_current":"N/A","rcd_rating":"N/A","r1_live":"0.18","r1_neutral":"0.00","r2_cpc":"0.29","r1_plus_r2":"0.29","r2":"0.47","insulation_test_voltage":"500","insulation_ll":">200","insulation_le":">200","polarity":"Pass","measured_zs":"0.64","disconnection_time":"N/A","image_sourced":false,"notes":""}],"observations":[{"ref":"1","location":"Consumer unit","description":"No RCD protection provided to socket outlet circuits — all socket circuits require RCD protection","code":"C2"},{"ref":"2","location":"Consumer unit","description":"Consumer unit requires replacement — rewirable fuses present, no overcurrent protection to modern standard","code":"C3"},{"ref":"3","location":"Throughout","description":"No main protective bonding conductors to gas and water services identified","code":"C2"}],"declaration":"I/We being the person(s) responsible for the inspection and testing of the electrical installation, having exercised reasonable skill and care when carrying out the inspection and testing, hereby declare that the information in this report, including the observations and the attached schedules, provides an accurate record of the condition of the electrical installation at the time of the inspection and testing."}`;
+
+  if(type==='eic') return base+`
+JSON structure:
+{"client":"","address":"","description":"New consumer unit installation","date_of_installation":"${today}","designer":"J. Steele","constructor":"J. Steele","inspector":"J. Steele","reg_number":"NICEIC-54321","supply_type":"TN-C-S","earthing_conductor":"16mm² copper","bonding_conductor":"10mm² copper","main_switch_rating":"100A","prospective_fault_current":"1.2kA","external_ze":"0.35","phases":"Single Phase","frequency":"50Hz","nominal_voltage":"230","max_demand":"60A","means_of_earthing":"Distributor's facility","rcd_present":"Yes","rcd_type":"Type A","rcd_trip_time":"18","supply_polarity":"Verified","earth_continuity":"Verified","insulation_resistance":">200MΩ","characteristics_confirmed":"Yes","departures":"None","permitted_exceptions":"None","circuit_details":[{"circuit_number":"1","description":"Ring Final — Ground Floor Sockets","circuit_type":"Ring final","wiring_type":"2.5mm² T&E","ref_method":"C","live_csa":"2.5","cpc_csa":"1.5","max_disconnect_time":"0.4","no_points":"8","mcb_bs":"BS EN 60898","mcb_type":"B","mcb_rating":"32","mcb_breaking_capacity":"6","max_zs":"1.37","rcd_bs":"BS EN 61008","rcd_type":"RCBO","rcd_operating_current":"30","rcd_rating":"30","r1_live":"0.22","r1_neutral":"0.22","r2_cpc":"0.36","r1_plus_r2":"0.45","r2":"0.72","insulation_test_voltage":"500","insulation_ll":">200","insulation_le":">200","polarity":"Pass","measured_zs":"0.52","disconnection_time":"18","image_sourced":false,"notes":""},{"circuit_number":"2","description":"Lighting — Ground Floor","circuit_type":"Radial","wiring_type":"1.5mm² T&E","ref_method":"C","live_csa":"1.5","cpc_csa":"1.0","max_disconnect_time":"5","no_points":"6","mcb_bs":"BS EN 60898","mcb_type":"B","mcb_rating":"6","mcb_breaking_capacity":"6","max_zs":"8.00","rcd_bs":"BS EN 61008","rcd_type":"RCBO","rcd_operating_current":"30","rcd_rating":"30","r1_live":"0.41","r1_neutral":"0.00","r2_cpc":"0.65","r1_plus_r2":"0.82","r2":"1.30","insulation_test_voltage":"500","insulation_ll":">200","insulation_le":">200","polarity":"Pass","measured_zs":"1.17","disconnection_time":"18","image_sourced":false,"notes":""},{"circuit_number":"3","description":"Lighting — First Floor","circuit_type":"Radial","wiring_type":"1.5mm² T&E","ref_method":"C","live_csa":"1.5","cpc_csa":"1.0","max_disconnect_time":"5","no_points":"5","mcb_bs":"BS EN 60898","mcb_type":"B","mcb_rating":"6","mcb_breaking_capacity":"6","max_zs":"8.00","rcd_bs":"BS EN 61008","rcd_type":"RCBO","rcd_operating_current":"30","rcd_rating":"30","r1_live":"0.48","r1_neutral":"0.00","r2_cpc":"0.77","r1_plus_r2":"0.95","r2":"1.52","insulation_test_voltage":"500","insulation_ll":">200","insulation_le":">200","polarity":"Pass","measured_zs":"1.30","disconnection_time":"18","image_sourced":false,"notes":""},{"circuit_number":"4","description":"Ring Final — First Floor Sockets","circuit_type":"Ring final","wiring_type":"2.5mm² T&E","ref_method":"C","live_csa":"2.5","cpc_csa":"1.5","max_disconnect_time":"0.4","no_points":"6","mcb_bs":"BS EN 60898","mcb_type":"B","mcb_rating":"32","mcb_breaking_capacity":"6","max_zs":"1.37","rcd_bs":"BS EN 61008","rcd_type":"RCBO","rcd_operating_current":"30","rcd_rating":"30","r1_live":"0.25","r1_neutral":"0.25","r2_cpc":"0.40","r1_plus_r2":"0.50","r2":"0.80","insulation_test_voltage":"500","insulation_ll":">200","insulation_le":">200","polarity":"Pass","measured_zs":"0.58","disconnection_time":"18","image_sourced":false,"notes":""},{"circuit_number":"5","description":"Cooker Circuit","circuit_type":"Radial","wiring_type":"6mm² T&E","ref_method":"C","live_csa":"6.0","cpc_csa":"2.5","max_disconnect_time":"5","no_points":"1","mcb_bs":"BS EN 60898","mcb_type":"B","mcb_rating":"32","mcb_breaking_capacity":"6","max_zs":"1.37","rcd_bs":"BS EN 61008","rcd_type":"RCBO","rcd_operating_current":"30","rcd_rating":"30","r1_live":"0.12","r1_neutral":"0.00","r2_cpc":"0.29","r1_plus_r2":"0.29","r2":"0.64","insulation_test_voltage":"500","insulation_ll":">200","insulation_le":">200","polarity":"Pass","measured_zs":"0.64","disconnection_time":"18","image_sourced":false,"notes":""},{"circuit_number":"6","description":"Electric Shower — Bathroom","circuit_type":"Radial","wiring_type":"10mm² T&E","ref_method":"C","live_csa":"10.0","cpc_csa":"4.0","max_disconnect_time":"0.4","no_points":"1","mcb_bs":"BS EN 60898","mcb_type":"B","mcb_rating":"40","mcb_breaking_capacity":"6","max_zs":"1.09","rcd_bs":"BS EN 61008","rcd_type":"RCBO","rcd_operating_current":"30","rcd_rating":"30","r1_live":"0.08","r1_neutral":"0.00","r2_cpc":"0.19","r1_plus_r2":"0.19","r2":"0.44","insulation_test_voltage":"500","insulation_ll":">200","insulation_le":">200","polarity":"Pass","measured_zs":"0.54","disconnection_time":"18","image_sourced":false,"notes":""}],"declaration":"I/We CERTIFY that the works specified above, have been designed, constructed, inspected and tested in accordance with BS 7671:2018 (IET Wiring Regulations), amended to ${today}, and that to the best of my/our knowledge and belief, at the time of my/our inspection, complied with BS 7671 except as detailed below."}`;
+
+  return base+`
+JSON structure:
+{"client":"","address":"","description_of_work":"","reason_for_works":"","date_of_works":"${today}","electrician":"J. Steele","reg_number":"NICEIC-54321","part_of_installation":"","supply_type":"TN-C-S","wiring_system":"2.5mm² T&E","ref_method":"C","mcb_type":"B","mcb_rating":"32A","mcb_bs":"BS EN 60898","earth_continuity_r2":"0.45","earth_continuity_pass":true,"insulation_test_voltage":"500","insulation_ll":">200","insulation_le":">200","insulation_pass":true,"polarity":"Satisfactory","max_permitted_zs":"1.37","earth_fault_loop_impedance":"0.54","zs_pass":true,"rcd_type":"N/A","rcd_rating":"N/A","rcd_half_in":"N/A","rcd_full_in":"N/A","rcd_operation":"N/A","comments":"All works completed in accordance with BS 7671:2018+A2:2022.","departures":"None","declaration":"I certify that the said works do not impair the safety of the existing installation, that the said works have been designed, constructed, inspected and tested in accordance with BS 7671:2018 and that the said works, to the best of my knowledge and belief, at the time of my inspection, complied with BS 7671:2018 except as detailed below."}`;
+}
+
+// ══ UI HELPERS ════════════════════════════════════════════════════════════════
+function goPage(name,btn){
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+}
+function setCert(type,btn){
+  certType=type;
+  document.querySelectorAll('.cert-type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // Show/hide observations tab for EICR only
+  document.getElementById('tab-observations').style.display=type==='eicr'?'':'none';
+  renderChips();
+  clearOutput();
+}
+function setConn(mode,btn){
+  connMode=mode;
+  document.querySelectorAll('.conn-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.conn-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('cp-'+mode).classList.add('active');
+}
+function getBase(){return connMode==='direct'?document.getElementById('ollamaUrl').value.trim():document.getElementById('proxyUrl').value.trim();}
+function getModel(){return connMode==='direct'?document.getElementById('modelDirect').value.trim():document.getElementById('modelProxy').value.trim();}
+function getVisModel(){return document.getElementById('visionModel').value.trim()||'llava';}
+
+function showErr(msg){const e=document.getElementById('errMsg');e.textContent=msg;e.classList.add('show');document.getElementById('emptyInstall').style.display='none';}
+function showOk(msg){const e=document.getElementById('okMsg');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),4000);}
+function clearAlerts(){document.getElementById('errMsg').classList.remove('show');document.getElementById('okMsg').classList.remove('show');}
+
+function renderChips(){
+  const el=document.getElementById('exChips');el.innerHTML='';
+  (examples[certType]||[]).forEach(ex=>{
+    const c=document.createElement('span');c.className='chip';
+    c.textContent=ex.length>65?ex.slice(0,62)+'…':ex;c.title=ex;
+    c.onclick=()=>{document.getElementById('jobBrief').value=ex;};
+    el.appendChild(c);
+  });
+}
+function clearOutput(){
+  document.getElementById('installContent').style.display='none';
+  document.getElementById('installContent').innerHTML='';
+  document.getElementById('emptyInstall').style.display='';
+  document.getElementById('obsContent').style.display='none';
+  document.getElementById('emptyObs').style.display='';
+  document.getElementById('supplyContent').style.display='none';
+  document.getElementById('emptySupply').style.display='';
+  document.getElementById('emptyDecl').style.display='';
+  document.getElementById('declContent').style.display='none';
+  boards=[];renderBoards();
+  clearAlerts();
+}
+function clearAll(){document.getElementById('jobBrief').value='';clearImg();clearOutput();}
+
+// ══ CONNECTION TEST ═══════════════════════════════════════════════════════════
+async function testConn(){
+  try{const r=await fetch(document.getElementById('ollamaUrl').value.trim()+'/api/tags');const d=await r.json();showOk('Connected! Models: '+d.models?.map(m=>m.name).join(', '));}
+  catch(e){showErr('Cannot reach Ollama:\n'+e.message);}
+}
+async function testProxy(){
+  const url=document.getElementById('proxyUrl').value.trim();
+  if(!url){showErr('Enter proxy URL first.');return;}
+  try{const r=await fetch(url+'/api/tags');const d=await r.json();showOk('Proxy connected! Models: '+d.models?.map(m=>m.name).join(', '));}
+  catch(e){showErr('Cannot reach proxy:\n'+e.message);}
+}
+
+// ══ IMAGE / CAMERA ════════════════════════════════════════════════════════════
+function handleFile(e){const f=e.target.files[0];if(!f)return;imgMime=f.type||'image/jpeg';const r=new FileReader();r.onload=ev=>{imgB64=ev.target.result.split(',')[1];showPreview(ev.target.result);};r.readAsDataURL(f);}
+function showPreview(url){document.getElementById('boardImg').src=url;document.getElementById('previewWrap').classList.add('show');document.getElementById('uploadZone').style.display='none';document.getElementById('extractedBox').classList.remove('show');boardData=null;}
+function clearImg(){imgB64=null;boardData=null;document.getElementById('boardImg').src='';document.getElementById('previewWrap').classList.remove('show');document.getElementById('uploadZone').style.display='';document.getElementById('extractedBox').classList.remove('show');closeCam();}
+function onDragOver(e){e.preventDefault();document.getElementById('uploadZone').classList.add('dragover');}
+function onDragLeave(){document.getElementById('uploadZone').classList.remove('dragover');}
+function onDrop(e){e.preventDefault();document.getElementById('uploadZone').classList.remove('dragover');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/')){imgMime=f.type;const r=new FileReader();r.onload=ev=>{imgB64=ev.target.result.split(',')[1];showPreview(ev.target.result);};r.readAsDataURL(f);}}
+async function openCam(){try{camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920}}});document.getElementById('camFeed').srcObject=camStream;document.getElementById('camSec').classList.add('show');document.getElementById('uploadZone').style.display='none';}catch(e){showErr('Camera: '+e.message);}}
+function capPhoto(){const v=document.getElementById('camFeed'),c=document.getElementById('capCanvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);const url=c.toDataURL('image/jpeg',.92);imgB64=url.split(',')[1];imgMime='image/jpeg';showPreview(url);closeCam();}
+function closeCam(){if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}document.getElementById('camSec').classList.remove('show');if(!imgB64)document.getElementById('uploadZone').style.display='';}
+
+// ══ BOARD SCAN ════════════════════════════════════════════════════════════════
+async function scanBoard(){
+  if(!imgB64){showErr('No image loaded.');return;}
+  const btn=document.getElementById('scanBtn'),ov=document.getElementById('scanOv');
+  btn.disabled=true;btn.textContent='⏳ Scanning...';ov.classList.add('show');
+  try{
+    const r=await fetch(getBase()+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:getVisModel(),prompt:VISION_PROMPT,images:[imgB64],stream:false,options:{temperature:0.1}})});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    const raw=(data.response||'').replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    let parsed;try{parsed=JSON.parse(raw);}catch{const m=raw.match(/\{[\s\S]*\}/);if(m)parsed=JSON.parse(m[0]);else throw new Error('Vision model returned invalid JSON');}
+    boardData=parsed;renderExtracted(parsed);
+    const txt=bdToText(parsed);if(txt&&!document.getElementById('jobBrief').value.trim())document.getElementById('jobBrief').value=txt;
+  }catch(e){showErr('Scan failed: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='🔍 Scan Board';ov.classList.remove('show');}
+}
+function bdToText(d){const p=[];if(d.board_make&&d.board_make!=='Unknown')p.push(d.board_make);if(d.board_type&&d.board_type!=='Unknown')p.push(d.board_type);if(d.board_rating&&d.board_rating!=='Unknown')p.push(d.board_rating+' main switch');if(d.rcd_protection&&d.rcd_protection!=='Unknown')p.push('RCD: '+d.rcd_protection);if(d.circuits?.length)p.push(d.circuits.length+' circuits identified');if(d.board_condition&&d.board_condition!=='Unknown')p.push('board condition: '+d.board_condition);if(d.observations)p.push(d.observations);return p.join(', ');}
+function renderExtracted(d){
+  document.getElementById('extractedBox').classList.add('show');
+  const rows=[['Make',d.board_make],['Type',d.board_type],['Rating',d.board_rating],['Supply',d.supply_type],['RCD',d.rcd_protection],['Condition',d.board_condition],['Confidence',d.confidence]].filter(([,v])=>v&&v!=='Unknown');
+  let h=rows.map(([k,v])=>`<div class="extracted-row"><span class="extracted-k">${k}</span><span class="extracted-v">${v}</span></div>`).join('');
+  if(d.circuits?.length)h+=`<div style="margin-top:.4rem"><div class="extracted-k" style="margin-bottom:.25rem;font-size:.6rem">Circuits (${d.circuits.length})</div><div class="pills">${d.circuits.map(c=>`<span class="pill">${c.position}. ${c.label||'?'} ${c.rating_amps||''}A</span>`).join('')}</div></div>`;
+  document.getElementById('extractedRows').innerHTML=h;
+}
+
+// ══ GENERATE ══════════════════════════════════════════════════════════════════
+async function generate(){
+  const brief=document.getElementById('jobBrief').value.trim();
+  if(!brief&&!boardData){showErr('Add a job description or scan a board image first.');return;}
+  const url=getBase();if(!url){showErr('Enter your proxy URL in the sidebar.\nExample: https://192.168.1.53:3001');return;}
+  clearOutput();clearAlerts();
+  document.getElementById('emptyInstall').style.display='none';
+  document.getElementById('loadWrap').classList.add('show');
+  document.getElementById('genBtn').disabled=true;
+  const msgs=['Querying Ollama...','Parsing BS 7671...','Computing test values...','Building schedule...','Applying wiring regs...','Almost done...'];
+  let mi=0;const lt=setInterval(()=>{document.getElementById('loadTxt').textContent=msgs[++mi%msgs.length];},1800);
+  try{
+    const r=await fetch(url+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:getModel(),system:buildPrompt(certType,boardData),prompt:brief||'Generate the certificate using the board data above.',stream:false,options:{temperature:0.2,top_p:0.9}})});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    const raw=(data.response||'').replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    let result;try{result=JSON.parse(raw);}catch{const m=raw.match(/\{[\s\S]*\}/);if(m)result=JSON.parse(m[0]);else throw new Error('Model returned invalid JSON.\n\nTry gemma3:27b or deepseek-r1:14b for better output.\n\nRaw:\n'+raw.slice(0,400));}
+    clearInterval(lt);lastResult=result;renderAll(result);
+  }catch(e){clearInterval(lt);document.getElementById('emptyInstall').style.display='';showErr('Generation failed:\n'+e.message);}
+  finally{document.getElementById('loadWrap').classList.remove('show');document.getElementById('genBtn').disabled=false;}
+}
+
+// ══ RENDER ALL ════════════════════════════════════════════════════════════════
+function renderAll(d){
+  if(certType==='eicr'){renderInstallEICR(d);renderObs(d);renderSupply(d);renderDecl(d);renderBoardsFromData(d);}
+  else if(certType==='eic'){renderInstallEIC(d);renderSupply(d);renderDecl(d);renderBoardsFromData(d);}
+  else{renderInstallMWC(d);renderSupply(d);renderDecl(d);}
+  renderInspSchedule();
+}
+
+// ══ EDITABLE FIELD ════════════════════════════════════════════════════════════
+function ef(label,val,cls='',img=false){
+  const badge=img?'<span class="ef-img-badge">📷</span>':'';
+  return `<div class="ef ${img?'img-src':''}"><div class="ef-label">${label}${badge}</div><div class="ef-val ${cls}" contenteditable="true">${val||'—'}</div></div>`;
+}
+function showContent(cId,eId){document.getElementById(cId).style.display='block';if(eId)document.getElementById(eId).style.display='none';}
+
+// ══ INSTALLATION — EICR ═══════════════════════════════════════════════════════
+function renderInstallEICR(d){
+  const img=!!boardData,isSat=(d.overall_condition||'').toLowerCase().includes('satisfactory')&&!(d.overall_condition||'').toLowerCase().includes('un');
+  document.getElementById('installContent').innerHTML=`
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.5rem">
+    <div><div style="font-size:1.3rem;font-weight:700">Electrical Installation Condition Report</div><div style="font-size:.75rem;color:var(--text2);margin-top:2px">BS 7671:2018+A2:2022 · ${certRef}</div></div>
+    <div class="btn-group">
+      <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Print / PDF</button>
+    </div>
+  </div>
+  ${img?`<div style="background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:6px;padding:.5rem .85rem;font-size:.7rem;color:var(--fi);margin-bottom:1rem">📷 Fields marked with 📷 were extracted from your board photo. Tap any value to edit.</div>`:''}
+  <div class="result-banner ${isSat?'sat':'unsat'}" style="margin-bottom:1rem">
+    <span style="font-size:1.3rem">${isSat?'✓':'✗'}</span>
+    <div><div class="result-text">${d.overall_condition||'Unsatisfactory'}</div><div style="font-size:.7rem;color:var(--text2)">Recommended next inspection: ${d.recommended_next_inspection||'—'}</div></div>
+    <div class="btn-group" style="margin-left:auto">
+      <button class="btn btn-secondary btn-sm" onclick="setResult(true)">✓ Satisfactory</button>
+      <button class="btn btn-secondary btn-sm" onclick="setResult(false)">✗ Unsatisfactory</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">👤 Client & Property</div></div>
+    <div class="card-body"><div class="form-grid g3">
+      ${ef('Client Name',d.client)}${ef('Address',d.address)}${ef('Description',d.description)}
+      ${ef('Estimated Age',d.installation_age)}${ef('Date of Inspection',d.date_of_inspection)}
+      ${ef('Inspector',d.inspector)}${ef('Registration Number',d.reg_number)}
+    </div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">⚡ Supply & Earthing</div></div>
+    <div class="card-body"><div class="form-grid g4">
+      ${ef('Supply System',d.supply_type,'',img&&boardData?.supply_type!=='Unknown')}
+      ${ef('Main Switch',d.main_switch_rating,'hi',img&&boardData?.main_switch_rating!=='Unknown')}
+      ${ef('External Ze (Ω)',d.external_ze,'hi')}${ef('PFC',d.prospective_fault_current)}
+      ${ef('Earthing Conductor',d.earthing_conductor)}${ef('Main Bonding',d.bonding_conductor)}
+      ${ef('Phases',d.phases||'Single Phase')}${ef('Nominal Voltage (V)',d.nominal_voltage||'230')}
+      ${ef('Frequency (Hz)',d.frequency||'50')}${ef('Max Demand',d.max_demand)}
+      ${ef('Means of Earthing',d.means_of_earthing)}
+    </div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">🔒 RCD / Main Protection</div></div>
+    <div class="card-body"><div class="form-grid g4">
+      ${ef('RCD Present',d.rcd_present,d.rcd_present==='Yes'?'ok':'bad',img&&boardData?.rcd_protection)}
+      ${ef('RCD Type',d.rcd_type,'',img)}
+      ${ef('RCD Rating (mA)',d.rcd_rating,'',img)}
+      ${ef('Trip Time (ms)',d.rcd_trip_time)}
+    </div></div>
+  </div>`;
+  showContent('installContent','emptyInstall');
+}
+
+function setResult(sat){
+  const b=document.querySelector('.result-banner');
+  const t=b?.querySelector('.result-text');
+  if(!b||!t)return;
+  b.className='result-banner '+(sat?'sat':'unsat');
+  t.textContent=sat?'Satisfactory':'Unsatisfactory';
+}
+
+// ══ INSTALLATION — EIC ════════════════════════════════════════════════════════
+function renderInstallEIC(d){
+  const img=!!boardData;
+  document.getElementById('installContent').innerHTML=`
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.5rem">
+    <div><div style="font-size:1.3rem;font-weight:700">Electrical Installation Certificate</div><div style="font-size:.75rem;color:var(--text2);margin-top:2px">BS 7671:2018+A2:2022 · New/Altered Installation · ${certRef}</div></div>
+    <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Print / PDF</button>
+  </div>
+  ${img?`<div style="background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:6px;padding:.5rem .85rem;font-size:.7rem;color:var(--fi);margin-bottom:1rem">📷 Fields marked with 📷 from board photo. Tap any value to edit.</div>`:''}
+  <div class="card">
+    <div class="card-header"><div class="card-title">👤 Client & Installation</div></div>
+    <div class="card-body"><div class="form-grid g3">
+      ${ef('Client',d.client)}${ef('Address',d.address)}${ef('Description',d.description)}
+      ${ef('Date of Installation',d.date_of_installation)}${ef('Designer',d.designer)}${ef('Constructor',d.constructor)}
+      ${ef('Inspector',d.inspector)}${ef('Registration Number',d.reg_number)}
+    </div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">⚡ Supply & Earthing</div></div>
+    <div class="card-body"><div class="form-grid g4">
+      ${ef('Supply System',d.supply_type,'',img&&boardData?.supply_type!=='Unknown')}
+      ${ef('Main Switch',d.main_switch_rating,'hi',img)}
+      ${ef('External Ze (Ω)',d.external_ze,'hi')}${ef('PFC',d.prospective_fault_current)}
+      ${ef('Earthing Conductor',d.earthing_conductor)}${ef('Main Bonding',d.bonding_conductor)}
+      ${ef('Means of Earthing',d.means_of_earthing)}${ef('Max Demand',d.max_demand)}
+    </div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">✅ Installation Verification</div></div>
+    <div class="card-body"><div class="form-grid g4">
+      ${ef('Supply Polarity',d.supply_polarity,'ok')}${ef('Earth Continuity',d.earth_continuity,'ok')}
+      ${ef('Insulation Resistance',d.insulation_resistance,'ok')}${ef('Characteristics Confirmed',d.characteristics_confirmed,'ok')}
+    </div></div>
+  </div>`;
+  showContent('installContent','emptyInstall');
+}
+
+// ══ INSTALLATION — MWC ════════════════════════════════════════════════════════
+function renderInstallMWC(d){
+  document.getElementById('installContent').innerHTML=`
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.5rem">
+    <div><div style="font-size:1.3rem;font-weight:700">Electrical Minor Works Certificate</div><div style="font-size:.75rem;color:var(--text2);margin-top:2px">BS 7671:2018+A2:2022 · ${certRef}</div></div>
+    <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Print / PDF</button>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">👤 Details</div></div>
+    <div class="card-body"><div class="form-grid g3">
+      ${ef('Client',d.client)}${ef('Address',d.address)}${ef('Date of Works',d.date_of_works)}
+      ${ef('Electrician',d.electrician)}${ef('Registration Number',d.reg_number)}${ef('Supply Type',d.supply_type)}
+    </div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">🔧 Work Carried Out</div></div>
+    <div class="card-body"><div class="form-grid g2">
+      ${ef('Description of Work',d.description_of_work)}${ef('Reason for Works',d.reason_for_works)}
+      ${ef('Part of Installation Affected',d.part_of_installation)}${ef('Wiring System',d.wiring_system)}
+      ${ef('Overcurrent Device Type',d.mcb_type)}${ef('Overcurrent Device Rating',d.mcb_rating)}
+    </div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">🔬 Test Results</div></div>
+    <div class="card-body">
+      <div style="font-size:.72rem;font-weight:600;color:var(--text2);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.06em">Continuity</div>
+      <div class="form-grid g3" style="margin-bottom:.85rem">
+        ${ef('Earth Continuity R2 (Ω)',d.earth_continuity_r2,'hi')}
+        ${ef('Result',d.earth_continuity_pass?'Pass':'Fail',d.earth_continuity_pass?'ok':'bad')}
+      </div>
+      <div style="font-size:.72rem;font-weight:600;color:var(--text2);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.06em">Insulation Resistance</div>
+      <div class="form-grid g4" style="margin-bottom:.85rem">
+        ${ef('Test Voltage (V)',d.insulation_test_voltage)}${ef('L-L (MΩ)',d.insulation_ll,'ok')}
+        ${ef('L-E (MΩ)',d.insulation_le,'ok')}${ef('Result',d.insulation_pass?'Pass':'Fail',d.insulation_pass?'ok':'bad')}
+      </div>
+      <div style="font-size:.72rem;font-weight:600;color:var(--text2);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.06em">Earth Fault Loop Impedance</div>
+      <div class="form-grid g4" style="margin-bottom:.85rem">
+        ${ef('Polarity',d.polarity,'ok')}${ef('Max Permitted Zs (Ω)',d.max_permitted_zs)}
+        ${ef('Measured Zs (Ω)',d.earth_fault_loop_impedance,'hi')}${ef('Result',d.zs_pass?'Pass':'Fail',d.zs_pass?'ok':'bad')}
+      </div>
+      <div style="font-size:.72rem;font-weight:600;color:var(--text2);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.06em">RCD Test</div>
+      <div class="form-grid g4">
+        ${ef('RCD Type',d.rcd_type)}${ef('RCD Rating (mA)',d.rcd_rating)}
+        ${ef('½Iₙ (ms)',d.rcd_half_in)}${ef('Iₙ (ms)',d.rcd_full_in)}
+        ${ef('RCD Operation',d.rcd_operation)}${ef('Comments',d.comments)}
+      </div>
+    </div>
+  </div>`;
+  showContent('installContent','emptyInstall');
+}
+
+// ══ OBSERVATIONS ═════════════════════════════════════════════════════════════
+function renderObs(d){
+  const obs=d.observations||[];
+  document.getElementById('obsContent').innerHTML=`
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+    <div style="font-size:1.1rem;font-weight:700">Observations & Recommendations</div>
+    <button class="btn btn-primary btn-sm" onclick="addObs()">+ Add Observation</button>
+  </div>
+  <div class="card">
+    <div class="card-body" style="padding:0">
+      <table class="obs-table" id="obsTable">
+        <thead><tr><th style="width:50px">Ref</th><th style="width:50px">Code</th><th style="width:160px">Location</th><th>Observation</th><th style="width:40px"></th></tr></thead>
+        <tbody id="obsBody">${obs.map((o,i)=>obsRow(o,i)).join('')}</tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Code Reference</div></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.72rem">
+        <div style="display:flex;align-items:center;gap:.5rem"><span class="obs-code-badge c1">C1</span> Danger present — immediate action required</div>
+        <div style="display:flex;align-items:center;gap:.5rem"><span class="obs-code-badge c2">C2</span> Potentially dangerous — urgent remedial action</div>
+        <div style="display:flex;align-items:center;gap:.5rem"><span class="obs-code-badge c3">C3</span> Improvement recommended</div>
+        <div style="display:flex;align-items:center;gap:.5rem"><span class="obs-code-badge fi">FI</span> Further investigation required</div>
+      </div>
+    </div>
+  </div>`;
+  showContent('obsContent','emptyObs');
+}
+function obsRow(o,i){
+  const code=(o.code||'C3').toUpperCase();
+  const cls=code==='C1'?'c1':code==='C2'?'c2':code==='FI'?'fi':'c3';
+  return `<tr>
+    <td><span class="td-e" contenteditable="true">${o.ref||i+1}</span></td>
+    <td><span class="obs-code-badge ${cls} td-e" contenteditable="true">${code}</span></td>
+    <td><span class="td-e" contenteditable="true" style="text-align:left">${o.location||''}</span></td>
+    <td><span class="td-e" contenteditable="true" style="text-align:left">${o.description||''}</span></td>
+    <td><button class="btn btn-danger btn-xs" onclick="this.closest('tr').remove()">✕</button></td>
+  </tr>`;
+}
+function addObs(){const tb=document.getElementById('obsBody');if(!tb)return;const n=tb.querySelectorAll('tr').length+1;tb.insertAdjacentHTML('beforeend',obsRow({ref:n,code:'C3',location:'',description:''},n-1));}
+
+// ══ SUPPLY CHARACTERISTICS ════════════════════════════════════════════════════
+function renderSupply(d){
+  const earthSystems=['TN-S','TN-C-S','TN-C','TT','IT'];
+  const currentEarth=d.supply_type||'TN-C-S';
+  document.getElementById('supplyContent').innerHTML=`
+  <div class="card">
+    <div class="card-header"><div class="card-title">⚡ Supply Characteristics and Earthing Arrangements</div></div>
+    <div class="card-body">
+      <div class="form-grid g3" style="margin-bottom:1rem">
+        <div>
+          <div style="font-size:.62rem;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">Earthing Arrangement</div>
+          <div class="earth-btns" id="earthBtns">
+            ${earthSystems.map(s=>`<button class="earth-btn ${s===currentEarth?'active':''}" onclick="setEarth('${s}',this)">${s}</button>`).join('')}
+          </div>
+        </div>
+        <div>
+          <div style="font-size:.62rem;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">Live Conductors</div>
+          <div class="earth-btns">
+            <button class="earth-btn active" id="acBtn" onclick="setAC(this)">～ AC</button>
+            <button class="earth-btn" id="dcBtn" onclick="setDC(this)">⎓ DC</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:.62rem;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">Number of Supplies</div>
+          <select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.75rem;outline:none">
+            <option>1</option><option>2</option><option>3</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid g2" style="margin-bottom:1rem">
+        <div>
+          <div style="font-size:.62rem;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">Live Conductors Configuration</div>
+          <div style="display:flex;flex-direction:column;gap:.25rem">
+            ${['1-phase (2 wire)','1-phase (3 wire)','2-phase (3 wire)','3-phase (3 wire)','3-phase (4 wire)'].map((c,i)=>`<label style="display:flex;align-items:center;gap:.5rem;font-size:.72rem;cursor:pointer"><input type="radio" name="phases" ${i===0?'checked':''}> ${c}</label>`).join('')}
+          </div>
+        </div>
+        <div class="form-grid" style="gap:.4rem;align-content:start">
+          ${ef('Nominal Voltage Uo (V)',d.nominal_voltage||'230')}
+          ${ef('Nominal Frequency (Hz)',d.frequency||'50')}
+          <div>
+            <div style="font-size:.62rem;color:var(--text2);margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.06em">Supply Polarity Confirmed</div>
+            <div class="toggle-group">
+              ${['YES','NO','LIM','N/A'].map(v=>`<button class="toggle-btn ${v==='YES'?'active-pass':''}" onclick="toggleSingle(this,'supply-pol')">${v}</button>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid g3" style="margin-bottom:1rem">
+        <div>${ef('Earth Loop Impedance Ze (Ω)',d.external_ze,'hi')}</div>
+        <div>${ef('PFC / PSCC Ipf (kA)',d.prospective_fault_current)}</div>
+        <div>${ef('Maximum Demand (A)',d.max_demand)}</div>
+      </div>
+      <div style="font-size:.78rem;font-weight:600;margin-bottom:.5rem">Supply Protective Device</div>
+      <div class="form-grid g3">
+        <div class="field"><label>BS(EN)</label><select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.75rem;outline:none;width:100%"><option>Select...</option><option>BS EN 60898</option><option>BS 88</option><option>BS 1361</option></select></div>
+        <div class="field"><label>Type</label><select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.75rem;outline:none;width:100%"><option>Select...</option><option>B</option><option>C</option><option>D</option></select></div>
+        <div>${ef('Rated Current (A)',d.main_switch_rating?.replace('A',''))}</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">🔗 Particulars of Installation</div></div>
+    <div class="card-body">
+      <div style="font-size:.72rem;font-weight:500;margin-bottom:.5rem">Means of Earthing</div>
+      <div style="display:flex;gap:1rem;margin-bottom:.85rem;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.75rem;cursor:pointer"><input type="checkbox" ${(d.means_of_earthing||'').toLowerCase().includes('distrib')?'checked':''}> Distributor's facility</label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.75rem;cursor:pointer"><input type="checkbox" ${(d.means_of_earthing||'').toLowerCase().includes('electr')?'checked':''}> Earth electrode</label>
+      </div>
+      <div class="form-grid g3">
+        ${ef('Maximum Demand (A)',d.max_demand)}
+        ${ef('No. of Meters','')}
+        ${ef('No. of Consumer Units','1')}
+      </div>
+    </div>
+  </div>`;
+  showContent('supplyContent','emptySupply');
+}
+function setEarth(s,btn){document.querySelectorAll('.earth-btn').forEach(b=>{if(b.closest('#earthBtns'))b.classList.remove('active')});btn.classList.add('active');}
+function setAC(btn){btn.classList.add('active');document.getElementById('dcBtn').classList.remove('active');}
+function setDC(btn){btn.classList.add('active');document.getElementById('acBtn').classList.remove('active');}
+function toggleSingle(btn,group){const p=btn.closest('.toggle-group');p.querySelectorAll('.toggle-btn').forEach(b=>b.className='toggle-btn');const v=btn.textContent.trim().toLowerCase();btn.classList.add(v==='yes'||v==='pass'?'active-pass':v==='no'||v==='fail'?'active-fail':v==='lim'?'active-lim':'active-na');}
+
+// ══ INSPECTION SCHEDULE ═══════════════════════════════════════════════════════
+function renderInspSchedule(){
+  const CODES=['✓','C1','C2','C3','FI','LIM','N/V','N/A','X'];
+  const CODE_CLS={'✓':'pass','C1':'c1','C2':'c2','C3':'c3','FI':'fi','LIM':'lim','N/V':'nv','N/A':'na','X':'na'};
+  let html='';
+  INSP_SCHEDULE.forEach(sec=>{
+    html+=`<div class="insp-section">
+      <div class="insp-section-hdr" onclick="toggleInspSec(this)">
+        <div class="insp-section-num">${sec.num}</div>
+        <div class="insp-section-title">${sec.title}</div>
+        <div class="insp-section-actions">
+          <button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();setSecAll('sec-${sec.num}','pass')">✓ Set</button>
+          <button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();setSecAll('sec-${sec.num}',null)">Clear</button>
+        </div>
+      </div>
+      <div id="sec-${sec.num}">`;
+    sec.items.forEach(item=>{
+      const isYesNo=item.btns&&item.btns[0]==='YES';
+      if(isYesNo){
+        html+=`<div class="insp-item"><div class="insp-item-ref">${item.ref}</div><div class="insp-item-desc">${item.desc}</div><div class="insp-item-btns">
+          ${['YES','NO','N/A'].map(v=>`<button class="toggle-btn btn-sm" onclick="toggleSingle(this,'yesno')">${v}</button>`).join('')}
+        </div></div>`;
+      } else {
+        html+=`<div class="insp-item"><div class="insp-item-ref">${item.ref}</div><div class="insp-item-desc">${item.desc}</div><div class="insp-item-btns">
+          ${CODES.map(code=>`<button class="insp-code-btn" data-code="${code}" data-key="${item.ref}" onclick="setInspCode(this,'${item.ref}','${code}')" title="${code}">${code}</button>`).join('')}
+        </div></div>`;
+      }
+    });
+    html+='</div></div>';
+  });
+  document.getElementById('inspContent').innerHTML=html;
+}
+function toggleInspSec(hdr){const body=hdr.nextElementSibling;body.style.display=body.style.display==='none'?'':'none';}
+function setInspCode(btn,key,code){
+  const row=btn.closest('.insp-item');
+  row.querySelectorAll('.insp-code-btn').forEach(b=>b.className='insp-code-btn');
+  const cls=code==='✓'?'sel-pass':code==='C1'?'sel-c1':code==='C2'?'sel-c2':code==='C3'?'sel-c3':code==='FI'?'sel-fi':code==='LIM'?'sel-lim':code==='N/V'?'sel-nv':'sel-na';
+  btn.classList.add(cls);
+  inspState[key]=code;
+}
+function setAllInsp(val){document.querySelectorAll('.insp-code-btn').forEach(btn=>{if(val)setInspCode(btn,btn.dataset.key,val==='pass'?'✓':'N/A');else{btn.className='insp-code-btn';}});}
+function setSecAll(secId,val){document.querySelectorAll(`#${secId} .insp-code-btn`).forEach(btn=>{if(val)setInspCode(btn,btn.dataset.key,'✓');else btn.className='insp-code-btn';});}
+
+// ══ BOARDS ════════════════════════════════════════════════════════════════════
+function renderBoardsFromData(d){
+  const circuits=d.circuit_details||[];
+  if(!circuits.length)return;
+  boards=[{id:1,name:'DB-1',location:'Consumer unit',circuits:circuits,manufacturer:d.board_make||boardData?.board_make||'',supply_polarity:'PASS',zs_at_db:d.external_ze||'',ipf_at_db:d.prospective_fault_current||'',rcd_rating:d.rcd_rating||'',rcd_trip_time:d.rcd_trip_time||''}];
+  document.getElementById('boardsBadge').textContent=boards.length;
+  renderBoards();
+}
+function addBoard(){
+  const n=boards.length+1;
+  boards.push({id:n,name:`DB-${n}`,location:'',circuits:[],manufacturer:'',supply_polarity:'',zs_at_db:'',ipf_at_db:'',rcd_rating:'',rcd_trip_time:''});
+  document.getElementById('boardsBadge').textContent=boards.length;
+  renderBoards();
+  openBoard(boards[boards.length-1]);
+}
+function renderBoards(){
+  const el=document.getElementById('boardsListContent');
+  if(!boards.length){el.innerHTML='<div class="empty"><div class="empty-icon">🔌</div><div class="empty-txt">No boards added yet. Add a board or generate a certificate first.</div></div>';return;}
+  el.innerHTML=boards.map(b=>`
+    <div class="board-card" onclick="openBoard(${JSON.stringify(b).replace(/"/g,'&quot;')})">
+      <div class="board-card-left">
+        <div class="board-icon">🔌</div>
+        <div><div class="board-name">${b.name}</div><div class="board-meta">${b.circuits.length} circuits · ${b.circuits.filter(c=>c.result==='Pass').length} tested</div></div>
+      </div>
+      <div class="board-status">IN PROGRESS</div>
+    </div>`).join('')+
+    `<button class="add-board-btn" onclick="addBoard()">+ Add Board</button>`;
+}
+function openBoard(board){
+  currentBoard=typeof board==='string'?JSON.parse(board):board;
+  document.getElementById('boardsList').style.display='none';
+  document.getElementById('boardDetail').style.display='block';
+  document.getElementById('circuitView').style.display='none';
+  renderBoardDetail(currentBoard);
+}
+function backToBoards(){document.getElementById('boardsList').style.display='block';document.getElementById('boardDetail').style.display='none';document.getElementById('circuitView').style.display='none';}
+function openCircuits(board){
+  currentBoard=board;
+  document.getElementById('boardsList').style.display='none';
+  document.getElementById('boardDetail').style.display='none';
+  document.getElementById('circuitView').style.display='block';
+  renderCircuitTable(board);
+}
+
+function renderBoardDetail(b){
+  document.getElementById('boardDetail').innerHTML=`
+  <div class="board-detail">
+    <div class="board-detail-hdr">
+      <button class="btn btn-secondary btn-sm" onclick="backToBoards()">← Back</button>
+      <div class="board-detail-name">🔌 ${b.name}</div>
+      <div class="board-status" style="padding:.2rem .65rem;border-radius:12px;font-size:.65rem;font-weight:600;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,.25)">IN PROGRESS</div>
+      <div style="margin-left:auto" class="btn-group">
+        <button class="btn btn-secondary btn-sm" onclick="markBoardDone(${b.id})">✓ Mark as done</button>
+        <button class="btn btn-primary btn-sm" onclick="openCircuits(currentBoard)">Circuits →</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Board Details</div></div>
+          <div class="card-body"><div class="form-grid g2">
+            ${ef('Name',b.name)}${ef('Manufacturer',b.manufacturer||'')}
+            ${ef('Location',b.location||'')}${ef('Supplied From','')}
+            <div>
+              <div style="font-size:.62rem;color:var(--text2);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.06em">No. of Phases</div>
+              <select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.75rem;outline:none;width:100%"><option>1</option><option>2</option><option>3</option></select>
+            </div>
+            <div>
+              <div style="font-size:.62rem;color:var(--text2);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.06em">Supply Polarity Confirmed</div>
+              <div class="toggle-group">
+                ${['PASS','FAIL','LIM','N/A'].map(v=>`<button class="toggle-btn ${v==='PASS'?'active-pass':''}" onclick="toggleSingle(this,'sp-${b.id}')">${v}</button>`).join('')}
+              </div>
+            </div>
+            <div>
+              <div style="font-size:.62rem;color:var(--text2);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.06em">Phase Sequence Confirmed</div>
+              <div class="toggle-group">
+                ${['PASS','FAIL','LIM','N/A'].map(v=>`<button class="toggle-btn" onclick="toggleSingle(this,'ps-${b.id}')">${v}</button>`).join('')}
+              </div>
+            </div>
+            ${ef('Zs at DB (Ω)',b.zs_at_db,'hi')}
+            ${ef('Ipf at DB (kA)',b.ipf_at_db)}
+          </div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🔬 Testing Information</div></div>
+          <div class="card-body">
+            <div class="team-member-sel" style="margin-bottom:.75rem">
+              <div class="member-avatar">JS</div>
+              <div><div class="member-name">JJ Steele</div><div style="font-size:.62rem;color:var(--text2)">Engineer</div></div>
+            </div>
+            ${ef('Date Tested',new Date().toLocaleDateString('en-GB'))}
+            <div style="margin-top:.75rem">
+              <div style="font-size:.72rem;font-weight:600;margin-bottom:.5rem">Equipment Used</div>
+              <div class="form-grid g2">
+                <div class="field"><label>Multifunction</label><select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.72rem;outline:none;width:100%"><option>Select equipment...</option></select></div>
+                <div class="field"><label>Continuity</label><select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.72rem;outline:none;width:100%"><option>Select equipment...</option></select></div>
+                <div class="field"><label>Insulation Resistance</label><select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.72rem;outline:none;width:100%"><option>Select equipment...</option></select></div>
+                <div class="field"><label>Earth Loop</label><select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.72rem;outline:none;width:100%"><option>Select equipment...</option></select></div>
+                <div class="field"><label>RCD</label><select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.72rem;outline:none;width:100%"><option>Select equipment...</option></select></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚡ Main Switch</div></div>
+          <div class="card-body"><div class="form-grid g3">
+            <div class="field"><label>BS (EN)</label><select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.72rem;outline:none;width:100%"><option>Select...</option><option selected>BS EN 60947</option><option>BS EN 60898</option></select></div>
+            <div class="field"><label>Voltage Rating</label><select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.72rem;outline:none;width:100%"><option>Select...</option><option selected>230V</option><option>400V</option></select></div>
+            ${ef('Rated Current (A)',lastResult?.main_switch_rating?.replace('A','')||'100')}
+            ${ef('Ipf Rating (kA)',b.ipf_at_db||'6')}
+            <div>
+              <div style="font-size:.62rem;color:var(--text2);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.06em">RCD Rating (mA)</div>
+              <select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.72rem;outline:none;width:100%"><option>Select...</option><option>30</option><option>100</option><option>300</option></select>
+            </div>
+            ${ef('RCD Trip Time (ms)',b.rcd_trip_time||'')}
+          </div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚡ SPD Details</div></div>
+          <div class="card-body"><div class="form-grid g2">
+            <div class="field"><label>SPD Type</label><select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.72rem;outline:none;width:100%"><option>Select...</option><option>Type 1</option><option>Type 2</option><option>Type 1+2</option><option>None</option></select></div>
+            <div>
+              <div style="font-size:.62rem;color:var(--text2);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.06em">Operation Status Confirmed</div>
+              <div class="toggle-group">${['PASS','FAIL','LIM','N/A'].map(v=>`<button class="toggle-btn" onclick="toggleSingle(this,'spd-${b.id}')">${v}</button>`).join('')}</div>
+            </div>
+          </div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📊 Overcurrent Device</div></div>
+          <div class="card-body"><div class="form-grid g3">
+            <div class="field"><label>BS (EN)</label><select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55mm;border-radius:5px;font-size:.72rem;outline:none;width:100%"><option>Select...</option><option selected>BS EN 60898</option><option>BS EN 61009</option></select></div>
+            <div class="field"><label>Voltage Rating</label><select style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:5px;font-size:.72rem;outline:none;width:100%"><option>Select...</option><option selected>230V</option><option>400V</option></select></div>
+            ${ef('Rated Current (A)',lastResult?.main_switch_rating?.replace('A','')||'100')}
+          </div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📝 Notes</div></div>
+          <div class="card-body"><div class="field"><textarea placeholder="Any additional information about this distribution board..." rows="3"></textarea></div></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:1rem" onclick="openCircuits(currentBoard)">Circuits →</button>
+  </div>`;
+}
+
+function markBoardDone(id){const b=boards.find(x=>x.id===id);if(b)b.done=true;backToBoards();renderBoards();}
+
+function renderCircuitTable(b){
+  const circuits=b.circuits||[];
+  document.getElementById('circuitView').innerHTML=`
+  <div style="display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap">
+    <button class="btn btn-secondary btn-sm" onclick="openBoard(currentBoard)">← Back</button>
+    <div style="font-size:1rem;font-weight:700">🔌 ${b.name}</div>
+    <div class="board-status" style="padding:.2rem .65rem;border-radius:12px;font-size:.65rem;font-weight:600;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,.25)">IN PROGRESS</div>
+  </div>
+  <div class="circuit-toolbar">
+    <button class="btn btn-secondary btn-sm" onclick="quickAddCircuits(1)">Quick add</button>
+    <button class="btn btn-primary btn-sm" onclick="quickAddCircuits(1)">+ Add</button>
+    <button class="btn btn-blue-outline btn-sm" onclick="document.getElementById('bfi').click()"><span class="ai-badge" style="font-size:.55rem;padding:.08rem .28rem">⚡AI</span> Import</button>
+    <button class="btn btn-secondary btn-sm" onclick="autofillZs()">Autofill</button>
+    <button class="btn btn-secondary btn-sm" onclick="fillColumn()">Fill column</button>
+    <div class="circuit-count">${circuits.length} circuits · ${circuits.filter(c=>c.result==='Pass').length} tested</div>
+    <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="window.print()">🖨️ Print schedule</button>
+  </div>
+  <div class="schedule-wrap">
+  <table class="schedule-table" id="circTable">
+    <thead>
+      <tr>
+        <th rowspan="2" style="min-width:30px">#</th>
+        <th rowspan="2" style="text-align:left;min-width:140px">Circuit description</th>
+        <th rowspan="2" style="min-width:35px">No. points</th>
+        <th rowspan="2" style="min-width:55px">Wiring type</th>
+        <th rowspan="2" style="min-width:40px">Ref method</th>
+        <th colspan="2" class="grp-hdr">Conductors</th>
+        <th rowspan="2" style="min-width:50px">Max discon. time (s)</th>
+        <th colspan="5" class="grp-hdr">Overcurrent Devices</th>
+        <th colspan="4" class="grp-hdr">RCD</th>
+        <th colspan="4" class="grp-hdr">Ring Final Circuits</th>
+        <th colspan="2" class="grp-hdr">R1+R2 or R2</th>
+        <th colspan="3" class="grp-hdr">Insulation Resistance</th>
+        <th rowspan="2">Polarity</th>
+        <th rowspan="2" style="min-width:65px">Measured Zs (Ω)</th>
+        <th rowspan="2">Discon. time (ms)</th>
+      </tr>
+      <tr>
+        <th>Live mm²</th><th>cpc mm²</th>
+        <th>BS(EN)</th><th>Type</th><th>Rating (A)</th><th>Breaking cap. (kA)</th><th>Max Zs (Ω)</th>
+        <th>BS(EN)</th><th>Type</th><th>Op. current (mA)</th><th>Rating (A)</th>
+        <th>r1 live (Ω)</th><th>rn neutral (Ω)</th><th>r2 cpc (Ω)</th><th>—</th>
+        <th>R1+R2 (Ω)</th><th>R2 (Ω)</th>
+        <th>Test V</th><th>L-L (MΩ)</th><th>L-E (MΩ)</th>
+      </tr>
+    </thead>
+    <tbody id="circBody">
+      ${circuits.map((c,i)=>circRow(c,i)).join('')}
+    </tbody>
+  </table>
+  </div>
+  ${!circuits.length?`
+  <div class="no-circuits">
+    <div class="no-circuits-icon">📋</div>
+    <div class="no-circuits-text">No circuits added</div>
+    <div>Add <div class="quick-add-nums" style="display:inline-flex">${[1,4,6,8,12,16,18,24].map(n=>`<div class="quick-add-num" onclick="quickAddCircuits(${n})">${n}</div>`).join('')}</div> circuits?</div>
+    <div style="margin-top:.5rem"><span style="font-size:.78rem;color:var(--text2)">or import with </span><button class="btn btn-blue-outline btn-sm" onclick="document.getElementById('bfi').click()"><span class="ai-badge" style="font-size:.55rem">⚡AI</span> Import</button></div>
+  </div>`:''}
+  <button class="btn btn-secondary btn-sm" style="margin:.75rem 1rem" onclick="quickAddCircuits(1)">+ Add Circuit Row</button>`;
+}
+
+function circRow(c,i){
+  const pass=c.result==='Pass';
+  return `<tr class="${c.image_sourced?'img-src':''}">
+    <td><span class="td-e" contenteditable="true">${c.circuit_number||i+1}</span></td>
+    <td class="td-desc"><span class="td-e" contenteditable="true" style="text-align:left">${c.description||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.no_points||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.wiring_type||c.circuit_type||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.ref_method||'C'}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.live_csa||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.cpc_csa||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.max_disconnect_time||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.mcb_bs||'BS EN 60898'}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.mcb_type||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.mcb_rating||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.mcb_breaking_capacity||'6'}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.max_zs||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.rcd_bs||'N/A'}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.rcd_type||'N/A'}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.rcd_operating_current||c.rcd_rating||'N/A'}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.rcd_rating||'N/A'}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.r1_live||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.r1_neutral||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.r2_cpc||''}</span></td>
+    <td><span class="td-e" contenteditable="true">—</span></td>
+    <td><span class="td-e" contenteditable="true">${c.r1_plus_r2||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.r2||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.insulation_test_voltage||'500'}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.insulation_ll||''}</span></td>
+    <td><span class="td-e" contenteditable="true">${c.insulation_le||''}</span></td>
+    <td class="${c.polarity==='Pass'?'ok':''}"><span class="td-e" contenteditable="true">${c.polarity||''}</span></td>
+    <td class="${pass?'ok':'bad'}"><span class="td-e" contenteditable="true">${c.measured_zs||''}</span></td>
+    <td class="${pass?'ok':'bad'}"><span class="td-e" contenteditable="true">${c.disconnection_time||''}</span></td>
+  </tr>`;
+}
+
+function quickAddCircuits(n){
+  const tbody=document.getElementById('circBody');if(!tbody)return;
+  const existing=tbody.querySelectorAll('tr').length;
+  for(let i=0;i<n;i++){
+    const num=existing+i+1;
+    const blank={circuit_number:num,description:'New Circuit',no_points:'',wiring_type:'2.5mm² T&E',ref_method:'C',live_csa:'2.5',cpc_csa:'1.5',max_disconnect_time:'0.4',mcb_bs:'BS EN 60898',mcb_type:'B',mcb_rating:'32',mcb_breaking_capacity:'6',max_zs:'1.37',rcd_bs:'N/A',rcd_type:'N/A',rcd_operating_current:'N/A',rcd_rating:'N/A',r1_live:'',r1_neutral:'',r2_cpc:'',r1_plus_r2:'',r2:'',insulation_test_voltage:'500',insulation_ll:'>200',insulation_le:'>200',polarity:'Pass',measured_zs:'',disconnection_time:'',result:'Pass',image_sourced:false};
+    tbody.insertAdjacentHTML('beforeend',circRow(blank,num-1));
+  }
+  document.querySelector('.no-circuits')?.remove();
+}
+function autofillZs(){alert('Autofill Zs: would calculate based on Ze + R1+R2 values in each row.');}
+function fillColumn(){alert('Fill column: select a column to fill all rows with the same value.');}
+
+// ══ DECLARATION ═══════════════════════════════════════════════════════════════
+function renderDecl(d){
+  const isEIC=certType==='eic';
+  document.getElementById('declContent').innerHTML=`
+  <div style="font-size:1.1rem;font-weight:700;margin-bottom:1rem">Declaration</div>
+  ${isEIC?`<div style="display:grid;grid-template-columns:1fr 1fr;background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:1rem">
+    <button class="btn" style="border-radius:0;background:#fff;color:#000;font-size:.78rem;padding:.6rem">👤 Single declaration<br><span style="font-weight:400;font-size:.65rem;color:#666">One contractor for all</span></button>
+    <button class="btn btn-secondary" style="border-radius:0;font-size:.78rem;padding:.6rem">👥 Multiple declarations<br><span style="font-weight:400;font-size:.65rem">Multiple contractors</span></button>
+  </div>`:''}
+  <div class="card">
+    <div class="card-header"><div class="card-title">${isEIC?'FOR THE DESIGN, CONSTRUCTION, INSPECTION AND TESTING':'DECLARATION'}</div></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div>
+          <div class="field" style="margin-bottom:.75rem"><label>Details of departures from BS 7671, as amended</label><textarea rows="4" placeholder="None">${d.departures||'None'}</textarea><div style="font-size:.6rem;color:var(--text3);margin-top:.25rem">Regulations 120.3, 133.5</div></div>
+          <div class="field"><label>Details of permitted exceptions</label><textarea rows="4" placeholder="None">${d.permitted_exceptions||'None'}</textarea><div style="font-size:.6rem;color:var(--text3);margin-top:.25rem">Regulations 411.3.3</div></div>
+          <div style="margin-top:.75rem">
+            <div style="font-size:.72rem;font-weight:500;margin-bottom:.35rem">Risk assessment attached</div>
+            <div class="toggle-group"><button class="toggle-btn" onclick="toggleSingle(this,'ra')">YES</button><button class="toggle-btn active-na" onclick="toggleSingle(this,'ra')">N/A</button></div>
+          </div>
+        </div>
+        <div>
+          <div style="margin-bottom:.75rem">
+            <div style="font-size:.62rem;color:var(--text2);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.06em">For the design, construction, inspection and testing</div>
+            <div class="team-member-sel" style="margin-bottom:.35rem">
+              <div class="member-avatar">JS</div>
+              <div><div class="member-name">JJ Steele</div><div style="font-size:.62rem;color:var(--text2)">Select team member ▾</div></div>
+            </div>
+            ${ef('Date',new Date().toLocaleDateString('en-GB'))}
+          </div>
+          <div style="margin-bottom:.75rem">
+            <div style="font-size:.62rem;color:var(--text2);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.06em">Certificate authorised for issue by</div>
+            <div class="team-member-sel">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--bg4);border:1px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--text3)">+</div>
+              <div style="font-size:.75rem;color:var(--text2)">Select team member ▾</div>
+            </div>
+            <div style="font-size:.6rem;color:var(--text3);margin-top:.3rem">Only QS and Admin roles can sign off the certificate.</div>
+          </div>
+          <div>
+            <div style="font-size:.62rem;color:var(--text2);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.06em">Trading Title</div>
+            <div class="company-card">
+              <div class="company-icon">🏢</div>
+              <div><div class="company-name">JJS Electrical</div><div class="company-phone">📞 07899785784</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:1rem;padding:.75rem;background:var(--bg3);border:1px solid var(--border);border-radius:6px;font-size:.7rem;color:var(--text2);line-height:1.7">${d.declaration||''}</div>
+    </div>
+  </div>`;
+  showContent('declContent','emptyDecl');
+}
+
+// ══ APPENDIX ══════════════════════════════════════════════════════════════════
+function addAppendixPhotos(e){
+  const files=Array.from(e.target.files);
+  const grid=document.getElementById('appendixPhotos');
+  files.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const div=document.createElement('div');div.className='appendix-photo';
+      div.innerHTML=`<img src="${ev.target.result}"><div class="appendix-photo-cap" contenteditable="true" placeholder="Add caption...">Caption</div>`;
+      grid.insertBefore(div,grid.lastElementChild);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ══ INIT ══════════════════════════════════════════════════════════════════════
+renderChips();
+renderInspSchedule();
+// Hide observations tab for non-EICR
+document.getElementById('tab-observations').style.display='';
+</script>
+</body>
+</html>
