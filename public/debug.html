@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CertAI Debug</title>
+<style>
+body{background:#111;color:#eee;font-family:monospace;padding:20px;font-size:13px}
+.btn{background:#3b6ef8;color:#fff;border:none;padding:8px 14px;border-radius:5px;cursor:pointer;margin:4px;font-size:12px}
+.btn.red{background:#ef4444}
+.out{background:#1a1a1a;border:1px solid #333;border-radius:5px;padding:12px;margin:8px 0;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto}
+.ok{color:#22c55e}
+.err{color:#ef4444}
+.warn{color:#f59e0b}
+h3{color:#3b6ef8;margin:16px 0 6px}
+input{background:#222;border:1px solid #333;color:#eee;padding:6px 10px;border-radius:4px;font-family:monospace;font-size:12px;width:400px;margin:4px}
+</style>
+</head>
+<body>
+<h2>⚡ CertAI Debug Console</h2>
+<p style="color:#888;font-size:11px">Open browser DevTools console too (F12) for full logs</p>
+
+<h3>1. Auth State</h3>
+<button class="btn" onclick="checkAuth()">Check Token</button>
+<div class="out" id="authOut">Click to check...</div>
+
+<h3>2. Server Health</h3>
+<button class="btn" onclick="checkHealth()">GET /health</button>
+<div class="out" id="healthOut">Click to check...</div>
+
+<h3>3. OpenAI Key Status</h3>
+<button class="btn" onclick="checkOpenAI()">GET /api/vision/test</button>
+<div class="out" id="openaiOut">Click to check...</div>
+
+<h3>4. Set OpenAI Key</h3>
+<input type="text" id="keyInput" placeholder="sk-proj-...">
+<button class="btn" onclick="setKey()">POST /api/config/openai-key</button>
+<div class="out" id="keyOut">Enter key and click button...</div>
+
+<h3>5. Test Vision Scan (tiny test image)</h3>
+<button class="btn" onclick="testScan()">POST /api/vision/scan</button>
+<div class="out" id="scanOut">Click to run a test scan with a 1x1 pixel image...</div>
+
+<h3>6. Test Vision Scan with Real Image</h3>
+<input type="file" id="imgFile" accept="image/*" style="width:auto">
+<button class="btn" onclick="testRealScan()">Scan Selected Image</button>
+<div class="out" id="realScanOut">Select an image then click scan...</div>
+
+<script>
+function tok(){return localStorage.getItem('certai_token')||'';}
+function hdrs(){return{'Content-Type':'application/json','Authorization':'Bearer '+tok()};}
+function out(id,msg,cls){const el=document.getElementById(id);el.innerHTML='<span class="'+(cls||'')+'">'+(typeof msg==='object'?JSON.stringify(msg,null,2):msg)+'</span>';}
+
+function checkAuth(){
+  const token=tok();
+  if(!token){out('authOut','❌ No token in localStorage — not logged in','err');return;}
+  const parts=token.split('.');
+  if(parts.length!==3){out('authOut','❌ Token malformed','err');return;}
+  try{
+    const payload=JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+    const exp=new Date(payload.exp);
+    const expired=payload.exp<Date.now();
+    out('authOut',
+      '✓ Token found\n'+
+      'User: '+payload.name+' ('+payload.email+')\n'+
+      'Role: '+payload.role+'\n'+
+      'Expires: '+exp.toLocaleString()+'\n'+
+      (expired?'❌ TOKEN EXPIRED — log out and back in':'✓ Token valid'),
+      expired?'err':'ok');
+  }catch(e){out('authOut','❌ Could not decode token: '+e.message,'err');}
+}
+
+async function checkHealth(){
+  out('healthOut','Fetching...','warn');
+  try{
+    const r=await fetch('/health');
+    const d=await r.json();
+    out('healthOut','HTTP '+r.status+'\n'+JSON.stringify(d,null,2),r.ok?'ok':'err');
+  }catch(e){out('healthOut','❌ '+e.message,'err');}
+}
+
+async function checkOpenAI(){
+  out('openaiOut','Testing OpenAI key...','warn');
+  if(!tok()){out('openaiOut','❌ Not logged in — go to /login.html first','err');return;}
+  try{
+    const r=await fetch('/api/vision/test',{headers:hdrs()});
+    const d=await r.json();
+    out('openaiOut','HTTP '+r.status+'\n'+JSON.stringify(d,null,2),r.ok?'ok':'err');
+  }catch(e){out('openaiOut','❌ '+e.message,'err');}
+}
+
+async function setKey(){
+  const key=document.getElementById('keyInput').value.trim();
+  if(!key){out('keyOut','Enter a key first','err');return;}
+  out('keyOut','Sending...','warn');
+  if(!tok()){out('keyOut','❌ Not logged in','err');return;}
+  try{
+    const r=await fetch('/api/config/openai-key',{method:'POST',headers:hdrs(),body:JSON.stringify({key})});
+    const d=await r.json();
+    out('keyOut','HTTP '+r.status+'\n'+JSON.stringify(d,null,2),r.ok?'ok':'err');
+    if(r.ok){
+      // Also save to localStorage for settings page
+      const conn=JSON.parse(localStorage.getItem('certai_connection')||'{}');
+      conn.openAIKey=key;
+      localStorage.setItem('certai_connection',JSON.stringify(conn));
+      out('keyOut',document.getElementById('keyOut').textContent+'\n✓ Also saved to localStorage','ok');
+    }
+  }catch(e){out('keyOut','❌ '+e.message,'err');}
+}
+
+async function testScan(){
+  out('scanOut','Sending tiny test image to /api/vision/scan...','warn');
+  if(!tok()){out('scanOut','❌ Not logged in','err');return;}
+  // 1x1 white pixel PNG as base64
+  const tiny='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  try{
+    const r=await fetch('/api/vision/scan',{
+      method:'POST',
+      headers:hdrs(),
+      body:JSON.stringify({image:tiny,mime:'image/png',prompt:'What do you see? Reply with just one sentence.'})
+    });
+    const d=await r.json();
+    out('scanOut','HTTP '+r.status+'\n'+JSON.stringify(d,null,2),r.ok?'ok':'err');
+  }catch(e){out('scanOut','❌ '+e.message,'err');}
+}
+
+async function testRealScan(){
+  const file=document.getElementById('imgFile').files[0];
+  if(!file){out('realScanOut','Select an image file first','err');return;}
+  out('realScanOut','Reading image...','warn');
+  const reader=new FileReader();
+  reader.onload=async ev=>{
+    const b64=ev.target.result.split(',')[1];
+    out('realScanOut','Sending '+Math.round(b64.length/1024)+'KB image to GPT-4o mini...','warn');
+    try{
+      const r=await fetch('/api/vision/scan',{
+        method:'POST',
+        headers:hdrs(),
+        body:JSON.stringify({
+          image:b64,
+          mime:file.type||'image/jpeg',
+          prompt:`You are an expert UK electrician. List every circuit breaker visible in this consumer unit photo. For each one, give: position number, label text exactly as written, amp rating, and type (B/C/D MCB or RCBO). Also note the board manufacturer and main switch rating. Reply ONLY with valid JSON like: {"board_make":"Hager","board_rating":"100A","circuits":[{"position":"1","label":"Sockets","rating_amps":"32","mcb_type":"B","is_rcbo":false}]}`
+        })
+      });
+      const d=await r.json();
+      out('realScanOut','HTTP '+r.status+'\nTokens used: '+d.tokens_used+'\n\n'+JSON.stringify(d,null,2),r.ok?'ok':'err');
+    }catch(e){out('realScanOut','❌ '+e.message,'err');}
+  };
+  reader.readAsDataURL(file);
+}
+</script>
+</body>
+</html>
