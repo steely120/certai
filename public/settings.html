@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>CertAI — Settings</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;--border:#252525;--border2:#333;--blue:#3b6ef8;--blue2:#2d5ce8;--blue-dim:rgba(59,110,248,.1);--text:#f0f0f0;--text2:#888;--text3:#444;--red:#ef4444;--red-dim:rgba(239,68,68,.12);--green:#22c55e;--green-dim:rgba(34,197,94,.12);--amber:#f59e0b}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:54px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none}
+.logo-badge{width:28px;height:28px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+.logo-text{font-weight:700;font-size:.95rem;color:var(--blue)}
+.topbar-right{margin-left:auto;display:flex;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 14px;border:none;border-radius:7px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:.78rem;transition:all .12s;text-decoration:none;white-space:nowrap}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue2)}
+.btn-sec{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.btn-sec:hover{background:var(--bg4);color:var(--text)}
+.btn-ghost{background:none;color:var(--text2);border:1px solid var(--border2)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.btn-sm{font-size:.68rem;padding:4px 8px}
+.btn-block{width:100%}
+/* LAYOUT */
+.layout{display:flex;flex:1;max-width:1000px;width:100%;margin:0 auto;gap:0}
+.sidebar{width:200px;padding:20px 12px;border-right:1px solid var(--border);flex-shrink:0}
+.nav-item{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:.78rem;font-weight:500;color:var(--text2);transition:all .12s;margin-bottom:2px;border:none;background:none;font-family:'Inter',sans-serif;width:100%;text-align:left}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--blue-dim);color:var(--blue)}
+.nav-section{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--text3);padding:10px 10px 4px;margin-top:6px}
+.main{flex:1;padding:24px;overflow-y:auto}
+/* PANELS */
+.panel{display:none}
+.panel.active{display:block}
+.panel-title{font-size:1.1rem;font-weight:700;margin-bottom:4px}
+.panel-sub{font-size:.75rem;color:var(--text2);margin-bottom:20px}
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.card-title{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--blue)}
+.card-body{padding:14px}
+/* FORM */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.f{display:flex;flex-direction:column;gap:3px;margin-bottom:12px}
+.f:last-child{margin-bottom:0}
+.f label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text2)}
+.f input,.f select,.f textarea{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:7px;font-size:.78rem;outline:none;font-family:'Inter',sans-serif;transition:border-color .12s;width:100%}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--blue)}
+.f textarea{resize:vertical;min-height:60px;line-height:1.5}
+select option{background:var(--bg3)}
+/* SIGNATURE PAD */
+.sig-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:7px;overflow:hidden;position:relative}
+#sigCanvas{display:block;cursor:crosshair;touch-action:none}
+.sig-controls{display:flex;gap:6px;padding:6px 8px;background:var(--bg4);border-top:1px solid var(--border)}
+/* LOGO UPLOAD */
+.logo-upload-area{border:2px dashed var(--border2);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
+.logo-upload-area:hover{border-color:var(--blue);background:var(--blue-dim)}
+.logo-preview{max-height:80px;max-width:200px;object-fit:contain;border-radius:4px;border:1px solid var(--border)}
+/* ALERTS */
+.alert{display:none;padding:8px 12px;border-radius:7px;font-size:.72rem;font-weight:500;margin-bottom:12px;line-height:1.5}
+.alert.on{display:block}
+.alert.err{background:var(--red-dim);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.alert.ok{background:var(--green-dim);border:1px solid rgba(34,197,94,.3);color:var(--green)}
+/* USER LIST */
+.user-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.user-item:last-child{border-bottom:none}
+.u-avatar{width:32px;height:32px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0}
+.u-name{font-weight:600;font-size:.82rem}
+.u-email{font-size:.65rem;color:var(--text2)}
+.u-role{font-size:.6rem;font-weight:600;padding:1px 6px;border-radius:3px;margin-left:5px}
+.u-role.admin{background:var(--blue-dim);color:var(--blue)}
+.u-role.user{background:var(--bg4);color:var(--text2)}
+/* INVITE BOX */
+.invite-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.invite-token{background:var(--bg4);border:1px solid var(--border2);border-radius:5px;padding:8px 12px;font-family:monospace;font-size:.72rem;color:var(--green);word-break:break-all;margin-top:8px}
+/* MODAL */
+.m-wrap{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:flex-end;justify-content:center;padding:0}
+.m-wrap.on{display:flex}
+.m-wrap.center{align-items:center;padding:16px}
+.m-box{background:var(--bg2);border:1px solid var(--border2);border-radius:12px 12px 0 0;width:100%;max-width:480px;overflow:hidden;animation:sup .2s ease}
+.m-wrap.center .m-box{border-radius:12px}
+@keyframes sup{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.m-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
+.m-title{font-weight:700;font-size:.9rem}
+.m-body{padding:16px;max-height:70vh;overflow-y:auto}
+.m-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+@media(max-width:600px){.layout{flex-direction:column}.sidebar{width:100%;padding:10px;border-right:none;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px}.nav-section{display:none}.main{padding:14px}.g2,.g3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="logo" href="/dashboard.html">
+    <div class="logo-badge">⚡</div>
+    <div class="logo-text">CertAI</div>
+  </a>
+  <div style="font-size:.75rem;color:var(--text2);margin-left:4px">/ Settings</div>
+  <div class="topbar-right">
+    <a class="btn btn-sec btn-sm" href="/dashboard.html">← Dashboard</a>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">Sign out</button>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="nav-section">Profile</div>
+    <button class="nav-item active" onclick="showPanel('profile',this)">👤 My Profile</button>
+    <button class="nav-item" onclick="showPanel('signature',this)">✍️ Signature</button>
+    <button class="nav-item" onclick="showPanel('equipment',this)">🔬 Test Equipment</button>
+    <button class="nav-item" onclick="showPanel('password',this)">🔒 Password</button>
+    <div class="nav-section">Company</div>
+    <button class="nav-item" onclick="showPanel('company',this)">🏢 Company Info</button>
+    <div class="nav-section" id="adminSection" style="display:none">Admin</div>
+    <button class="nav-item" id="usersNavBtn" onclick="showPanel('users',this)" style="display:none">👥 Users</button>
+    <button class="nav-item" id="connectionNavBtn" onclick="showPanel('connection',this)">🔌 Connection</button>
+  </aside>
+
+  <main class="main">
+    <div class="alert err" id="errMsg"></div>
+    <div class="alert ok" id="okMsg"></div>
+
+    <!-- PROFILE -->
+    <div class="panel active" id="panel-profile">
+      <div class="panel-title">My Profile</div>
+      <div class="panel-sub">Your personal information used on certificates</div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Personal Details</div></div>
+        <div class="card-body">
+          <div class="g2">
+            <div class="f"><label>Full Name</label><input type="text" id="pName" placeholder="JJ Steele"></div>
+            <div class="f"><label>Email</label><input type="email" id="pEmail" placeholder="jj@example.com" disabled style="opacity:.6"></div>
+            <div class="f"><label>Company / Trading Name</label><input type="text" id="pCompany" placeholder="JJS Electrical"></div>
+            <div class="f"><label>NICEIC / ECA Registration No.</label><input type="text" id="pRegNumber" placeholder="e.g. NICEIC-12345"></div>
+          </div>
+          <div class="f"><label>Qualifications &amp; Certifications</label><textarea id="pQuals" placeholder="e.g. 18th Edition (BS 7671), ECS Gold Card, City &amp; Guilds 2391-52"></textarea></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Default Certificate Settings</div></div>
+        <div class="card-body">
+          <div class="g3">
+            <div class="f"><label>Default Earthing Arrangement</label>
+              <select id="pDefaultSupply"><option>TN-C-S</option><option>TN-S</option><option>TT</option><option>TN-C</option></select>
+            </div>
+            <div class="f"><label>Default Earthing Conductor CSA</label>
+              <select id="pEarthCond"><option>6mm²</option><option>10mm²</option><option selected>16mm²</option><option>25mm²</option></select>
+            </div>
+            <div class="f"><label>Default Bonding Conductor CSA</label>
+              <select id="pBondCond"><option>6mm²</option><option selected>10mm²</option><option>16mm²</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveProfile()">Save Profile</button>
+    </div>
+
+    <!-- SIGNATURE -->
+    <div class="panel" id="panel-signature">
+      <div class="panel-title">Signature</div>
+      <div class="panel-sub">Draw your signature — it will appear on generated certificates</div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Draw Signature</div></div>
+        <div class="card-body">
+          <div class="sig-wrap">
+            <canvas id="sigCanvas" width="500" height="160"></canvas>
+            <div class="sig-controls">
+              <button class="btn btn-sec btn-sm" onclick="clearSig()">Clear</button>
+              <span style="font-size:.65rem;color:var(--text2);margin-left:4px">Draw with mouse or finger</span>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:.68rem;color:var(--text2)">Existing signature:</div>
+          <div id="existingSig" style="margin-top:6px"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveSig()">Save Signature</button>
+    </div>
+
+    <!-- TEST EQUIPMENT -->
+    <div class="panel" id="panel-equipment">
+      <div class="panel-title">Test Equipment</div>
+      <div class="panel-sub">Equipment details appear on the testing information page of certificates</div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Test Instruments</div></div>
+        <div class="card-body">
+          <div class="g2">
+            <div class="f"><label>Multifunction Tester (MFT)</label><input type="text" id="eMft" placeholder="e.g. Fluke 1664FC SN:12345678"></div>
+            <div class="f"><label>Continuity Tester</label><input type="text" id="eCont" placeholder="e.g. MFT or dedicated tester"></div>
+            <div class="f"><label>Insulation Resistance Tester</label><input type="text" id="eIr" placeholder="e.g. Fluke 1587 SN:87654321"></div>
+            <div class="f"><label>Earth Loop Impedance Tester</label><input type="text" id="eZel" placeholder="e.g. MFT or dedicated tester"></div>
+            <div class="f"><label>RCD Tester</label><input type="text" id="eRcd" placeholder="e.g. MFT or dedicated tester"></div>
+          </div>
+          <div style="font-size:.65rem;color:var(--text2);margin-top:6px">Note: Test equipment details should include instrument make, model and serial number. Calibration certificates should be maintained separately.</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveEquipment()">Save Equipment Details</button>
+    </div>
+
+    <!-- PASSWORD -->
+    <div class="panel" id="panel-password">
+      <div class="panel-title">Change Password</div>
+      <div class="panel-sub">Update your account password</div>
+      <div class="card">
+        <div class="card-body">
+          <div class="f"><label>Current Password</label><input type="password" id="pwCurrent" placeholder="Enter current password"></div>
+          <div class="f"><label>New Password</label><input type="password" id="pwNew" placeholder="Choose a new password"></div>
+          <div class="f"><label>Confirm New Password</label><input type="password" id="pwConfirm" placeholder="Confirm new password"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
+    </div>
+
+    <!-- COMPANY -->
+    <div class="panel" id="panel-company">
+      <div class="panel-title">Company Information</div>
+      <div class="panel-sub">Company details and logo that appear on certificates</div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Company Logo</div></div>
+        <div class="card-body">
+          <div id="logoPreviewWrap" style="margin-bottom:10px;display:none">
+            <img id="logoPreview" class="logo-preview" src="" alt="Company logo">
+          </div>
+          <div class="logo-upload-area" onclick="document.getElementById('logoFileIn').click()">
+            <input type="file" id="logoFileIn" accept="image/*" style="display:none" onchange="uploadLogo(event)">
+            <div style="font-size:1.5rem;margin-bottom:6px">🏢</div>
+            <div style="font-size:.75rem;font-weight:500">Click to upload company logo</div>
+            <div style="font-size:.65rem;color:var(--text2);margin-top:3px">PNG, JPG — will appear on PDF certificates</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Company Details</div></div>
+        <div class="card-body">
+          <div class="g2">
+            <div class="f"><label>Company / Trading Name</label><input type="text" id="coName" placeholder="JJS Electrical"></div>
+            <div class="f"><label>Phone Number</label><input type="text" id="coPhone" placeholder="07899785784"></div>
+            <div class="f"><label>Email</label><input type="email" id="coEmail" placeholder="info@jjselectrical.co.uk"></div>
+            <div class="f"><label>Website</label><input type="text" id="coWebsite" placeholder="www.jjselectrical.co.uk"></div>
+          </div>
+          <div class="f"><label>Address</label><textarea id="coAddress" rows="2" placeholder="Company address"></textarea></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveCompany()">Save Company Info</button>
+    </div>
+
+    <!-- USERS (ADMIN) -->
+    <div class="panel" id="panel-users">
+      <div class="panel-title">User Management</div>
+      <div class="panel-sub">Manage users who can access CertAI</div>
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-title">Active Users</div>
+          <button class="btn btn-primary btn-sm" onclick="openInviteModal()">+ Invite User</button>
+        </div>
+        <div id="userListWrap">
+          <div style="padding:20px;text-align:center;color:var(--text2);font-size:.75rem">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONNECTION -->
+    <div class="panel" id="panel-connection">
+      <div class="panel-title">Ollama Connection</div>
+      <div class="panel-sub">Configure the connection to your local Ollama AI server</div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Proxy Settings</div></div>
+        <div class="card-body">
+          <div class="f"><label>Proxy URL (leave blank if using built-in proxy)</label><input type="text" id="connProxy" placeholder="https://192.168.1.53:3001"></div>
+          <div class="g2">
+            <div class="f"><label>Vision Model (for board scanning)</label><input type="text" id="connVision" placeholder="llava" value="llava"></div>
+            <div class="f"><label>Text Model</label><input type="text" id="connText" placeholder="gemma3:27b" value="gemma3:27b"></div>
+          </div>
+          <button class="btn btn-sec btn-sm" onclick="testConnection()" style="margin-top:4px">⚡ Test Connection</button>
+          <div id="connStatus" style="font-size:.7rem;color:var(--text2);margin-top:8px"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveConnection()">Save Connection Settings</button>
+    </div>
+
+  </main>
+</div>
+
+<!-- INVITE MODAL -->
+<div class="m-wrap center" id="inviteModal">
+  <div class="m-box">
+    <div class="m-hdr"><div class="m-title">Invite New User</div><button class="btn btn-sec btn-sm" onclick="closeInviteModal()">✕</button></div>
+    <div class="m-body">
+      <div style="font-size:.75rem;color:var(--text2);margin-bottom:12px;line-height:1.5">Enter the email address of the person you want to invite. Share the generated token with them — they'll need it to register.</div>
+      <div class="f"><label>Email Address</label><input type="email" id="inviteEmail" placeholder="new.user@example.com"></div>
+      <div id="inviteResult" style="display:none">
+        <div style="font-size:.72rem;font-weight:600;margin-bottom:5px;color:var(--green)">✓ Invite token generated</div>
+        <div class="invite-box">
+          <div style="font-size:.65rem;color:var(--text2)">Share this token with <span id="inviteEmailDisplay"></span>:</div>
+          <div class="invite-token" id="inviteTokenDisplay"></div>
+          <button class="btn btn-sec btn-sm" style="margin-top:8px" onclick="copyInviteToken()">Copy Token</button>
+        </div>
+        <div style="font-size:.65rem;color:var(--text2);margin-top:8px;line-height:1.4">They should go to <strong style="color:var(--text)">your CertAI URL</strong>, click Register, and enter this token along with their details.</div>
+      </div>
+    </div>
+    <div class="m-footer">
+      <button class="btn btn-sec" style="flex:1" onclick="closeInviteModal()">Close</button>
+      <button class="btn btn-primary" style="flex:2" id="inviteBtn" onclick="generateInvite()">Generate Invite Token</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT USER MODAL -->
+<div class="m-wrap center" id="editUserModal">
+  <div class="m-box">
+    <div class="m-hdr"><div class="m-title">Edit User</div><button class="btn btn-sec btn-sm" onclick="closeEditUser()">✕</button></div>
+    <div class="m-body">
+      <div class="f"><label>Full Name</label><input type="text" id="euName"></div>
+      <div class="f"><label>Company</label><input type="text" id="euCompany"></div>
+      <div class="f"><label>Role</label><select id="euRole"><option value="user">User</option><option value="admin">Admin</option></select></div>
+      <div class="f"><label>New Password (leave blank to keep current)</label><input type="password" id="euPassword" placeholder="Leave blank to keep"></div>
+    </div>
+    <div class="m-footer">
+      <button class="btn btn-danger btn-sm" onclick="deleteUser()">🗑 Delete</button>
+      <button class="btn btn-sec" style="flex:1" onclick="closeEditUser()">Cancel</button>
+      <button class="btn btn-primary" style="flex:2" onclick="saveEditUser()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BASE = '';
+let token = localStorage.getItem('certai_token');
+let user = null;
+let editingUserId = null;
+
+// SIGNATURE PAD
+let sigDrawing = false;
+const canvas = document.getElementById('sigCanvas');
+const ctx = canvas.getContext('2d');
+ctx.strokeStyle = '#f0f0f0';
+ctx.lineWidth = 2;
+ctx.lineCap = 'round';
+
+function getPos(e) {
+  const r = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / r.width;
+  const scaleY = canvas.height / r.height;
+  if (e.touches) return { x: (e.touches[0].clientX - r.left) * scaleX, y: (e.touches[0].clientY - r.top) * scaleY };
+  return { x: (e.clientX - r.left) * scaleX, y: (e.clientY - r.top) * scaleY };
+}
+canvas.addEventListener('mousedown', e => { sigDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener('mousemove', e => { if (!sigDrawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+canvas.addEventListener('mouseup', () => sigDrawing = false);
+canvas.addEventListener('mouseleave', () => sigDrawing = false);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); sigDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!sigDrawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, { passive: false });
+canvas.addEventListener('touchend', () => sigDrawing = false);
+function clearSig() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+function authHeaders() { return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }; }
+function showErr(m) { const e = document.getElementById('errMsg'); e.textContent = m; e.classList.add('on'); document.getElementById('okMsg').classList.remove('on'); setTimeout(() => e.classList.remove('on'), 6000); }
+function showOk(m) { const e = document.getElementById('okMsg'); e.textContent = m; e.classList.add('on'); document.getElementById('errMsg').classList.remove('on'); setTimeout(() => e.classList.remove('on'), 4000); }
+
+function showPanel(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (name === 'users') loadUsers();
+}
+
+async function init() {
+  if (!token) { window.location.href = '/login.html'; return; }
+  try {
+    const r = await fetch(BASE + '/api/auth/me', { headers: authHeaders() });
+    if (!r.ok) { logout(); return; }
+    user = await r.json();
+    populateProfile();
+    if (user.role === 'admin') {
+      document.getElementById('adminSection').style.display = 'block';
+      document.getElementById('usersNavBtn').style.display = 'flex';
+    }
+  } catch(e) { logout(); }
+}
+
+function populateProfile() {
+  document.getElementById('pName').value = user.name || '';
+  document.getElementById('pEmail').value = user.email || '';
+  document.getElementById('pCompany').value = user.company || '';
+  const p = user.profile || {};
+  document.getElementById('pRegNumber').value = p.regNumber || '';
+  document.getElementById('pQuals').value = p.qualifications || '';
+  document.getElementById('pDefaultSupply').value = p.defaultSupplyType || 'TN-C-S';
+  document.getElementById('pEarthCond').value = p.defaultEarthConductor || '16mm²';
+  document.getElementById('pBondCond').value = p.defaultBondConductor || '10mm²';
+  // Equipment
+  document.getElementById('eMft').value = p.equipment?.mft || '';
+  document.getElementById('eCont').value = p.equipment?.continuity || '';
+  document.getElementById('eIr').value = p.equipment?.ir || '';
+  document.getElementById('eZel').value = p.equipment?.zel || '';
+  document.getElementById('eRcd').value = p.equipment?.rcd || '';
+  // Company
+  document.getElementById('coName').value = user.company || '';
+  document.getElementById('coPhone').value = p.phone || '';
+  document.getElementById('coEmail').value = p.companyEmail || '';
+  document.getElementById('coWebsite').value = p.website || '';
+  document.getElementById('coAddress').value = p.companyAddress || '';
+  // Logo
+  if (p.logoUrl) {
+    document.getElementById('logoPreviewWrap').style.display = 'block';
+    document.getElementById('logoPreview').src = p.logoUrl;
+  }
+  // Signature
+  if (p.signature) {
+    document.getElementById('existingSig').innerHTML = `<img src="${p.signature}" style="max-height:60px;border:1px solid var(--border);border-radius:5px;background:var(--bg3);padding:4px">`;
+  }
+  // Connection
+  const conn = JSON.parse(localStorage.getItem('certai_connection') || '{}');
+  document.getElementById('connProxy').value = conn.proxyUrl || '';
+  document.getElementById('connVision').value = conn.visionModel || 'llava';
+  document.getElementById('connText').value = conn.textModel || 'gemma3:27b';
+}
+
+async function saveProfile() {
+  const updates = {
+    name: document.getElementById('pName').value.trim(),
+    company: document.getElementById('pCompany').value.trim(),
+    profile: {
+      ...( user.profile || {}),
+      regNumber: document.getElementById('pRegNumber').value.trim(),
+      qualifications: document.getElementById('pQuals').value.trim(),
+      defaultSupplyType: document.getElementById('pDefaultSupply').value,
+      defaultEarthConductor: document.getElementById('pEarthCond').value,
+      defaultBondConductor: document.getElementById('pBondCond').value,
+    }
+  };
+  try {
+    const r = await fetch(BASE + '/api/users/profile', { method: 'PUT', headers: authHeaders(), body: JSON.stringify(updates) });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.error); return; }
+    user = d.user;
+    localStorage.setItem('certai_user', JSON.stringify(user));
+    showOk('Profile saved successfully');
+  } catch(e) { showErr('Save failed: ' + e.message); }
+}
+
+async function saveSig() {
+  const sig = canvas.toDataURL('image/png');
+  const updates = { profile: { ...(user.profile || {}), signature: sig } };
+  try {
+    const r = await fetch(BASE + '/api/users/profile', { method: 'PUT', headers: authHeaders(), body: JSON.stringify(updates) });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.error); return; }
+    user = d.user;
+    localStorage.setItem('certai_user', JSON.stringify(user));
+    document.getElementById('existingSig').innerHTML = `<img src="${sig}" style="max-height:60px;border:1px solid var(--border);border-radius:5px;background:var(--bg3);padding:4px">`;
+    showOk('Signature saved');
+  } catch(e) { showErr('Save failed'); }
+}
+
+async function saveEquipment() {
+  const updates = {
+    profile: {
+      ...(user.profile || {}),
+      equipment: {
+        mft: document.getElementById('eMft').value.trim(),
+        continuity: document.getElementById('eCont').value.trim(),
+        ir: document.getElementById('eIr').value.trim(),
+        zel: document.getElementById('eZel').value.trim(),
+        rcd: document.getElementById('eRcd').value.trim(),
+      }
+    }
+  };
+  try {
+    const r = await fetch(BASE + '/api/users/profile', { method: 'PUT', headers: authHeaders(), body: JSON.stringify(updates) });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.error); return; }
+    user = d.user;
+    localStorage.setItem('certai_user', JSON.stringify(user));
+    showOk('Equipment details saved');
+  } catch(e) { showErr('Save failed'); }
+}
+
+async function changePassword() {
+  const cur = document.getElementById('pwCurrent').value;
+  const nw = document.getElementById('pwNew').value;
+  const conf = document.getElementById('pwConfirm').value;
+  if (!cur || !nw) { showErr('Enter current and new password'); return; }
+  if (nw !== conf) { showErr('New passwords do not match'); return; }
+  if (nw.length < 6) { showErr('Password must be at least 6 characters'); return; }
+  try {
+    const r = await fetch(BASE + '/api/auth/change-password', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ currentPassword: cur, newPassword: nw }) });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.error); return; }
+    document.getElementById('pwCurrent').value = '';
+    document.getElementById('pwNew').value = '';
+    document.getElementById('pwConfirm').value = '';
+    showOk('Password updated successfully');
+  } catch(e) { showErr('Failed: ' + e.message); }
+}
+
+async function saveCompany() {
+  const updates = {
+    company: document.getElementById('coName').value.trim(),
+    profile: {
+      ...(user.profile || {}),
+      phone: document.getElementById('coPhone').value.trim(),
+      companyEmail: document.getElementById('coEmail').value.trim(),
+      website: document.getElementById('coWebsite').value.trim(),
+      companyAddress: document.getElementById('coAddress').value.trim(),
+    }
+  };
+  try {
+    const r = await fetch(BASE + '/api/users/profile', { method: 'PUT', headers: authHeaders(), body: JSON.stringify(updates) });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.error); return; }
+    user = d.user;
+    localStorage.setItem('certai_user', JSON.stringify(user));
+    showOk('Company info saved');
+  } catch(e) { showErr('Save failed'); }
+}
+
+async function uploadLogo(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const fd = new FormData(); fd.append('logo', file);
+  try {
+    const r = await fetch(BASE + '/api/upload/logo', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: fd });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.error); return; }
+    document.getElementById('logoPreviewWrap').style.display = 'block';
+    document.getElementById('logoPreview').src = d.url;
+    showOk('Logo uploaded');
+  } catch(e) { showErr('Upload failed'); }
+  e.target.value = '';
+}
+
+function saveConnection() {
+  const conn = {
+    proxyUrl: document.getElementById('connProxy').value.trim(),
+    visionModel: document.getElementById('connVision').value.trim() || 'llava',
+    textModel: document.getElementById('connText').value.trim() || 'gemma3:27b',
+  };
+  localStorage.setItem('certai_connection', JSON.stringify(conn));
+  showOk('Connection settings saved');
+}
+
+async function testConnection() {
+  const url = document.getElementById('connProxy').value.trim();
+  const status = document.getElementById('connStatus');
+  if (!url) { status.textContent = 'Enter a proxy URL to test'; return; }
+  status.textContent = 'Testing...'; status.style.color = 'var(--text2)';
+  try {
+    const r = await fetch(url + '/api/tags', { headers: { 'Authorization': 'Bearer ' + token } });
+    const d = await r.json();
+    status.textContent = '✓ Connected — Models: ' + (d.models?.map(m => m.name).join(', ') || 'none');
+    status.style.color = 'var(--green)';
+  } catch(e) {
+    status.textContent = '✗ Cannot connect: ' + e.message;
+    status.style.color = 'var(--red)';
+  }
+}
+
+// USER MANAGEMENT
+async function loadUsers() {
+  try {
+    const r = await fetch(BASE + '/api/users', { headers: authHeaders() });
+    const d = await r.json();
+    const wrap = document.getElementById('userListWrap');
+    if (!d.users?.length) { wrap.innerHTML = '<div style="padding:16px;color:var(--text2);font-size:.75rem">No users found</div>'; return; }
+    wrap.innerHTML = d.users.map(u => `
+      <div class="user-item">
+        <div class="u-avatar">${u.name.charAt(0).toUpperCase()}</div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:4px">
+            <span class="u-name">${u.name}</span>
+            <span class="u-role ${u.role}">${u.role}</span>
+          </div>
+          <div class="u-email">${u.email} · ${u.company || 'No company'}</div>
+        </div>
+        <button class="btn btn-sec btn-sm" onclick="openEditUser('${u.id}','${u.name}','${u.company||''}','${u.role}')">Edit</button>
+      </div>`).join('');
+  } catch(e) { showErr('Failed to load users'); }
+}
+
+function openInviteModal() { document.getElementById('inviteModal').classList.add('on'); document.getElementById('inviteResult').style.display = 'none'; }
+function closeInviteModal() { document.getElementById('inviteModal').classList.remove('on'); document.getElementById('inviteEmail').value = ''; }
+
+async function generateInvite() {
+  const email = document.getElementById('inviteEmail').value.trim();
+  if (!email) { showErr('Enter an email address'); return; }
+  const btn = document.getElementById('inviteBtn'); btn.disabled = true;
+  try {
+    const r = await fetch(BASE + '/api/users/invite', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ email }) });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.error); return; }
+    document.getElementById('inviteEmailDisplay').textContent = email;
+    document.getElementById('inviteTokenDisplay').textContent = d.inviteToken;
+    document.getElementById('inviteResult').style.display = 'block';
+  } catch(e) { showErr('Failed: ' + e.message); }
+  finally { btn.disabled = false; }
+}
+
+function copyInviteToken() {
+  const t = document.getElementById('inviteTokenDisplay').textContent;
+  navigator.clipboard.writeText(t).then(() => showOk('Token copied to clipboard'));
+}
+
+function openEditUser(id, name, company, role) {
+  editingUserId = id;
+  document.getElementById('euName').value = name;
+  document.getElementById('euCompany').value = company;
+  document.getElementById('euRole').value = role;
+  document.getElementById('euPassword').value = '';
+  document.getElementById('editUserModal').classList.add('on');
+}
+function closeEditUser() { document.getElementById('editUserModal').classList.remove('on'); editingUserId = null; }
+
+async function saveEditUser() {
+  if (!editingUserId) return;
+  const updates = { name: document.getElementById('euName').value.trim(), company: document.getElementById('euCompany').value.trim(), role: document.getElementById('euRole').value };
+  const pw = document.getElementById('euPassword').value;
+  if (pw) updates.password = pw;
+  try {
+    const r = await fetch(BASE + '/api/users/' + editingUserId, { method: 'PUT', headers: authHeaders(), body: JSON.stringify(updates) });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.error); return; }
+    closeEditUser(); loadUsers(); showOk('User updated');
+  } catch(e) { showErr('Save failed'); }
+}
+
+async function deleteUser() {
+  if (!editingUserId || !confirm('Delete this user? This cannot be undone.')) return;
+  try {
+    const r = await fetch(BASE + '/api/users/' + editingUserId, { method: 'DELETE', headers: authHeaders() });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.error); return; }
+    closeEditUser(); loadUsers(); showOk('User deleted');
+  } catch(e) { showErr('Delete failed'); }
+}
+
+function logout() {
+  localStorage.removeItem('certai_token');
+  localStorage.removeItem('certai_user');
+  window.location.href = '/login.html';
+}
+
+init();
+</script>
+</body>
+</html>
