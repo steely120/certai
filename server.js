@@ -4,137 +4,258 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const crypto = require('crypto');
 
 const app = express();
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://192.168.1.34:11434';
 const PORT = process.env.PORT || 3001;
 const DATA_DIR = process.env.DATA_DIR || '/data/certai';
+const JWT_SECRET = process.env.JWT_SECRET || 'certai-secret-change-me';
 
-// Ensure data directories exist
-[DATA_DIR, path.join(DATA_DIR, 'uploads'), path.join(DATA_DIR, 'certs')].forEach(d => {
-  if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
-});
+[DATA_DIR,
+ path.join(DATA_DIR,'uploads'),
+ path.join(DATA_DIR,'certs'),
+ path.join(DATA_DIR,'users'),
+ path.join(DATA_DIR,'logos')
+].forEach(d=>{ if(!fs.existsSync(d)) fs.mkdirSync(d,{recursive:true}); });
 
-// Multer for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(DATA_DIR, 'uploads')),
-  filename: (req, file, cb) => {
-    const unique = Date.now() + '-' + Math.round(Math.random() * 1e6);
-    cb(null, unique + path.extname(file.originalname));
-  }
+  destination:(req,file,cb)=>cb(null, file.fieldname==='logo'?path.join(DATA_DIR,'logos'):path.join(DATA_DIR,'uploads')),
+  filename:(req,file,cb)=>cb(null,Date.now()+'-'+Math.round(Math.random()*1e6)+path.extname(file.originalname))
 });
-const upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } });
+const upload = multer({storage,limits:{fileSize:20*1024*1024}});
 
 app.use(cors());
-app.use(express.json({ limit: '25mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json({limit:'25mb'}));
+app.use(express.static(path.join(__dirname,'public')));
+app.use('/uploads',express.static(path.join(DATA_DIR,'uploads')));
+app.use('/logos',express.static(path.join(DATA_DIR,'logos')));
+app.use('/docs',express.static(path.join(__dirname,'docs')));
 
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(DATA_DIR, 'uploads')));
+function signToken(payload){
+  const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url');
+  const b=Buffer.from(JSON.stringify({...payload,iat:Date.now(),exp:Date.now()+7*24*60*60*1000})).toString('base64url');
+  const s=crypto.createHmac('sha256',JWT_SECRET).update(h+'.'+b).digest('base64url');
+  return h+'.'+b+'.'+s;
+}
+function verifyToken(token){
+  try{
+    const[h,b,s]=token.split('.');
+    const exp=crypto.createHmac('sha256',JWT_SECRET).update(h+'.'+b).digest('base64url');
+    if(s!==exp)return null;
+    const p=JSON.parse(Buffer.from(b,'base64url').toString());
+    return p.exp<Date.now()?null:p;
+  }catch{return null;}
+}
+function hashPw(pw){return crypto.createHmac('sha256',JWT_SECRET).update(pw).digest('hex');}
 
-// Serve BS7671 PDF if present
-app.use('/docs', express.static(path.join(__dirname, 'docs')));
-
-// ── OLLAMA PROXY ──────────────────────────────────────────────────────────────
-app.post('/api/generate', async (req, res) => {
-  try {
-    const response = await fetch(`${OLLAMA_URL}/api/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body),
-    });
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    console.error('Ollama error:', err.message);
-    res.status(502).json({ error: 'Could not reach Ollama', detail: err.message });
-  }
-});
-
-app.get('/api/tags', async (req, res) => {
-  try {
-    const response = await fetch(`${OLLAMA_URL}/api/tags`);
-    res.json(await response.json());
-  } catch (err) {
-    res.status(502).json({ error: 'Could not reach Ollama' });
-  }
-});
-
-// ── FILE UPLOAD ───────────────────────────────────────────────────────────────
-app.post('/api/upload', upload.single('photo'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  res.json({
-    ok: true,
-    filename: req.file.filename,
-    url: `/uploads/${req.file.filename}`,
-    size: req.file.size
+function auth(req,res,next){
+  const a=req.headers.authorization;
+  if(!a||!a.startsWith('Bearer '))return res.status(401).json({error:'Unauthorized'});
+  const p=verifyToken(a.slice(7));
+  if(!p)return res.status(401).json({error:'Invalid or expired token'});
+  req.user=p;next();
+}
+function adminAuth(req,res,next){
+  auth(req,res,()=>{
+    if(req.user.role!=='admin')return res.status(403).json({error:'Admin required'});
+    next();
   });
+}
+
+function getUsers(){
+  const f=path.join(DATA_DIR,'users','users.json');
+  return fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):[];
+}
+function saveUsers(u){fs.writeFileSync(path.join(DATA_DIR,'users','users.json'),JSON.stringify(u,null,2));}
+function safeUser(u){const{password,...s}=u;return s;}
+
+// AUTH
+app.get('/api/setup/status',(req,res)=>{
+  res.json({needsSetup:getUsers().length===0});
 });
 
-// Upload and return as base64 for AI scanning
-app.post('/api/upload-scan', upload.single('photo'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  const filePath = path.join(DATA_DIR, 'uploads', req.file.filename);
-  const b64 = fs.readFileSync(filePath).toString('base64');
-  const mime = req.file.mimetype || 'image/jpeg';
-  res.json({ ok: true, base64: b64, mime, filename: req.file.filename, url: `/uploads/${req.file.filename}` });
-});
-
-// ── CERTIFICATE SAVE / LOAD ───────────────────────────────────────────────────
-app.post('/api/cert/save', (req, res) => {
-  try {
-    const cert = req.body;
-    if (!cert.id) cert.id = `cert-${Date.now()}`;
-    cert.savedAt = new Date().toISOString();
-    const filePath = path.join(DATA_DIR, 'certs', cert.id + '.json');
-    fs.writeFileSync(filePath, JSON.stringify(cert, null, 2));
-    res.json({ ok: true, id: cert.id });
-  } catch (err) {
-    res.status(500).json({ error: 'Save failed', detail: err.message });
+app.post('/api/auth/register',(req,res)=>{
+  const{email,password,name,company,inviteToken}=req.body;
+  if(!email||!password||!name)return res.status(400).json({error:'Email, password and name required'});
+  const users=getUsers();
+  if(users.find(u=>u.email.toLowerCase()===email.toLowerCase()))return res.status(409).json({error:'Email already registered'});
+  const isFirst=users.length===0;
+  if(!isFirst){
+    const expected=hashPw('invite-'+email.toLowerCase());
+    if(!inviteToken||inviteToken!==expected)return res.status(403).json({error:'Valid invite token required'});
   }
+  const user={
+    id:'u-'+Date.now(),
+    email:email.toLowerCase(),
+    password:hashPw(password),
+    name,company:company||'',
+    role:isFirst?'admin':'user',
+    createdAt:new Date().toISOString(),
+    profile:{regNumber:'',qualifications:'',signature:'',logoUrl:'',
+      equipment:{mft:'',continuity:'',ir:'',zel:'',rcd:''},
+      defaultSupplyType:'TN-C-S',defaultEarthConductor:'16mm²',defaultBondConductor:'10mm²'}
+  };
+  users.push(user);saveUsers(users);
+  const token=signToken({id:user.id,email:user.email,role:user.role,name:user.name});
+  res.json({ok:true,token,user:safeUser(user)});
 });
 
-app.get('/api/cert/list', (req, res) => {
-  try {
-    const certsDir = path.join(DATA_DIR, 'certs');
-    const files = fs.readdirSync(certsDir).filter(f => f.endsWith('.json'));
-    const certs = files.map(f => {
-      try {
-        const raw = JSON.parse(fs.readFileSync(path.join(certsDir, f), 'utf8'));
-        return { id: raw.id, type: raw.type, client: raw.client, address: raw.address, inspDate: raw.inspDate, savedAt: raw.savedAt };
-      } catch (e) { return null; }
-    }).filter(Boolean).sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
-    res.json({ certs });
-  } catch (err) {
-    res.json({ certs: [] });
-  }
+app.post('/api/auth/login',(req,res)=>{
+  const{email,password}=req.body;
+  if(!email||!password)return res.status(400).json({error:'Email and password required'});
+  const user=getUsers().find(u=>u.email.toLowerCase()===email.toLowerCase());
+  if(!user||user.password!==hashPw(password))return res.status(401).json({error:'Invalid email or password'});
+  const token=signToken({id:user.id,email:user.email,role:user.role,name:user.name});
+  res.json({ok:true,token,user:safeUser(user)});
 });
 
-app.get('/api/cert/:id', (req, res) => {
-  try {
-    const filePath = path.join(DATA_DIR, 'certs', req.params.id + '.json');
-    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Not found' });
-    res.json(JSON.parse(fs.readFileSync(filePath, 'utf8')));
-  } catch (err) {
-    res.status(500).json({ error: 'Load failed' });
-  }
+app.get('/api/auth/me',auth,(req,res)=>{
+  const user=getUsers().find(u=>u.id===req.user.id);
+  if(!user)return res.status(404).json({error:'User not found'});
+  res.json(safeUser(user));
 });
 
-app.delete('/api/cert/:id', (req, res) => {
-  try {
-    const filePath = path.join(DATA_DIR, 'certs', req.params.id + '.json');
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Delete failed' });
-  }
+app.get('/api/users',adminAuth,(req,res)=>{
+  res.json({users:getUsers().map(safeUser)});
 });
 
-// ── HEALTH ────────────────────────────────────────────────────────────────────
-app.get('/health', (req, res) => res.json({ status: 'ok', ollama: OLLAMA_URL }));
+app.put('/api/users/profile',auth,(req,res)=>{
+  const users=getUsers();
+  const idx=users.findIndex(u=>u.id===req.user.id);
+  if(idx===-1)return res.status(404).json({error:'Not found'});
+  const{password,role,id,email,...updates}=req.body;
+  users[idx]={...users[idx],...updates};
+  saveUsers(users);
+  res.json({ok:true,user:safeUser(users[idx])});
+});
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ CertAI running on http://0.0.0.0:${PORT}`);
-  console.log(`🤖 Ollama: ${OLLAMA_URL}`);
-  console.log(`💾 Data: ${DATA_DIR}`);
+app.put('/api/users/:id',adminAuth,(req,res)=>{
+  const users=getUsers();
+  const idx=users.findIndex(u=>u.id===req.params.id);
+  if(idx===-1)return res.status(404).json({error:'Not found'});
+  const{password:newPw,...updates}=req.body;
+  users[idx]={...users[idx],...updates};
+  if(newPw)users[idx].password=hashPw(newPw);
+  saveUsers(users);
+  res.json({ok:true,user:safeUser(users[idx])});
+});
+
+app.delete('/api/users/:id',adminAuth,(req,res)=>{
+  if(req.params.id===req.user.id)return res.status(400).json({error:'Cannot delete yourself'});
+  saveUsers(getUsers().filter(u=>u.id!==req.params.id));
+  res.json({ok:true});
+});
+
+app.post('/api/users/invite',adminAuth,(req,res)=>{
+  const{email}=req.body;
+  if(!email)return res.status(400).json({error:'Email required'});
+  const token=hashPw('invite-'+email.toLowerCase());
+  res.json({ok:true,email,inviteToken:token});
+});
+
+app.post('/api/auth/change-password',auth,(req,res)=>{
+  const{currentPassword,newPassword}=req.body;
+  const users=getUsers();
+  const idx=users.findIndex(u=>u.id===req.user.id);
+  if(users[idx].password!==hashPw(currentPassword))return res.status(401).json({error:'Current password incorrect'});
+  users[idx].password=hashPw(newPassword);
+  saveUsers(users);
+  res.json({ok:true});
+});
+
+app.post('/api/upload/logo',auth,upload.single('logo'),(req,res)=>{
+  if(!req.file)return res.status(400).json({error:'No file'});
+  const url='/logos/'+req.file.filename;
+  const users=getUsers();
+  const idx=users.findIndex(u=>u.id===req.user.id);
+  if(idx!==-1){users[idx].profile=users[idx].profile||{};users[idx].profile.logoUrl=url;saveUsers(users);}
+  res.json({ok:true,url});
+});
+
+// OLLAMA
+app.post('/api/generate',auth,async(req,res)=>{
+  try{const r=await fetch(OLLAMA_URL+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req.body)});res.json(await r.json());}
+  catch(e){res.status(502).json({error:'Ollama unreachable',detail:e.message});}
+});
+app.get('/api/tags',auth,async(req,res)=>{
+  try{const r=await fetch(OLLAMA_URL+'/api/tags');res.json(await r.json());}
+  catch(e){res.status(502).json({error:'Ollama unreachable'});}
+});
+
+// FILE UPLOAD
+app.post('/api/upload',auth,upload.single('photo'),(req,res)=>{
+  if(!req.file)return res.status(400).json({error:'No file'});
+  res.json({ok:true,filename:req.file.filename,url:'/uploads/'+req.file.filename});
+});
+
+// CERTS
+function certsDir(userId){
+  const d=path.join(DATA_DIR,'certs',userId);
+  if(!fs.existsSync(d))fs.mkdirSync(d,{recursive:true});
+  return d;
+}
+
+app.post('/api/cert/save',auth,(req,res)=>{
+  try{
+    const cert=req.body;
+    if(!cert.id)cert.id='cert-'+Date.now();
+    cert.savedAt=new Date().toISOString();
+    cert.userId=req.user.id;
+    fs.writeFileSync(path.join(certsDir(req.user.id),cert.id+'.json'),JSON.stringify(cert,null,2));
+    res.json({ok:true,id:cert.id});
+  }catch(e){res.status(500).json({error:'Save failed',detail:e.message});}
+});
+
+app.get('/api/cert/list',auth,(req,res)=>{
+  try{
+    let dirs=[];
+    if(req.user.role==='admin'&&req.query.all==='true'){
+      const root=path.join(DATA_DIR,'certs');
+      dirs=fs.readdirSync(root).map(d=>path.join(root,d)).filter(d=>fs.statSync(d).isDirectory());
+    }else{
+      dirs=[certsDir(req.user.id)];
+    }
+    const certs=[];
+    dirs.forEach(dir=>{
+      if(!fs.existsSync(dir))return;
+      fs.readdirSync(dir).filter(f=>f.endsWith('.json')).forEach(f=>{
+        try{
+          const raw=JSON.parse(fs.readFileSync(path.join(dir,f),'utf8'));
+          certs.push({id:raw.id,type:raw.type,client:raw.client,address:raw.address,inspDate:raw.inspDate,savedAt:raw.savedAt,userId:raw.userId});
+        }catch(e){}
+      });
+    });
+    certs.sort((a,b)=>new Date(b.savedAt)-new Date(a.savedAt));
+    res.json({certs});
+  }catch(e){res.json({certs:[]});}
+});
+
+app.get('/api/cert/:id',auth,(req,res)=>{
+  try{
+    const userDir=certsDir(req.user.id);
+    let fp=path.join(userDir,req.params.id+'.json');
+    if(!fs.existsSync(fp)&&req.user.role==='admin'){
+      const root=path.join(DATA_DIR,'certs');
+      fp=fs.readdirSync(root).map(d=>path.join(root,d,req.params.id+'.json')).find(p=>fs.existsSync(p));
+    }
+    if(!fp||!fs.existsSync(fp))return res.status(404).json({error:'Not found'});
+    res.json(JSON.parse(fs.readFileSync(fp,'utf8')));
+  }catch(e){res.status(500).json({error:'Load failed'});}
+});
+
+app.delete('/api/cert/:id',auth,(req,res)=>{
+  try{
+    const fp=path.join(certsDir(req.user.id),req.params.id+'.json');
+    if(fs.existsSync(fp))fs.unlinkSync(fp);
+    res.json({ok:true});
+  }catch(e){res.status(500).json({error:'Delete failed'});}
+});
+
+app.get('/health',(req,res)=>res.json({status:'ok',ollama:OLLAMA_URL}));
+
+app.listen(PORT,'0.0.0.0',()=>{
+  console.log('CertAI on port '+PORT);
+  console.log('Ollama: '+OLLAMA_URL);
+  console.log('Data: '+DATA_DIR);
 });
