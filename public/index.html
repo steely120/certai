@@ -63,9 +63,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .scan-mode-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--bg4);border:1px solid var(--border);border-radius:var(--rs);overflow:hidden}
 .smt{padding:5px 4px;text-align:center;font-size:.6rem;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text2);font-family:'Inter',sans-serif;transition:all .12s}
 .smt.active{background:var(--blue);color:#fff}
-.up-zone{border:2px dashed var(--border2);border-radius:var(--rs);padding:12px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--bg)}
+.up-zone{border:2px dashed var(--border2);border-radius:var(--rs);padding:12px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg)}
 .up-zone:hover,.up-zone.drag{border-color:var(--blue);background:var(--blue-dim)}
-.up-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .up-zone-icon{font-size:1.4rem;margin-bottom:3px}
 .up-zone-txt{font-size:.62rem;color:var(--text2);line-height:1.4}
 .up-zone-txt strong{color:var(--fi)}
@@ -295,9 +294,8 @@ td.warn{color:var(--amber)!important}
 .ap-photo img{width:100%;height:120px;object-fit:cover;display:block}
 .ap-photo-cap{padding:4px 6px;font-size:.62rem;color:var(--text2);outline:none}
 .ap-photo-cap:focus{color:var(--text)}
-.drop-zone{border:2px dashed var(--border2);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.drop-zone{border:2px dashed var(--border2);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;transition:all .2s}
 .drop-zone:hover{border-color:var(--blue);background:var(--blue-dim)}
-.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 
 /* SCROLLBAR */
 ::-webkit-scrollbar{width:3px;height:3px}
@@ -412,8 +410,7 @@ td.warn{color:var(--amber)!important}
           <button class="btn btn-sec btn-sm" onclick="closeCam()">✕</button>
         </div>
       </div>
-      <div class="up-zone" id="upZone" ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
-        <input type="file" accept="image/*" onchange="handleFile(event)">
+      <div class="up-zone" id="upZone" onclick="document.getElementById('bfi').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
         <div class="up-zone-icon">📷</div>
         <div class="up-zone-txt"><strong>Drop photo here</strong><br>or click to browse</div>
       </div>
@@ -545,8 +542,7 @@ td.warn{color:var(--amber)!important}
         <input type="file" id="apPhotoIn" accept="image/*" multiple style="display:none" onchange="addAppendixPhotos(event)">
         <p style="font-size:.7rem;color:var(--text2);margin-bottom:8px">Photos added here appear at the end of the certificate. Click captions to edit.</p>
         <div class="photo-grid" id="apPhotoGrid">
-          <div class="drop-zone">
-            <input type="file" accept="image/*" multiple onchange="addAppendixPhotos(event)">
+          <div class="drop-zone" onclick="document.getElementById('apPhotoIn').click()">
             <div style="font-size:1.5rem;margin-bottom:4px">📷</div>
             <div style="font-size:.68rem;color:var(--text2)">Drop photos here or click to browse</div>
           </div>
@@ -708,7 +704,7 @@ const INSP=[
     {r:'8.1',d:'Presence and adequacy of devices for isolation and switching',reg:'Reg 537.2'},
     {r:'8.2',d:'Adequacy of isolation of equipment requiring maintenance',reg:'Reg 537.2.1.1'},
     {r:'8.3',d:'Isolation devices clearly identifiable by position or durable marking',reg:'Reg 537.2.2.6'},
-    {r:'8.4',d:'Presence and adequacy of fire fighter's switches (where required)',reg:'Reg 537.6'},
+    {r:'8.4',d:'Presence and adequacy of firefighter switches (where required)',reg:'Reg 537.6'},
   ]},
   {n:9,title:'Current-Using Equipment (Permanently Connected)',items:[
     {r:'9.1',d:'Condition of equipment in terms of IP rating (suitability for environment)',reg:'Reg 416.2'},
@@ -787,7 +783,22 @@ async function testConn(){try{const r=await fetch(document.getElementById('ollam
 async function testProxy(){const url=document.getElementById('proxyUrl').value.trim();if(!url){showErr('Enter proxy URL.');return;}try{const r=await fetch(url+'/api/tags');const d=await r.json();showOk('Proxy connected! Models: '+d.models?.map(m=>m.name).join(', '));}catch(e){showErr('Cannot reach proxy:\n'+e.message);}}
 
 // ══ IMAGE / CAMERA ════════════════════════════════════════════════════════════
-function handleFile(e){const f=e.target.files[0];if(!f)return;imgMime=f.type||'image/jpeg';const r=new FileReader();r.onload=ev=>{imgB64=ev.target.result.split(',')[1];showPreview(ev.target.result);};r.readAsDataURL(f);}
+function handleFile(e){
+  const f=e.target.files[0];if(!f)return;
+  imgMime=f.type||"image/jpeg";
+  const r=new FileReader();
+  r.onload=ev=>{
+    imgB64=ev.target.result.split(",")[1];
+    showPreview(ev.target.result);
+    const url=getBase();
+    if(url){
+      const fd=new FormData();fd.append("photo",f);
+      fetch(url+"/api/upload",{method:"POST",body:fd}).then(r=>r.json()).then(d=>{if(d.url)console.log("Uploaded:",d.url);}).catch(()=>{});
+    }
+  };
+  r.readAsDataURL(f);
+  e.target.value="";
+}
 function showPreview(url){document.getElementById('boardImg').src=url;document.getElementById('prevWrap').classList.add('on');document.getElementById('upZone').style.display='none';document.getElementById('extBox').classList.remove('on');}
 function clearImg(){imgB64=null;lastExtracted=null;document.getElementById('boardImg').src='';document.getElementById('prevWrap').classList.remove('on');document.getElementById('upZone').style.display='';document.getElementById('extBox').classList.remove('on');closeCam();}
 function onDragOver(e){e.preventDefault();document.getElementById('upZone').classList.add('drag');}
