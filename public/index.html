@@ -346,18 +346,65 @@ td.bad{color:var(--red)!important}
 
 /* PRINT */
 @media print{
-  body{background:#fff!important;color:#000!important;font-size:8pt;overflow:visible!important;height:auto!important}
-  .topbar,.sidebar,.circ-toolbar,.btn,.alert{display:none!important}
-  .app-body,.main-area{display:block!important;overflow:visible!important}
-  .page{display:block!important;height:auto!important}
-  .sched-wrap{overflow:visible!important}
-  .card{border:1px solid #ccc!important;break-inside:avoid;margin-bottom:.3cm}
-  .card-hdr{background:#eee!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .sched-tbl{font-size:6pt!important;min-width:unset!important}
-  .sched-tbl th{background:#ddd!important;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .sched-tbl td{color:#222!important}
-  @page{size:A4 landscape;margin:1cm}
+  body,html{background:#fff!important;color:#000!important;overflow:visible!important;height:auto!important}
+  .topbar,.sidebar,.circ-toolbar,.btn,.alert,.m-wrap,.nav-scroll{display:none!important}
+  .app-body,.main-area{display:block!important;overflow:visible!important;width:100%!important}
+  .page,.page.active{display:none!important}
+  #print-doc{display:block!important}
+  @page{size:A4 portrait;margin:0}
 }
+/* PRINT DOCUMENT STYLES */
+#print-doc{display:none}
+.pd{font-family:Arial,sans-serif;font-size:8pt;color:#000;background:#fff;width:210mm;margin:0 auto}
+.pd-page{width:210mm;min-height:297mm;padding:8mm 8mm 12mm;position:relative;page-break-after:always;break-after:page}
+.pd-page:last-child{page-break-after:auto}
+.pd-header{background:#8b0000;color:#fff;padding:6px 10px;margin-bottom:6px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pd-header h1{font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin:0}
+.pd-header p{font-size:7pt;margin:2px 0 0;opacity:.85}
+.pd-header-right{text-align:right;font-size:6.5pt}
+.pd-section{margin-bottom:5px}
+.pd-section-title{background:#8b0000;color:#fff;padding:3px 7px;font-size:8pt;font-weight:700;text-transform:uppercase;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pd-section-body{border:1px solid #ccc;border-top:none;padding:5px 7px}
+.pd-field-row{display:grid;gap:4px;margin-bottom:3px}
+.pd-field-row.g2{grid-template-columns:1fr 1fr}
+.pd-field-row.g3{grid-template-columns:1fr 1fr 1fr}
+.pd-field-row.g4{grid-template-columns:1fr 1fr 1fr 1fr}
+.pd-field{display:flex;flex-direction:column}
+.pd-field-label{font-size:6pt;color:#666;text-transform:uppercase;letter-spacing:.04em;margin-bottom:1px}
+.pd-field-value{font-size:8pt;color:#000;border-bottom:1px solid #ccc;padding-bottom:1px;min-height:14px}
+.pd-table{width:100%;border-collapse:collapse;font-size:6.5pt;margin-top:4px}
+.pd-table th{background:#8b0000;color:#fff;padding:2px 4px;text-align:left;font-weight:600;border:1px solid #8b0000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pd-table th.center{text-align:center}
+.pd-table td{padding:2px 4px;border:1px solid #ccc;vertical-align:top}
+.pd-table tr:nth-child(even) td{background:#f9f9f9;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pd-table td.center{text-align:center}
+.pd-obs-count{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:3px;font-size:7pt;font-weight:700;margin-right:5px;margin-bottom:5px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pd-obs-count.c1{background:#ef4444;color:#fff}
+.pd-obs-count.c2{background:#f97316;color:#fff}
+.pd-obs-count.c3{background:#f59e0b;color:#fff}
+.pd-obs-count.fi{background:#38bdf8;color:#fff}
+.pd-insp-item{display:flex;gap:6px;padding:2px 0;border-bottom:1px solid #eee;align-items:flex-start;font-size:7pt}
+.pd-insp-ref{min-width:40px;color:#666;flex-shrink:0}
+.pd-insp-desc{flex:1;line-height:1.3}
+.pd-insp-outcome{min-width:70px;text-align:center;font-weight:600}
+.pd-insp-section-hdr{background:#e8e8e8;padding:3px 5px;font-size:7.5pt;font-weight:700;margin:4px 0 2px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pd-summary-box{border:2px solid #8b0000;padding:6px 8px;margin:5px 0}
+.pd-summary-sat{background:#dcfce7;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pd-summary-unsat{background:#fee2e2;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pd-footer{position:absolute;bottom:6mm;left:8mm;right:8mm;display:flex;justify-content:space-between;font-size:6pt;color:#666;border-top:1px solid #ccc;padding-top:3px}
+.pd-watermark{color:#ccc;font-size:7pt;text-align:center;margin-top:4px}
+.pd-sched-tbl{width:100%;border-collapse:collapse;font-size:5.5pt}
+.pd-sched-tbl th{background:#8b0000;color:#fff;padding:2px 2px;text-align:center;font-size:5pt;border:1px solid #8b0000;white-space:nowrap;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pd-sched-tbl th.gh{background:#600000;font-size:5pt}
+.pd-sched-tbl td{padding:2px 2px;border:1px solid #ccc;text-align:center;font-size:5.5pt;vertical-align:middle}
+.pd-sched-tbl td.td-d{text-align:left;font-weight:500}
+.pd-sched-tbl tr:nth-child(even) td{background:#f9f9f9;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pd-guidance-title{font-size:10pt;font-weight:700;margin-bottom:6px}
+.pd-guidance-num{font-weight:700;color:#8b0000}
+.pd-guidance-item{margin-bottom:5px;font-size:7pt;line-height:1.45}
+.pd-wiring-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-top:4px;font-size:6.5pt}
+.pd-wiring-item{display:flex;align-items:flex-start;gap:3px}
+.pd-wiring-key{font-weight:700;min-width:20px;color:#8b0000}
 </style>
 </head>
 <body>
@@ -374,7 +421,7 @@ td.bad{color:var(--red)!important}
     <button class="nav-btn" onclick="goPage('decl',this)">✍️ Declaration</button>
     <button class="nav-btn" onclick="goPage('appendix',this)">📎 Appendix</button>
   </div>
-  <div class="topbar-right">
+  <div class="topbar-right"><button class="btn btn-primary btn-sm" onclick="generatePDF()" style="font-size:.65rem;padding:4px 9px">📄 Export PDF</button>
     <div class="cert-ref" id="certPill">—</div>
     <div class="status-badge"><div class="sdot"></div>IN PROGRESS</div>
   </div>
@@ -457,7 +504,7 @@ td.bad{color:var(--red)!important}
     <div class="bg">
       <button class="btn btn-sec btn-sm" style="flex:1" onclick="newCert()">+ New</button>
       <button class="btn btn-sec btn-sm" style="flex:1" onclick="saveCert()">💾 Save</button>
-      <button class="btn btn-sec btn-sm" style="flex:1" onclick="window.print()">🖨️</button>
+      <button class="btn btn-sec btn-sm" style="flex:1" onclick="generatePDF()">🖨️</button>
     </div>
     <button class="btn btn-primary btn-sm btn-block" onclick="loadCertList()">📂 Load Certificate</button>
   </div>
@@ -912,16 +959,15 @@ const INSP=[
 
 // ══ SCAN PROMPTS ══════════════════════════════════════════════════════════════
 const SCAN_PROMPTS={
-  board:`You are an expert UK electrician analysing a consumer unit photo. Extract ALL visible information.
-Return ONLY valid JSON, no markdown, no text before or after:
-{"board_make":"Hager/Wylex/MK/Schneider/Crabtree/Lewden/Unknown","board_type":"RCBO board/Split RCD/Main switch only/Rewirable/Unknown","board_rating":"e.g. 100A","supply_type":"TN-C-S/TN-S/TT/Unknown","rcd_protection":"Full RCBO/Split RCD/None/Unknown","main_switch_rating":"e.g. 100A","main_switch_bs":"e.g. BS EN 60947-3","phases":1,"ipf_rating":"e.g. 6kA","spd_present":"Yes/No/Unknown","circuits":[{"position":"1","label":"EXACT text as written on board","breaker_type":"MCB/RCBO/Fuse","breaker_make":"Hager/MK/Unknown","rating_amps":"32","mcb_type":"B/C/D/Unknown","is_rcbo":false,"notes":""}],"board_condition":"Good/Fair/Poor","observations":"any visible damage, burning, non-standard wiring","confidence":"High/Medium/Low"}
-Copy label text EXACTLY as written. Return ONLY the JSON.`,
-  service:`You are an expert UK electrician analysing a service head / meter / supply intake photo. Extract all visible information.
-Return ONLY valid JSON:
-{"supply_type":"TN-C-S/TN-S/TT/Unknown","earthing_type":"PME/Separate earth/Unknown","supply_voltage":"230V/400V/Unknown","supply_phases":"Single phase/Three phase/Unknown","meter_type":"Smart/Analog/Digital/Unknown","pfc_label":"e.g. 16kA","any_labels":"copy any visible text","condition":"Good/Fair/Poor","notes":"observations","confidence":"High/Medium/Low"}`,
-  sheet:`You are an expert UK electrician analysing a circuit schedule or test results sheet photo.
-Return ONLY valid JSON:
-{"circuits":[{"number":"1","description":"circuit label","live_csa":"2.5","cpc_csa":"1.5","mcb_type":"B","mcb_rating":"32","r1_plus_r2":"0.45","r2":"0.72","insulation_le":">200","insulation_ll":">200","polarity":"Pass/Fail","measured_zs":"0.52","max_zs":"1.37","rcd_type":"N/A","rcd_rating":"N/A","rcd_time":"N/A","result":"Pass/Fail"}],"notes":"","confidence":"High/Medium/Low"}`
+  board:`Look at this consumer unit / fuse board photo. List every circuit breaker you can see.
+For each one write down: the label text exactly as written, amp rating, and type (B/C/D).
+Also note the board manufacturer, main switch rating, and supply type.
+Reply ONLY with a JSON object - no explanation, no markdown, nothing else:
+{"board_make":"Hager","board_rating":"100A","supply_type":"TN-C-S","main_switch_rating":"100A","phases":1,"board_condition":"Good","observations":"","confidence":"High","circuits":[{"position":"1","label":"Sockets","rating_amps":"32","mcb_type":"B","breaker_type":"MCB","is_rcbo":false},{"position":"2","label":"Lighting","rating_amps":"6","mcb_type":"B","breaker_type":"MCB","is_rcbo":false}]}`,
+  service:`Look at this electrical service head or meter photo. Note the supply type, earthing arrangement, any ratings visible.
+Reply ONLY with JSON: {"supply_type":"TN-C-S","earthing_type":"PME","supply_voltage":"230V","supply_phases":"Single phase","condition":"Good","notes":"","confidence":"High"}`,
+  sheet:`Look at this electrical circuit schedule or test results sheet. Extract all circuit data visible.
+Reply ONLY with JSON: {"circuits":[{"number":"1","description":"Sockets","mcb_type":"B","mcb_rating":"32","r1_plus_r2":"0.45","r2":"0.72","insulation_le":">200","insulation_ll":">200","polarity":"Pass","measured_zs":"0.52","max_zs":"1.37","result":"Pass"}],"confidence":"High"}`
 };
 
 // ══ UI HELPERS ════════════════════════════════════════════════════════════════
@@ -973,7 +1019,7 @@ async function doSBScan(){
   const btn=document.getElementById('sbScanBtn'),ov=document.getElementById('sbScanOv');
   btn.disabled=true;btn.textContent='⏳';ov.classList.add('on');
   try{
-    const r=await fetch(url+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:getVisModel(),prompt:SCAN_PROMPTS[scanMode],images:[sbImgB64],stream:false,options:{temperature:0.1}})});
+    const r=await fetch(url+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:getVisModel(),prompt:SCAN_PROMPTS[scanMode],images:[sbImgB64],stream:false,options:{temperature:0.1,num_predict:2048}})});
     if(!r.ok)throw new Error('HTTP '+r.status);
     const data=await r.json();
     const raw=(data.response||'').replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
@@ -1099,7 +1145,7 @@ async function runImportScan(){
     :'AI is reading circuit information and test results from your image.';
   openM('m-import4');
   try{
-    const r=await fetch(url+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:getVisModel(),prompt:SCAN_PROMPTS[importType],images:[importImgB64],stream:false,options:{temperature:0.1}})});
+    const r=await fetch(url+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:getVisModel(),prompt:SCAN_PROMPTS[importType],images:[importImgB64],stream:false,options:{temperature:0.1,num_predict:2048}})});
     if(importAborted)return;
     if(!r.ok)throw new Error('HTTP '+r.status+' from vision model');
     const data=await r.json();
@@ -1211,7 +1257,7 @@ function renderInstallForm(){
 function eicRForm(){return `
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:5px">
   <div><div style="font-size:1rem;font-weight:700">Electrical Installation Condition Report</div><div style="font-size:.65rem;color:var(--text2)">BS 7671:2018+A2:2022 · ${certId}</div></div>
-  <button class="btn btn-sec btn-sm" onclick="window.print()">🖨️ Print</button>
+  <button class="btn btn-sec btn-sm" onclick="generatePDF()">🖨️ Print</button>
 </div>
 <div class="res-banner unsat" id="resBanner" onclick="toggleResult()">
   <span style="font-size:1.1rem" id="resIcon">✗</span>
@@ -1268,7 +1314,7 @@ function eicRForm(){return `
 function eicForm(){return `
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:5px">
   <div><div style="font-size:1rem;font-weight:700">Electrical Installation Certificate</div><div style="font-size:.65rem;color:var(--text2)">BS 7671:2018+A2:2022 · New/Altered Installation · ${certId}</div></div>
-  <button class="btn btn-sec btn-sm" onclick="window.print()">🖨️ Print</button>
+  <button class="btn btn-sec btn-sm" onclick="generatePDF()">🖨️ Print</button>
 </div>
 <div class="card">
   <div class="card-hdr"><div class="card-title">👤 Client &amp; Installation</div></div>
@@ -1313,7 +1359,7 @@ function eicForm(){return `
 function mwcForm(){return `
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:5px">
   <div><div style="font-size:1rem;font-weight:700">Electrical Minor Works Certificate</div><div style="font-size:.65rem;color:var(--text2)">BS 7671:2018+A2:2022 · ${certId}</div></div>
-  <button class="btn btn-sec btn-sm" onclick="window.print()">🖨️ Print</button>
+  <button class="btn btn-sec btn-sm" onclick="generatePDF()">🖨️ Print</button>
 </div>
 <div class="card">
   <div class="card-hdr"><div class="card-title">👤 Details</div></div>
@@ -1697,7 +1743,7 @@ function renderCircuitTable(idx){
     <button class="btn btn-sec btn-sm" onclick="addCircuit(${idx})">+ Add</button>
     <button class="btn btn-primary btn-sm" onclick="openImportModal(${idx})"><span class="btn-ai">⚡ AI</span> Import</button>
     <div class="circ-count">${circuits.length} circuits · ${circuits.filter(c=>c.result==='Pass').length} passed</div>
-    <button class="btn btn-sec btn-sm" style="margin-left:auto" onclick="window.print()">🖨️ Print</button>
+    <button class="btn btn-sec btn-sm" style="margin-left:auto" onclick="generatePDF()">🖨️ Print</button>
   </div>
   <div class="sched-wrap">
   <table class="sched-tbl" id="circTbl">
@@ -1956,6 +2002,496 @@ renderDeclForm();
 renderBoards();
 renderObsTable();
 document.getElementById('nb-obs').style.display='';
+</script>
+
+<!-- PRINT DOCUMENT (hidden, shown on print) -->
+<div id="print-doc"></div>
+
+<script>
+// ══ PDF GENERATION ════════════════════════════════════════════════════════════
+function gv(id){return document.getElementById(id)?.value||'';}
+function gt(id){return document.getElementById(id)?.textContent||document.getElementById(id)?.value||'';}
+
+function generatePDF(){
+  const pd=document.getElementById('print-doc');
+  pd.innerHTML='';
+  const certRef=document.getElementById('certPill').textContent;
+  const today=new Date().toLocaleDateString('en-GB');
+  
+  // Gather data
+  const client=gv('clientName'),address=gv('address'),premises=gv('premises');
+  const installAge=gv('installAge'),inspDate=gv('inspDate')||today;
+  const extent=gv('extent');
+  const supplySystem=gv('supplySystem'),mainSwitch=gv('mainSwitchRating');
+  const ze=gv('externalZe'),pfc=gv('pfc');
+  const earthCond=gv('earthCond'),bondCond=gv('bondCond');
+  const boardMake=gv('boardMake'),maxDemand=gv('maxDemand');
+  const rcdPresent=gv('rcdPresent'),rcdType=gv('rcdType'),rcdRating=gv('rcdRating'),rcdTime=gv('rcdTripTime');
+  const nextInsp=gv('nextInsp');
+  const resBanner=document.getElementById('resBanner');
+  const isSat=resBanner&&resBanner.classList.contains('sat');
+  const overall=isSat?'SATISFACTORY':'UNSATISFACTORY';
+  
+  // Count obs
+  const c1=obsItems.filter(o=>o.code==='C1').length;
+  const c2=obsItems.filter(o=>o.code==='C2').length;
+  const c3=obsItems.filter(o=>o.code==='C3').length;
+  const fi=obsItems.filter(o=>o.code==='FI').length;
+  
+  const certTypeLabel=certType==='eicr'?'ELECTRICAL INSTALLATION CONDITION REPORT':certType==='eic'?'ELECTRICAL INSTALLATION CERTIFICATE':'ELECTRICAL MINOR WORKS CERTIFICATE';
+  const bsRef=certType==='eicr'?'Requirements for electrical installations (BS7671-2018+A2:2022 18th edition)':'Requirements for electrical installations (BS7671-2018+A2:2022 18th edition)';
+
+  let html='<div class="pd">';
+  
+  // ═══ PAGE 1 — Front Page ═══
+  html+=`<div class="pd-page">
+  <div class="pd-header" style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div>
+      <h1>${certTypeLabel}</h1>
+      <p>${bsRef}</p>
+      <p>Certificate number: ${certRef}</p>
+    </div>
+  </div>
+  
+  <div class="pd-section">
+    <div class="pd-section-title">Details of Client or Person Ordering Report</div>
+    <div class="pd-section-body">
+      <div class="pd-field-row g2"><div class="pd-field"><div class="pd-field-label">Client</div><div class="pd-field-value">${client}</div></div><div class="pd-field"><div class="pd-field-label">Address</div><div class="pd-field-value">${address}</div></div></div>
+      <div class="pd-field-row g2"><div class="pd-field"><div class="pd-field-label">Phone</div><div class="pd-field-value"></div></div><div class="pd-field"><div class="pd-field-label">Email</div><div class="pd-field-value"></div></div></div>
+    </div>
+  </div>
+
+  <div class="pd-section">
+    <div class="pd-section-title">Reason for Producing this Report</div>
+    <div class="pd-section-body">
+      <div class="pd-field-row g2"><div class="pd-field"><div class="pd-field-label">Reason</div><div class="pd-field-value">&nbsp;</div></div><div class="pd-field"><div class="pd-field-label">Date Inspection Carried Out</div><div class="pd-field-value">${inspDate}</div></div></div>
+    </div>
+  </div>
+
+  <div class="pd-section">
+    <div class="pd-section-title">Details of the Installation which is the Subject of this Report</div>
+    <div class="pd-section-body">
+      <div class="pd-field-row g2"><div class="pd-field"><div class="pd-field-label">Occupier Name</div><div class="pd-field-value">${client}</div></div><div class="pd-field"><div class="pd-field-label">Installation Address</div><div class="pd-field-value">${address}</div></div></div>
+      <div class="pd-field-row g3"><div class="pd-field"><div class="pd-field-label">Description of Premises</div><div class="pd-field-value">${premises}</div></div><div class="pd-field"><div class="pd-field-label">Evidence of Alterations</div><div class="pd-field-value">&nbsp;</div></div><div class="pd-field"><div class="pd-field-label">Records Available</div><div class="pd-field-value">&nbsp;</div></div></div>
+      <div class="pd-field-row g3"><div class="pd-field"><div class="pd-field-label">Date of Previous Inspection</div><div class="pd-field-value">&nbsp;</div></div><div class="pd-field"><div class="pd-field-label">Previous Certificate Number</div><div class="pd-field-value">&nbsp;</div></div><div class="pd-field"><div class="pd-field-label">Estimated Age of Installation</div><div class="pd-field-value">${installAge}</div></div></div>
+    </div>
+  </div>
+
+  <div class="pd-section">
+    <div class="pd-section-title">Extent and Limitations of Inspection and Testing</div>
+    <div class="pd-section-body">
+      <div class="pd-field"><div class="pd-field-label">Extent of the electrical installation covered by this report</div><div class="pd-field-value" style="min-height:20px">${extent||'Full installation'}</div></div>
+      <div style="margin-top:4px" class="pd-field"><div class="pd-field-label">Agreed limitations including the reasons</div><div class="pd-field-value" style="min-height:14px">&nbsp;</div></div>
+      <div style="margin-top:4px" class="pd-field"><div class="pd-field-label">Agreed with</div><div class="pd-field-value">&nbsp;</div></div>
+      <div style="margin-top:4px" class="pd-field"><div class="pd-field-label">Operational limitations including the reasons</div><div class="pd-field-value" style="min-height:14px">&nbsp;</div></div>
+    </div>
+  </div>
+
+  <div style="font-size:6.5pt;color:#555;border:1px solid #ccc;padding:5px;margin:5px 0;line-height:1.4">
+    The inspection and testing in this report and accompanying schedules have been carried out in accordance with BS7671:2018+A2:2022 (18th Edition). It should be noted that cables concealed within flooring and ceilings, under floors, in walls, in roof spaces, and similar locations within the fabric of the building were not inspected unless specifically stated as being within the Extent of the inspection. An inspection should be made within an accessible roof space of any space-heating electrical equipment.
+  </div>
+
+  <div class="pd-section">
+    <div class="pd-section-title">Summary of the Condition of the Installation</div>
+    <div class="pd-section-body">
+      <div class="pd-field-row g2">
+        <div class="pd-field">
+          <div class="pd-field-label">Overall assessment of the installation in terms of its suitability for continued use</div>
+          <div class="pd-field-value ${isSat?'pd-summary-sat':'pd-summary-unsat'}" style="font-weight:700;font-size:9pt;padding:4px;text-align:center">${overall}</div>
+          ${!isSat?'<div style="font-size:6.5pt;color:#666;margin-top:2px">An unsatisfactory outcome indicates that a qualified person competent in electrical installation work has found defects and/or non-compliances with the current edition of the Wiring Regulations which require urgent attention.</div>':''}
+        </div>
+        <div style="font-size:6.5pt;color:#555;line-height:1.4">Where the overall assessment of the suitability for continued use is stated as UNSATISFACTORY, the recommendation is that any observations classified as C1 or C2 are addressed as a matter of urgency. Investigation without delay is recommended for FI items.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pd-section">
+    <div class="pd-section-title">Recommendations</div>
+    <div class="pd-section-body" style="font-size:7pt;line-height:1.5">
+      Subject to the necessary remedial action being taken, we recommend that the installation is further inspected and tested by: <strong>${nextInsp||'a qualified electrician'}</strong>
+      <br><br>Note: The proposed date for the next inspection is a recommendation only, providing that no C1 or C2 observations have been found, to ensure the installation can reasonably be expected to receive during its serviceable life.
+    </div>
+  </div>
+
+  <div class="pd-footer"><span>Report produced by CertAI</span><span>${certRef} — Page 1</span></div>
+  </div>`;
+
+  // ═══ PAGE 2 — Observations ═══
+  html+=`<div class="pd-page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase">Observations and Recommendations</div>
+    <div style="font-size:7pt;color:#666">${certRef}</div>
+  </div>
+  <div style="font-size:6.5pt;color:#555;margin-bottom:6px;line-height:1.4">
+    One of the following codes, as appropriate, has been allocated to each observation made above to indicate to the person responsible for the installation the degree of urgency for remedial action.
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+    <div class="pd-obs-count c1">C1 — ${c1} item${c1!==1?'s':''}<br><span style="font-size:6pt;font-weight:400">Danger present, risk of injury;<br>immediate remedial action required</span></div>
+    <div class="pd-obs-count c2">C2 — ${c2} item${c2!==1?'s':''}<br><span style="font-size:6pt;font-weight:400">Potentially dangerous;<br>urgent remedial action required</span></div>
+    <div class="pd-obs-count c3">C3 — ${c3} item${c3!==1?'s':''}<br><span style="font-size:6pt;font-weight:400">Improvement recommended;<br>(not required for satisfactory)</span></div>
+    <div class="pd-obs-count fi">FI — ${fi} item${fi!==1?'s':''}<br><span style="font-size:6pt;font-weight:400">Further investigation required<br>without delay</span></div>
+  </div>
+  <table class="pd-table">
+    <thead><tr><th style="width:30px">No.</th><th style="width:130px">Location</th><th>Observation</th><th style="width:40px" class="center">Code</th></tr></thead>
+    <tbody>
+    ${obsItems.length?obsItems.map((o,i)=>`<tr><td>${o.ref||i+1}</td><td>${o.location||''}</td><td>${o.desc}${o.reg?'<br><span style="font-size:5.5pt;color:#666">'+o.reg+'</span>':''}</td><td class="center" style="font-weight:700;color:${o.code==='C1'?'#ef4444':o.code==='C2'?'#f97316':o.code==='FI'?'#0ea5e9':'#f59e0b'}">${o.code}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:#888;padding:10px">No observations recorded</td></tr>'}
+    </tbody>
+  </table>
+  <div class="pd-footer"><span>Report produced by CertAI</span><span>${certRef} — Page 2</span></div>
+  </div>`;
+
+  // ═══ PAGE 3 — Declaration + Supply Characteristics ═══
+  const nomVoltage=gv('nomVoltage')||'230';
+  const nomFreq=gv('nomFreq')||'50';
+  html+=`<div class="pd-page">
+  <div style="font-size:7pt;color:#666;text-align:right;margin-bottom:4px">${certRef}</div>
+  
+  <div class="pd-section">
+    <div class="pd-section-title">General Condition of the Installation</div>
+    <div class="pd-section-body"><div class="pd-field"><div class="pd-field-label">General Condition of the Installation</div><div class="pd-field-value" style="min-height:16px">&nbsp;</div></div></div>
+  </div>
+
+  <div class="pd-section">
+    <div class="pd-section-title">Declaration</div>
+    <div class="pd-section-body" style="font-size:7pt;line-height:1.4">
+      I/We, being the person(s) responsible for the inspection and testing of the electrical installation (as indicated by my/our signatures below), particulars of which are described above, having exercised reasonable skill and care when carrying out the inspection and testing, hereby declare that the information in this report, including the observations and the attached schedules, provides an accurate assessment of the condition of the electrical installation taking into account the stated extent and limitations in the report.
+      <div class="pd-field-row g2" style="margin-top:6px">
+        <div class="pd-field"><div class="pd-field-label">Trading title</div><div class="pd-field-value">JJS Electrical</div></div>
+        <div class="pd-field"><div class="pd-field-label">Enrolment number</div><div class="pd-field-value">&nbsp;</div></div>
+      </div>
+      <div class="pd-field-row g2" style="margin-top:4px;padding:3px 0;border-top:1px solid #eee">
+        <div style="font-size:7pt;font-weight:600">Website:</div><div style="font-size:7pt">Phone: 07899785784</div>
+      </div>
+      <div style="margin-top:5px">
+        <div style="font-size:7pt;font-weight:600;margin-bottom:3px">Inspected and Tested by</div>
+        <div class="pd-field-row g4">
+          <div class="pd-field"><div class="pd-field-label">Name</div><div class="pd-field-value">JJ Steele</div></div>
+          <div class="pd-field"><div class="pd-field-label">Position</div><div class="pd-field-value">Manager</div></div>
+          <div class="pd-field"><div class="pd-field-label">Signature</div><div class="pd-field-value">&nbsp;</div></div>
+          <div class="pd-field"><div class="pd-field-label">Date</div><div class="pd-field-value">${inspDate}</div></div>
+        </div>
+      </div>
+      <div style="margin-top:4px">
+        <div style="font-size:7pt;font-weight:600;margin-bottom:3px">Report authorised by</div>
+        <div class="pd-field-row g4">
+          <div class="pd-field"><div class="pd-field-label">Name</div><div class="pd-field-value">&nbsp;</div></div>
+          <div class="pd-field"><div class="pd-field-label">Position</div><div class="pd-field-value">&nbsp;</div></div>
+          <div class="pd-field"><div class="pd-field-label">Signature</div><div class="pd-field-value">&nbsp;</div></div>
+          <div class="pd-field"><div class="pd-field-label">Date</div><div class="pd-field-value">&nbsp;</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pd-section">
+    <div class="pd-section-title">Supply Characteristics and Earthing Arrangements</div>
+    <div class="pd-section-body">
+      <div class="pd-field-row g4" style="margin-bottom:4px">
+        <div class="pd-field"><div class="pd-field-label">Earthing arrangement</div><div class="pd-field-value">${supplySystem}</div></div>
+        <div class="pd-field"><div class="pd-field-label">No. and type of live conductors</div><div class="pd-field-value">AC</div></div>
+        <div class="pd-field"><div class="pd-field-label">Nominal voltage (V)</div><div class="pd-field-value">${nomVoltage}</div></div>
+        <div class="pd-field"><div class="pd-field-label">Nominal frequency</div><div class="pd-field-value">${nomFreq} Hz</div></div>
+      </div>
+      <div class="pd-field-row g4">
+        <div class="pd-field"><div class="pd-field-label">Prospective fault current (kA)</div><div class="pd-field-value">${pfc}</div></div>
+        <div class="pd-field"><div class="pd-field-label">Earth loop impedance Ze (Ω)</div><div class="pd-field-value">${ze}</div></div>
+        <div class="pd-field"><div class="pd-field-label">Number of supplies</div><div class="pd-field-value">1</div></div>
+        <div class="pd-field"><div class="pd-field-label">Supply polarity confirmed</div><div class="pd-field-value">&nbsp;</div></div>
+      </div>
+      <div style="margin-top:4px;font-size:7pt;font-weight:600">Supply Protective Device</div>
+      <div class="pd-field-row g4" style="margin-top:2px">
+        <div class="pd-field"><div class="pd-field-label">BS(EN)</div><div class="pd-field-value">&nbsp;</div></div>
+        <div class="pd-field"><div class="pd-field-label">Short circuit capacity</div><div class="pd-field-value">&nbsp;</div></div>
+        <div class="pd-field"><div class="pd-field-label">Rated current (A)</div><div class="pd-field-value">${mainSwitch}</div></div>
+        <div class="pd-field"><div class="pd-field-label">IPF rating</div><div class="pd-field-value">&nbsp;</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pd-section">
+    <div class="pd-section-title">Particulars of Installation Referred to in this Report</div>
+    <div class="pd-section-body">
+      <div class="pd-field-row g2" style="margin-bottom:4px">
+        <div class="pd-field"><div class="pd-field-label">Means of earthing</div><div class="pd-field-value">Distributor's facility</div></div>
+        <div class="pd-field"><div class="pd-field-label">Details of installation earth electrode (where applicable)</div><div class="pd-field-value">N/A</div></div>
+      </div>
+      <div class="pd-field-row g4" style="margin-bottom:3px">
+        <div class="pd-field"><div class="pd-field-label">Main switch / fuse BS(EN)</div><div class="pd-field-value">&nbsp;</div></div>
+        <div class="pd-field"><div class="pd-field-label">No. of poles</div><div class="pd-field-value">1</div></div>
+        <div class="pd-field"><div class="pd-field-label">Voltage rating</div><div class="pd-field-value">230V</div></div>
+        <div class="pd-field"><div class="pd-field-label">Rated current (A)</div><div class="pd-field-value">${mainSwitch}</div></div>
+      </div>
+      <div class="pd-field-row g4" style="margin-bottom:3px">
+        <div class="pd-field"><div class="pd-field-label">Fuse device setting</div><div class="pd-field-value">&nbsp;</div></div>
+        <div class="pd-field"><div class="pd-field-label">Conductor material</div><div class="pd-field-value">Copper</div></div>
+        <div class="pd-field"><div class="pd-field-label">Conductor CSA</div><div class="pd-field-value">${earthCond}</div></div>
+        <div class="pd-field"><div class="pd-field-label">Continuity</div><div class="pd-field-value">&nbsp;</div></div>
+      </div>
+      <div class="pd-field-row g4" style="margin-bottom:3px">
+        <div class="pd-field"><div class="pd-field-label">If RCD main switch — operating current (mA)</div><div class="pd-field-value">${rcdRating}</div></div>
+        <div class="pd-field"><div class="pd-field-label">RCD time delay</div><div class="pd-field-value">&nbsp;</div></div>
+        <div class="pd-field"><div class="pd-field-label">RCD operating time (ms)</div><div class="pd-field-value">${rcdTime}</div></div>
+        <div class="pd-field"><div class="pd-field-label">&nbsp;</div><div class="pd-field-value">&nbsp;</div></div>
+      </div>
+      <div class="pd-field-row g4" style="margin-bottom:3px">
+        <div class="pd-field"><div class="pd-field-label">Earthing conductor — material</div><div class="pd-field-value">Copper</div></div>
+        <div class="pd-field"><div class="pd-field-label">Conductor CSA</div><div class="pd-field-value">${earthCond}</div></div>
+        <div class="pd-field"><div class="pd-field-label">Continuity</div><div class="pd-field-value">&nbsp;</div></div>
+        <div class="pd-field"><div class="pd-field-label">&nbsp;</div><div class="pd-field-value">&nbsp;</div></div>
+      </div>
+      <div class="pd-field-row g4">
+        <div class="pd-field"><div class="pd-field-label">Main protective bonding — material</div><div class="pd-field-value">Copper</div></div>
+        <div class="pd-field"><div class="pd-field-label">Conductor CSA</div><div class="pd-field-value">${bondCond}</div></div>
+        <div class="pd-field"><div class="pd-field-label">Continuity</div><div class="pd-field-value">&nbsp;</div></div>
+        <div class="pd-field"><div class="pd-field-label">Bonding of extraneous parts — Water: N/A Gas: N/A Oil: N/A</div><div class="pd-field-value">&nbsp;</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="pd-footer"><span>Report produced by CertAI</span><span>${certRef} — Page 3</span></div>
+  </div>`;
+
+  // ═══ PAGES 4-6 — Inspection Schedule ═══
+  const inspItems=document.querySelectorAll('.insp-item');
+  const inspSections=document.querySelectorAll('.insp-sec');
+  let inspHtml='';
+  let pageNum=4;
+  let itemCount=0;
+  const ITEMS_PER_PAGE=28;
+  
+  inspSections.forEach(sec=>{
+    const titleEl=sec.querySelector('.insp-sec-title');
+    const title=titleEl?titleEl.textContent:'';
+    const numEl=sec.querySelector('.insp-num');
+    const num=numEl?numEl.textContent:'';
+    const items=sec.querySelectorAll('.insp-item');
+    
+    if(itemCount===0){
+      inspHtml+=`<div class="pd-page"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:11pt;font-weight:700;text-transform:uppercase">Inspection Schedule</div><div style="font-size:7pt;color:#666">${certRef}</div></div>
+      <div style="font-size:7pt;color:#555;margin-bottom:6px">The following inspection results have been recorded using the following codes: ✓ = Satisfactory, C1/C2/C3 = Observation code, FI = Further Investigation, LIM = Limitation, N/V = Not Verified, N/A = Not Applicable, X = Fail</div>`;
+    }
+    
+    inspHtml+=`<div class="pd-insp-section-hdr">${num}. ${title}</div>`;
+    itemCount+=items.length+1;
+    
+    items.forEach(item=>{
+      const ref=item.querySelector('.insp-ref')?.textContent||'';
+      const desc=item.querySelector('.insp-desc')?.childNodes[0]?.textContent||item.querySelector('.insp-desc')?.textContent||'';
+      const reg=item.querySelector('.insp-reg')?.textContent||'';
+      // Find selected button
+      const selBtn=item.querySelector('.icb.s-pass,.icb.s-c1,.icb.s-c2,.icb.s-c3,.icb.s-fi,.icb.s-lim,.icb.s-nv,.icb.s-na');
+      let outcome=selBtn?selBtn.textContent.trim():'';
+      let outcomeColor='#000';
+      if(outcome==='✓')outcomeColor='#166534';
+      else if(outcome==='C1')outcomeColor='#ef4444';
+      else if(outcome==='C2')outcomeColor='#f97316';
+      else if(outcome==='C3')outcomeColor='#f59e0b';
+      else if(outcome==='FI')outcomeColor='#0ea5e9';
+      inspHtml+=`<div class="pd-insp-item"><span class="pd-insp-ref">${ref}</span><span class="pd-insp-desc">${desc.trim()}${reg?'<span style="font-size:5.5pt;color:#888;margin-left:4px">('+reg+')</span>':''}</span><span class="pd-insp-outcome" style="color:${outcomeColor}">${outcome||''}</span></div>`;
+      itemCount++;
+      if(itemCount>=ITEMS_PER_PAGE){
+        inspHtml+=`<div class="pd-footer"><span>Report produced by CertAI</span><span>${certRef} — Page ${pageNum}</span></div></div>`;
+        pageNum++;itemCount=0;
+        inspHtml+=`<div class="pd-page"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:11pt;font-weight:700;text-transform:uppercase">Inspection Schedule (continued)</div><div style="font-size:7pt;color:#666">${certRef}</div></div>`;
+      }
+    });
+  });
+  if(itemCount>0){inspHtml+=`<div class="pd-footer"><span>Report produced by CertAI</span><span>${certRef} — Page ${pageNum}</span></div></div>`;pageNum++;}
+  html+=inspHtml;
+
+  // ═══ DISTRIBUTION BOARD PAGES ═══
+  boards.forEach((b,bi)=>{
+    const circuits=b.circuits||[];
+    html+=`<div class="pd-page">
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+      <div><div style="font-size:10pt;font-weight:700">Distribution Board — ${b.name}</div><div style="font-size:7pt;color:#666">Location: ${b.location||'—'}</div></div>
+      <div style="font-size:7pt;color:#666">${certRef}</div>
+    </div>
+    <div class="pd-section">
+      <div class="pd-section-title" style="background:#600000">${b.name} — Board Details</div>
+      <div class="pd-section-body">
+        <div class="pd-field-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:3px;margin-bottom:3px">
+          <div class="pd-field"><div class="pd-field-label">Location</div><div class="pd-field-value">${b.location||'—'}</div></div>
+          <div class="pd-field"><div class="pd-field-label">Manufacturer</div><div class="pd-field-value">${b.manufacturer||'—'}</div></div>
+          <div class="pd-field"><div class="pd-field-label">Supplied from</div><div class="pd-field-value">${b.suppliedFrom||'—'}</div></div>
+          <div class="pd-field"><div class="pd-field-label">Polarity confirmed</div><div class="pd-field-value">—</div></div>
+          <div class="pd-field"><div class="pd-field-label">Phases</div><div class="pd-field-value">${b.phases||'1'}</div></div>
+          <div class="pd-field"><div class="pd-field-label">Zs at DB</div><div class="pd-field-value">${b.zs||'—'}</div></div>
+          <div class="pd-field"><div class="pd-field-label">IPF at DB</div><div class="pd-field-value">${b.ipf||'—'}</div></div>
+          <div class="pd-field"><div class="pd-field-label">RCD trip time</div><div class="pd-field-value">${b.rcdTime||'—'}</div></div>
+        </div>
+        <div class="pd-field-row" style="grid-template-columns:auto auto auto auto 1fr;gap:8px;font-size:7pt;margin-top:2px">
+          <span><strong>Main Switch</strong> BS(EN): 60947-3</span>
+          <span>Voltage rating: 230V</span>
+          <span>Rated current: ${mainSwitch||'100'}A</span>
+          <span>IPF rating: —</span>
+          <span>RCD rating: ${rcdRating||'—'}</span>
+        </div>
+        <div style="font-size:7pt;margin-top:2px"><strong>SPD Details</strong> Type: N/A &nbsp; Status: N/A &nbsp; <strong>Overcurrent Device</strong> BS(EN): 60898 &nbsp; Voltage: — &nbsp; Current: —</div>
+        ${b.notes?'<div style="font-size:7pt;margin-top:3px;color:#555">Notes: '+b.notes+'</div>':''}
+      </div>
+    </div>
+    
+    <div class="pd-section" style="margin-bottom:3px">
+      <div class="pd-section-title" style="font-size:7pt">Circuit Schedule — ${b.name}</div>
+    </div>
+    
+    <div style="overflow:hidden">
+    <table class="pd-sched-tbl">
+      <thead>
+        <tr>
+          <th rowspan="2">#</th>
+          <th rowspan="2" style="text-align:left;min-width:75px">Circuit designation</th>
+          <th rowspan="2">Pts</th>
+          <th rowspan="2">Wiring type</th>
+          <th rowspan="2">Ref</th>
+          <th colspan="2" class="gh">Conductors (mm²)</th>
+          <th rowspan="2">Max discon (s)</th>
+          <th colspan="5" class="gh">Overcurrent Devices</th>
+          <th colspan="4" class="gh">RCD</th>
+          <th colspan="3" class="gh">Ring Final (Ω)</th>
+          <th colspan="2" class="gh">R1+R2 or R2</th>
+          <th colspan="3" class="gh">Insulation (MΩ)</th>
+          <th rowspan="2">Pol</th>
+          <th rowspan="2">Max Zs</th>
+          <th rowspan="2">Meas Zs</th>
+          <th rowspan="2">Discon</th>
+          <th rowspan="2">Result</th>
+        </tr>
+        <tr>
+          <th>L</th><th>cpc</th>
+          <th>BS</th><th>Type</th><th>A</th><th>kA</th><th>Max Zs</th>
+          <th>BS</th><th>Type</th><th>mA</th><th>A</th>
+          <th>r1L</th><th>rn</th><th>r2</th>
+          <th>R1+R2</th><th>R2</th>
+          <th>V</th><th>L-L</th><th>L-E</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${circuits.length?circuits.map(c=>{
+          const pass=c.result==='Pass',fail=c.result==='Fail';
+          const measZs=parseFloat(c.measured_zs),maxZs=parseFloat(c.max_zs);
+          const zsOk=!isNaN(measZs)&&!isNaN(maxZs)?measZs<=maxZs:null;
+          return `<tr>
+            <td class="center">${c.circuit_number||''}</td>
+            <td class="td-d">${c.description||''}</td>
+            <td class="center">${c.no_points||'1'}</td>
+            <td class="center">${c.wiring_type||'A'}</td>
+            <td class="center">${c.ref_method||'C'}</td>
+            <td class="center">${c.live_csa||''}</td>
+            <td class="center">${c.cpc_csa||''}</td>
+            <td class="center">${c.max_disconnect_time||'0.4'}</td>
+            <td class="center">${(c.mcb_bs||'60898').replace('BS EN ','')}</td>
+            <td class="center">${c.mcb_type||''}</td>
+            <td class="center">${c.mcb_rating||''}</td>
+            <td class="center">${c.mcb_breaking_capacity||'6'}</td>
+            <td class="center">${c.max_zs||''}</td>
+            <td class="center">${(c.rcd_bs||'').replace('BS EN ','').replace('N/A','')}</td>
+            <td class="center">${c.rcd_type==='N/A'?'':c.rcd_type||''}</td>
+            <td class="center">${c.rcd_operating_current==='N/A'?'':c.rcd_operating_current||''}</td>
+            <td class="center">${c.rcd_rating==='N/A'?'':c.rcd_rating||''}</td>
+            <td class="center">${c.r1_live||''}</td>
+            <td class="center">${c.r1_neutral||''}</td>
+            <td class="center">${c.r2_cpc||''}</td>
+            <td class="center">${c.r1_plus_r2||''}</td>
+            <td class="center">${c.r2||''}</td>
+            <td class="center">${c.insulation_test_voltage||'500'}</td>
+            <td class="center">${c.insulation_ll||''}</td>
+            <td class="center">${c.insulation_le||''}</td>
+            <td class="center">${c.polarity||''}</td>
+            <td class="center">${c.max_zs||''}</td>
+            <td class="center" style="${zsOk===false?'color:#ef4444;font-weight:700':zsOk===true?'color:#166534':''}">${c.measured_zs||''}</td>
+            <td class="center">${c.disconnection_time||''}</td>
+            <td class="center" style="font-weight:700;color:${pass?'#166534':fail?'#ef4444':'#000'}">${c.result||''}</td>
+          </tr>`;
+        }).join(''):'<tr><td colspan="28" style="text-align:center;color:#888;padding:8px">No circuits recorded</td></tr>'}
+      </tbody>
+    </table>
+    </div>
+    <div class="pd-footer"><span>Report produced by CertAI</span><span>${certRef} — Page ${pageNum}</span></div>
+    </div>`;
+    pageNum++;
+    
+    // Testing information page
+    html+=`<div class="pd-page">
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+      <div style="font-size:10pt;font-weight:700">Distribution Board: ${b.name}</div>
+      <div style="font-size:7pt;color:#666">${certRef}</div>
+    </div>
+    <div style="font-size:7pt;color:#666;margin-bottom:5px">Location: ${b.location||'—'}</div>
+    <div class="pd-section">
+      <div class="pd-section-title" style="background:#600000">${b.name} — Testing Information</div>
+      <div class="pd-section-body">
+        <div class="pd-field-row g4" style="margin-bottom:4px">
+          <div class="pd-field"><div class="pd-field-label">Tested by — Name</div><div class="pd-field-value">JJ Steele</div></div>
+          <div class="pd-field"><div class="pd-field-label">Position</div><div class="pd-field-value">Manager</div></div>
+          <div class="pd-field"><div class="pd-field-label">Date tested</div><div class="pd-field-value">${new Date().toLocaleDateString('en-GB')}</div></div>
+          <div class="pd-field"><div class="pd-field-label">Signature</div><div class="pd-field-value">&nbsp;</div></div>
+        </div>
+        <div style="font-size:7pt;font-weight:600;margin-bottom:3px">Test Equipment Details</div>
+        <div class="pd-field-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px">
+          <div class="pd-field"><div class="pd-field-label">MFT</div><div class="pd-field-value">N/A</div></div>
+          <div class="pd-field"><div class="pd-field-label">Continuity</div><div class="pd-field-value">N/A</div></div>
+          <div class="pd-field"><div class="pd-field-label">Insulation resistance</div><div class="pd-field-value">N/A</div></div>
+          <div class="pd-field"><div class="pd-field-label">Earth fault loop impedance</div><div class="pd-field-value">N/A</div></div>
+          <div class="pd-field"><div class="pd-field-label">RCD</div><div class="pd-field-value">N/A</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="pd-footer"><span>Report produced by CertAI</span><span>${certRef} — Page ${pageNum}</span></div>
+    </div>`;
+    pageNum++;
+  });
+
+  // ═══ APPENDIX ═══
+  const apPhotos=document.querySelectorAll('#apGrid .ap-photo');
+  const boardPhotos=boards.filter(b=>b.boardPhotoUrl);
+  html+=`<div class="pd-page">
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+    <div style="font-size:11pt;font-weight:700">APPENDIX</div>
+    <div style="font-size:7pt;color:#666">${certRef}</div>
+  </div>
+  ${document.getElementById('appendixText')?.value?'<div style="font-size:7.5pt;margin-bottom:10px;line-height:1.5">'+document.getElementById('appendixText').value+'</div>':''}
+  ${apPhotos.length?`<div style="font-size:8pt;font-weight:700;margin-bottom:5px">APPENDIX PHOTOS</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+    ${Array.from(apPhotos).map(p=>{const img=p.querySelector('img');const cap=p.querySelector('.ap-photo-cap');return img?`<div><img src="${img.src}" style="width:100%;max-height:80mm;object-fit:cover;border:1px solid #ccc"><div style="font-size:6.5pt;color:#555;margin-top:2px">${cap?.textContent||''}</div></div>`:''}).join('')}
+  </div>`:''}
+  ${boards.some(b=>b.boardPhotoDataUrl)?`<div style="font-size:8pt;font-weight:700;margin-bottom:5px">DISTRIBUTION BOARD PHOTOS</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    ${boards.map(b=>b.boardPhotoDataUrl?`<div><img src="${b.boardPhotoDataUrl}" style="width:100%;max-height:80mm;object-fit:cover;border:1px solid #ccc"><div style="font-size:6.5pt;color:#555;margin-top:2px">${b.name}</div></div>`:'').join('')}
+  </div>`:''}
+  <div class="pd-footer"><span>Report produced by CertAI</span><span>${certRef} — Page ${pageNum}</span></div>
+  </div>`;
+  pageNum++;
+
+  // ═══ PAGE — Guidance for Recipients ═══
+  html+=`<div class="pd-page">
+  <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+    <div class="pd-guidance-title">CONDITION REPORT GUIDANCE FOR RECIPIENTS</div>
+    <div style="font-size:7pt;color:#666">${certRef}</div>
+  </div>
+  <div class="pd-guidance-item"><span class="pd-guidance-num">1.</span> The purpose of this Report is to confirm, as far as reasonably practicable, whether or not the electrical installation is in a satisfactory condition for continued service (see SUMMARY OF THE CONDITION OF THE INSTALLATION). The Report should identify any damage, deterioration, defects, and/or conditions which may give rise to danger (see OBSERVATIONS AND RECOMMENDATIONS section).</div>
+  <div class="pd-guidance-item"><span class="pd-guidance-num">2.</span> This Report is only valid if accompanied by the Inspection Schedule(s) and the Schedule(s) of Circuit Details and Test Results.</div>
+  <div class="pd-guidance-item"><span class="pd-guidance-num">3.</span> The person ordering the Report should have received this Report without watermarks and the inspector / company should have retained a duplicate.</div>
+  <div class="pd-guidance-item"><span class="pd-guidance-num">4.</span> This Report may be used to satisfy the requirement of a new owner or occupier to be made aware of the condition of the electrical installation at the time the Report was issued. If the property is vacated, this Report will provide the new owner / occupier with details of the condition of the installation at the time the Report was issued.</div>
+  <div class="pd-guidance-item"><span class="pd-guidance-num">5.</span> The EXTENT AND LIMITATIONS section should identify fully the extent of the installation covered by the Report and any limitations on the inspection and testing. The inspector should have agreed these matters with the person ordering the Report and with other interested parties (licensing authority, insurance company, mortgage provider etc.).</div>
+  <div class="pd-guidance-item"><span class="pd-guidance-num">6.</span> Depending upon the extent and limitations agreed, a SCHEDULE OF TEST RESULTS should be provided for each distribution board forming part of the installation covered by this Report.</div>
+  <div class="pd-guidance-item"><span class="pd-guidance-num">11.</span> INTAKE EQUIPMENT (VISUAL INSPECTION ONLY) EXPLANATION OF CLASSIFICATION CODE: Is a customer against an item in this section, other than access (see parts), should NOT be used to determine an overall outcome. NOTE 1: Where inadequacies in the intake equipment are encountered, which may result in a dangerous or potentially dangerous situation, the person ordering the work and / or duty holder must be informed. It is strongly recommended that the person ordering the work informs the appropriate authority.</div>
+  <div class="pd-guidance-item"><span class="pd-guidance-num">12.</span> Where the installation includes a Residual Current Device (RCD) it should be tested 6-monthly by pressing the 'test' button. If it fails to 'trip', the electricity supply should be switched off, a qualified electrician should be consulted. It is important that this instruction is followed.</div>
+  <div style="margin-top:8px">
+    <div style="font-size:8pt;font-weight:700;margin-bottom:5px;text-transform:uppercase">Wiring Types Reference</div>
+    <div class="pd-wiring-grid">
+      ${[['A','PVC/PVC cables'],['B','PVC cables in metallic conduit'],['C','PVC cables with concentric conductor core'],['D','PVC cable in metallic trunking'],['E','PVC cables in non-metallic trunking'],['F','PVCSWA cables'],['G','XLPE/SWA cables'],['H','Mineral insulated cables'],['Y','Other cable types not listed here']].map(([k,v])=>`<div class="pd-wiring-item"><span class="pd-wiring-key">${k}</span><span>${v}</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="pd-footer"><span>Report produced by CertAI</span><span>${certRef} — Page ${pageNum}</span></div>
+  </div>`;
+
+  html+='</div>'; // close .pd
+  pd.innerHTML=html;
+  window.print();
+  // Clear after print
+  setTimeout(()=>{pd.innerHTML='';},2000);
+}
 </script>
 </body>
 </html>
