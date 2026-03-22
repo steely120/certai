@@ -267,15 +267,30 @@ select option{background:var(--bg3)}
       <div class="panel-title">Ollama Connection</div>
       <div class="panel-sub">Configure the connection to your local Ollama AI server</div>
       <div class="card">
-        <div class="card-hdr"><div class="card-title">Proxy Settings</div></div>
+        <div class="card-hdr"><div class="card-title">🤖 AI Vision — GPT-4o mini (Board Scanning)</div></div>
         <div class="card-body">
-          <div class="f"><label>Proxy URL (leave blank if using built-in proxy)</label><input type="text" id="connProxy" placeholder="https://192.168.1.53:3001"></div>
-          <div class="g2">
-            <div class="f"><label>Vision Model (for board scanning)</label><input type="text" id="connVision" placeholder="llava" value="llava"></div>
-            <div class="f"><label>Text Model</label><input type="text" id="connText" placeholder="gemma3:27b" value="gemma3:27b"></div>
+          <div style="background:rgba(59,110,248,.08);border:1px solid rgba(59,110,248,.2);border-radius:6px;padding:8px 10px;font-size:.68rem;color:var(--text2);margin-bottom:10px;line-height:1.5">
+            Board photo scanning uses <strong style="color:var(--text)">OpenAI GPT-4o mini</strong> — significantly more accurate than local models for reading breaker labels. Cost is approximately £0.001 per scan.
           </div>
-          <button class="btn btn-sec btn-sm" onclick="testConnection()" style="margin-top:4px">⚡ Test Connection</button>
-          <div id="connStatus" style="font-size:.7rem;color:var(--text2);margin-top:8px"></div>
+          <div class="f">
+            <label>OpenAI API Key</label>
+            <input type="password" id="connOpenAI" placeholder="sk-...">
+            <span style="font-size:.6rem;color:var(--text2);margin-top:2px">Get your key at <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--blue)">platform.openai.com/api-keys</a></span>
+          </div>
+          <button class="btn btn-sec btn-sm" onclick="testOpenAI()" style="margin-top:4px">⚡ Test OpenAI Key</button>
+          <div id="openAIStatus" style="font-size:.7rem;color:var(--text2);margin-top:6px"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">🔌 Ollama (Local AI — Text Generation)</div></div>
+        <div class="card-body">
+          <div class="f"><label>Proxy URL</label><input type="text" id="connProxy" placeholder="https://192.168.1.53:3001"></div>
+          <div class="g2">
+            <div class="f"><label>Text Model</label><input type="text" id="connText" placeholder="gemma3:27b" value="gemma3:27b"></div>
+            <div class="f"><label>Vision Model (fallback)</label><input type="text" id="connVision" placeholder="llava" value="llava"></div>
+          </div>
+          <button class="btn btn-sec btn-sm" onclick="testConnection()" style="margin-top:4px">⚡ Test Ollama</button>
+          <div id="connStatus" style="font-size:.7rem;color:var(--text2);margin-top:6px"></div>
         </div>
       </div>
       <button class="btn btn-primary" onclick="saveConnection()">Save Connection Settings</button>
@@ -418,6 +433,7 @@ function populateProfile() {
   document.getElementById('connProxy').value = conn.proxyUrl || '';
   document.getElementById('connVision').value = conn.visionModel || 'llava';
   document.getElementById('connText').value = conn.textModel || 'gemma3:27b';
+  document.getElementById('connOpenAI').value = conn.openAIKey || '';
 }
 
 async function saveProfile() {
@@ -533,14 +549,51 @@ async function uploadLogo(e) {
   e.target.value = '';
 }
 
-function saveConnection() {
+async function saveConnection() {
+  const openAIKey = document.getElementById('connOpenAI').value.trim();
   const conn = {
     proxyUrl: document.getElementById('connProxy').value.trim(),
     visionModel: document.getElementById('connVision').value.trim() || 'llava',
     textModel: document.getElementById('connText').value.trim() || 'gemma3:27b',
+    openAIKey,
   };
   localStorage.setItem('certai_connection', JSON.stringify(conn));
+  // Save API key to server so server-side proxy can use it
+  if (openAIKey) {
+    try {
+      const r = await fetch('/api/config/openai-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ key: openAIKey })
+      });
+      const d = await r.json();
+      if (!r.ok) { showErr('Key saved locally but server update failed: ' + d.error); return; }
+    } catch(e) { showErr('Saved locally but could not reach server: ' + e.message); return; }
+  }
   showOk('Connection settings saved');
+}
+
+async function testOpenAI() {
+  const key = document.getElementById('connOpenAI').value.trim();
+  const status = document.getElementById('openAIStatus');
+  if (!key) { status.textContent = 'Enter your OpenAI API key first'; status.style.color = 'var(--red)'; return; }
+  status.textContent = 'Testing...'; status.style.color = 'var(--text2)';
+  try {
+    // Save first then test via server
+    await fetch('/api/config/openai-key', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ key })
+    });
+    const r = await fetch('/api/vision/test', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const d = await r.json();
+    if (!r.ok) { status.textContent = '✗ ' + d.error; status.style.color = 'var(--red)'; return; }
+    status.textContent = '✓ GPT-4o mini connected — ready to scan'; status.style.color = 'var(--green)';
+  } catch(e) {
+    status.textContent = '✗ ' + e.message; status.style.color = 'var(--red)';
+  }
 }
 
 async function testConnection() {
