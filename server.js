@@ -11,6 +11,7 @@ const OLLAMA_URL = process.env.OLLAMA_URL || 'http://192.168.1.34:11434';
 const PORT = process.env.PORT || 3001;
 const DATA_DIR = process.env.DATA_DIR || '/data/certai';
 const JWT_SECRET = process.env.JWT_SECRET || 'certai-secret-change-me';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 
 [DATA_DIR,
  path.join(DATA_DIR,'uploads'),
@@ -173,6 +174,33 @@ app.post('/api/upload/logo',auth,upload.single('logo'),(req,res)=>{
   res.json({ok:true,url});
 });
 
+// ── GPT-4o VISION SCAN ────────────────────────────────────────────────────────
+app.post('/api/vision/scan',auth,async(req,res)=>{
+  const{image,mime,prompt}=req.body;
+  if(!image)return res.status(400).json({error:'No image provided'});
+  if(!OPENAI_API_KEY)return res.status(500).json({error:'OPENAI_API_KEY not set in environment variables'});
+  try{
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+OPENAI_API_KEY},
+      body:JSON.stringify({
+        model:'gpt-4o-mini',
+        max_tokens:2048,
+        messages:[{
+          role:'user',
+          content:[
+            {type:'image_url',image_url:{url:'data:'+(mime||'image/jpeg')+';base64,'+image,detail:'high'}},
+            {type:'text',text:prompt}
+          ]
+        }]
+      })
+    });
+    if(!r.ok){const e=await r.json();return res.status(r.status).json({error:e.error?.message||'OpenAI error'});}
+    const d=await r.json();
+    res.json({response:d.choices?.[0]?.message?.content||'',model:'gpt-4o-mini',tokens_used:d.usage?.total_tokens});
+  }catch(e){res.status(502).json({error:'OpenAI request failed: '+e.message});}
+});
+
 // OLLAMA
 app.post('/api/generate',auth,async(req,res)=>{
   try{const r=await fetch(OLLAMA_URL+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req.body)});res.json(await r.json());}
@@ -252,7 +280,34 @@ app.delete('/api/cert/:id',auth,(req,res)=>{
   }catch(e){res.status(500).json({error:'Delete failed'});}
 });
 
-app.get('/health',(req,res)=>res.json({status:'ok',ollama:OLLAMA_URL}));
+
+// ── RUNTIME CONFIG (API keys set via UI) ──────────────────────────────────────
+let runtimeOpenAIKey = OPENAI_API_KEY; // start with env var if set
+
+app.post('/api/config/openai-key', auth, (req, res) => {
+  const { key } = req.body;
+  if (!key || !key.startsWith('sk-')) return res.status(400).json({ error: 'Invalid API key format — should start with sk-' });
+  runtimeOpenAIKey = key;
+  res.json({ ok: true });
+});
+
+app.get('/api/vision/test', auth, async (req, res) => {
+  const key = runtimeOpenAIKey;
+  if (!key) return res.status(500).json({ error: 'No OpenAI API key configured. Go to Settings → Connection to add your key.' });
+  try {
+    // Test with a minimal request
+    const r = await fetch('https://api.openai.com/v1/models', {
+      headers: { 'Authorization': 'Bearer ' + key }
+    });
+    if (!r.ok) {
+      const e = await r.json();
+      return res.status(401).json({ error: e.error?.message || 'Invalid API key' });
+    }
+    res.json({ ok: true, message: 'OpenAI API key valid' });
+  } catch(e) { res.status(502).json({ error: 'Cannot reach OpenAI: ' + e.message }); }
+});
+
+app.get('/health',(req,res)=>res.json({status:'ok',ollama:OLLAMA_URL,openai:runtimeOpenAIKey?'configured':'not set'}));
 
 app.listen(PORT,'0.0.0.0',()=>{
   console.log('CertAI on port '+PORT);
