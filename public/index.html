@@ -421,7 +421,7 @@ td.bad{color:var(--red)!important}
     <button class="nav-btn" onclick="goPage('decl',this)">✍️ Declaration</button>
     <button class="nav-btn" onclick="goPage('appendix',this)">📎 Appendix</button>
   </div>
-  <div class="topbar-right"><button class="btn btn-primary btn-sm" onclick="generatePDF()" style="font-size:.65rem;padding:4px 9px">📄 Export PDF</button>
+  <div class="topbar-right"><a class="btn btn-ghost btn-sm" href="/dashboard.html" style="font-size:.65rem;padding:4px 8px">← Dashboard</a><button class="btn btn-primary btn-sm" onclick="generatePDF()" style="font-size:.65rem;padding:4px 9px">📄 Export PDF</button>
     <div class="cert-ref" id="certPill">—</div>
     <div class="status-badge"><div class="sdot"></div>IN PROGRESS</div>
   </div>
@@ -507,6 +507,7 @@ td.bad{color:var(--red)!important}
       <button class="btn btn-sec btn-sm" style="flex:1" onclick="generatePDF()">🖨️</button>
     </div>
     <button class="btn btn-primary btn-sm btn-block" onclick="loadCertList()">📂 Load Certificate</button>
+    <button class="btn btn-ghost btn-sm btn-block" onclick="window.location.href='/dashboard.html'">← Dashboard</button>
   </div>
 </aside>
 
@@ -852,6 +853,64 @@ function genRef(){
 certId=genRef();
 document.getElementById('certPill').textContent=certId;
 
+// ══ AUTH ══════════════════════════════════════════════════════════════════════
+let _token=localStorage.getItem('certai_token');
+let _currentUser=null;
+function authHdrs(){return{'Content-Type':'application/json','Authorization':'Bearer '+(_token||'')};}
+function aFetch(url,opts={}){
+  opts.headers={...(opts.headers||{}),Authorization:'Bearer '+(_token||'')};
+  return fetch(url,opts);
+}
+async function initAuth(){
+  if(!_token){window.location.href='/login.html';return false;}
+  try{
+    const r=await fetch('/api/auth/me',{headers:authHdrs()});
+    if(!r.ok){window.location.href='/login.html';return false;}
+    _currentUser=await r.json();
+    // Populate from user profile
+    const p=_currentUser.profile||{};
+    const conn=JSON.parse(localStorage.getItem('certai_connection')||'{}');
+    if(conn.proxyUrl)document.getElementById('proxyUrl').value=conn.proxyUrl;
+    if(conn.visionModel)document.getElementById('modelProxy').value=conn.visionModel;
+    // Populate from session (new cert type or load)
+    const newType=sessionStorage.getItem('certai_new_type');
+    const loadId=sessionStorage.getItem('certai_load_id');
+    if(newType){certType=newType;sessionStorage.removeItem('certai_new_type');}
+    if(loadId){await loadCertFromServer(loadId);sessionStorage.removeItem('certai_load_id');}
+    else if(newType){
+      document.querySelectorAll('.ct-item').forEach((b,i)=>b.classList.toggle('active',['eicr','eic','mwc'][i]===certType));
+      document.getElementById('nb-obs').style.display=certType==='eicr'?'':'none';
+      renderInstallForm();renderSupplyForm();renderDeclForm();
+      // Pre-fill from user profile
+      setTimeout(()=>{
+        const ss=document.getElementById('supplySystem');if(ss&&p.defaultSupplyType)ss.value=p.defaultSupplyType;
+        const ec=document.getElementById('earthCond');if(ec&&p.defaultEarthConductor)ec.value=p.defaultEarthConductor;
+        const bc=document.getElementById('bondCond');if(bc&&p.defaultBondConductor)bc.value=p.defaultBondConductor;
+        const bm=document.getElementById('boardMake');if(bm&&_currentUser.company)bm.value='';
+      },100);
+    }
+    return true;
+  }catch(e){window.location.href='/login.html';return false;}
+}
+async function loadCertFromServer(id){
+  try{
+    const r=await aFetch('/api/cert/'+id);
+    const c=await r.json();
+    if(!r.ok||!c.id)return;
+    certId=c.id;certType=c.type||'eicr';
+    boards=c.boards||[];obsItems=c.obsItems||[];
+    document.getElementById('certPill').textContent=certId;
+    document.querySelectorAll('.ct-item').forEach((b,i)=>b.classList.toggle('active',['eicr','eic','mwc'][i]===certType));
+    document.getElementById('nb-obs').style.display=certType==='eicr'?'':'none';
+    renderInstallForm();renderSupplyForm();renderDeclForm();renderBoards();renderObsTable();
+    setTimeout(()=>{
+      const cn=document.getElementById('clientName');if(cn&&c.client)cn.value=c.client;
+      const ad=document.getElementById('address');if(ad&&c.address)ad.value=c.address;
+      const id2=document.getElementById('inspDate');if(id2&&c.inspDate)id2.value=c.inspDate;
+    },100);
+  }catch(e){console.error('Load failed',e);}
+}
+
 // ══ BS7671 OBSERVATION LIBRARY ════════════════════════════════════════════════
 const OBS_LIB=[
   {code:'C1',desc:'Exposed live conductors accessible to touch',reg:'Regulation 416.1',detail:'Live parts must be insulated or protected. Exposed live parts present immediate danger of electric shock.',cat:'Protection'},
@@ -994,7 +1053,7 @@ function setConn(mode,btn){
   document.getElementById('cp-'+mode).classList.add('on');
 }
 function setScanMode(m,btn){scanMode=m;document.querySelectorAll('.smt').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
-function getBase(){return connMode==='direct'?document.getElementById('ollamaUrl').value.trim():document.getElementById('proxyUrl').value.trim();}
+function getBase(){const conn=JSON.parse(localStorage.getItem('certai_connection')||'{}');const direct=document.getElementById('ollamaUrl')?.value.trim();const proxy=document.getElementById('proxyUrl')?.value.trim()||conn.proxyUrl||'';return connMode==='direct'&&direct?direct:proxy||'';}
 function getVisModel(){return connMode==='direct'?document.getElementById('modelDirect').value.trim():document.getElementById('modelProxy').value.trim();}
 function showErr(msg){const e=document.getElementById('errMsg');e.textContent=msg;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),8000);}
 function showOk(msg){const e=document.getElementById('okMsg');e.textContent=msg;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),4000);}
@@ -1002,7 +1061,7 @@ function closeM(id){document.getElementById(id).classList.remove('on');}
 function openM(id){document.getElementById(id).classList.add('on');}
 
 async function testConn(){try{const r=await fetch(document.getElementById('ollamaUrl').value.trim()+'/api/tags');const d=await r.json();showOk('Connected! '+d.models?.map(m=>m.name).join(', '));}catch(e){showErr('Cannot reach Ollama: '+e.message);}}
-async function testProxy(){const url=document.getElementById('proxyUrl').value.trim();if(!url){showErr('Enter proxy URL.');return;}try{const r=await fetch(url+'/api/tags');const d=await r.json();showOk('Proxy connected! '+d.models?.map(m=>m.name).join(', '));}catch(e){showErr('Cannot reach proxy: '+e.message);}}
+async function testProxy(){const url=document.getElementById('proxyUrl').value.trim();if(!url){showErr('Enter proxy URL.');return;}try{const r=await aFetch(url+'/api/tags');const d=await r.json();showOk('Proxy connected! '+d.models?.map(m=>m.name).join(', '));}catch(e){showErr('Cannot reach proxy: '+e.message);}}
 
 function tgSingle(btn,grp){btn.closest('.tg-grp').querySelectorAll('.tg').forEach(b=>{b.className='tg';});const v=btn.textContent.trim().toLowerCase();btn.classList.add(v==='yes'||v==='pass'?'sel-pass':v==='no'||v==='fail'?'sel-fail':v==='lim'?'sel-lim':'sel-na');}
 
@@ -1019,7 +1078,7 @@ async function doSBScan(){
   const btn=document.getElementById('sbScanBtn'),ov=document.getElementById('sbScanOv');
   btn.disabled=true;btn.textContent='⏳';ov.classList.add('on');
   try{
-    const r=await fetch(url+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:getVisModel(),prompt:SCAN_PROMPTS[scanMode],images:[sbImgB64],stream:false,options:{temperature:0.1,num_predict:2048}})});
+    const r=await aFetch(url+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:getVisModel(),prompt:SCAN_PROMPTS[scanMode],images:[sbImgB64],stream:false,options:{temperature:0.1,num_predict:2048}})});
     if(!r.ok)throw new Error('HTTP '+r.status);
     const data=await r.json();
     const raw=(data.response||'').replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
@@ -1145,7 +1204,7 @@ async function runImportScan(){
     :'AI is reading circuit information and test results from your image.';
   openM('m-import4');
   try{
-    const r=await fetch(url+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:getVisModel(),prompt:SCAN_PROMPTS[importType],images:[importImgB64],stream:false,options:{temperature:0.1,num_predict:2048}})});
+    const r=await aFetch(url+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:getVisModel(),prompt:SCAN_PROMPTS[importType],images:[importImgB64],stream:false,options:{temperature:0.1,num_predict:2048}})});
     if(importAborted)return;
     if(!r.ok)throw new Error('HTTP '+r.status+' from vision model');
     const data=await r.json();
@@ -1951,18 +2010,18 @@ async function saveCert(){
   const url=document.getElementById('proxyUrl').value.trim();
   const data=getCertData();
   try{
-    if(url){const r=await fetch(url+'/api/cert/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error();}
-    localStorage.setItem('certai_'+certId,JSON.stringify(data));
-    showOk('Saved: '+certId);
-  }catch(e){localStorage.setItem('certai_'+certId,JSON.stringify(data));showOk('Saved locally: '+certId);}
+    const r=await aFetch('/api/cert/save',{method:'POST',headers:authHdrs(),body:JSON.stringify(data)});if(!r.ok)throw new Error();
+    localStorage.setItem('certai_bk_'+certId,JSON.stringify(data));
+    showOk('Certificate saved ✓');
+  }catch(e){showErr('Save failed: '+e.message);}
 }
 async function loadCertList(){
   openM('m-load');
   const el=document.getElementById('certListContent');
   let certs=[];
   const url=document.getElementById('proxyUrl').value.trim();
-  try{if(url){const r=await fetch(url+'/api/cert/list');const d=await r.json();certs=d.certs||[];}}catch(e){}
-  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('certai_')){try{const d=JSON.parse(localStorage.getItem(k));if(!certs.find(c=>c.id===d.id))certs.push({...d,local:true});}catch(e){}}}
+  try{const r=await aFetch('/api/cert/list');const d=await r.json();certs=d.certs||[];}catch(e){}
+  
   certs.sort((a,b)=>new Date(b.savedAt)-new Date(a.savedAt));
   window._certList=certs;
   if(!certs.length){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--text2);font-size:.72rem">No saved certificates found.</div>';return;}
@@ -2002,6 +2061,8 @@ renderDeclForm();
 renderBoards();
 renderObsTable();
 document.getElementById('nb-obs').style.display='';
+// Auth check — redirect to login if not authenticated
+initAuth();
 </script>
 
 <!-- PRINT DOCUMENT (hidden, shown on print) -->
