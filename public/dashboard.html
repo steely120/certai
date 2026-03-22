@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>CertAI — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;--border:#252525;--border2:#333;--blue:#3b6ef8;--blue2:#2d5ce8;--blue-dim:rgba(59,110,248,.1);--text:#f0f0f0;--text2:#888;--text3:#444;--red:#ef4444;--green:#22c55e;--amber:#f59e0b}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+/* TOP BAR */
+.topbar{height:54px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none}
+.logo-badge{width:28px;height:28px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+.logo-text{font-weight:700;font-size:.95rem;color:var(--blue)}
+.topbar-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+.user-badge{display:flex;align-items:center;gap:7px;padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;cursor:pointer;transition:all .12s}
+.user-badge:hover{border-color:var(--border2)}
+.avatar{width:24px;height:24px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.user-name{font-size:.75rem;font-weight:600}
+.user-role{font-size:.6rem;color:var(--text2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 14px;border:none;border-radius:7px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:.78rem;transition:all .12s;text-decoration:none;white-space:nowrap}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue2)}
+.btn-sec{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.btn-sec:hover{background:var(--bg4);color:var(--text)}
+.btn-ghost{background:none;color:var(--text2);border:1px solid var(--border2)}
+.btn-danger{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.btn-sm{font-size:.68rem;padding:4px 8px}
+/* CONTENT */
+.content{flex:1;max-width:1100px;width:100%;margin:0 auto;padding:24px 20px}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px}
+.page-title{font-size:1.3rem;font-weight:700}
+.page-sub{font-size:.75rem;color:var(--text2);margin-top:2px}
+/* NEW CERT CARDS */
+.new-cert-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:32px}
+.new-cert-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:10px;text-decoration:none}
+.new-cert-card:hover{border-color:var(--blue);background:var(--blue-dim);transform:translateY(-1px)}
+.ncc-icon{width:42px;height:42px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.ncc-icon.eicr{background:rgba(239,68,68,.15)}
+.ncc-icon.eic{background:rgba(34,197,94,.12)}
+.ncc-icon.mwc{background:rgba(245,158,11,.12)}
+.ncc-name{font-weight:700;font-size:.9rem}
+.ncc-desc{font-size:.68rem;color:var(--text2);line-height:1.4}
+.ncc-badge{font-size:.58rem;font-weight:600;padding:2px 6px;border-radius:3px;align-self:flex-start;margin-top:auto}
+.ncc-badge.eicr{background:rgba(239,68,68,.15);color:#ef4444}
+.ncc-badge.eic{background:rgba(34,197,94,.12);color:#22c55e}
+.ncc-badge.mwc{background:rgba(245,158,11,.12);color:#f59e0b}
+/* FILTER BAR */
+.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:5px 12px;border-radius:20px;font-size:.7rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text2);transition:all .12s;font-family:'Inter',sans-serif}
+.filter-btn.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.search-box{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 10px;flex:1;max-width:280px}
+.search-box input{background:none;border:none;color:var(--text);font-size:.75rem;outline:none;font-family:'Inter',sans-serif;width:100%}
+.search-box input::placeholder{color:var(--text3)}
+/* CERT LIST */
+.cert-list{display:flex;flex-direction:column;gap:6px}
+.cert-item{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .12s}
+.cert-item:hover{border-color:var(--border2);background:var(--bg3)}
+.cert-type-badge{width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.cert-type-badge.eicr{background:rgba(239,68,68,.15)}
+.cert-type-badge.eic{background:rgba(34,197,94,.12)}
+.cert-type-badge.mwc{background:rgba(245,158,11,.12)}
+.cert-info{flex:1;min-width:0}
+.cert-client{font-weight:600;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cert-address{font-size:.68rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.cert-meta{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.cert-date{font-size:.65rem;color:var(--text2)}
+.cert-id{font-size:.58rem;color:var(--text3);font-family:monospace;background:var(--bg4);padding:1px 5px;border-radius:3px}
+.cert-type-label{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:3px}
+.cert-type-label.eicr{background:rgba(239,68,68,.12);color:#ef4444}
+.cert-type-label.eic{background:rgba(34,197,94,.1);color:#22c55e}
+.cert-type-label.mwc{background:rgba(245,158,11,.1);color:#f59e0b}
+.cert-actions{display:flex;gap:4px;flex-shrink:0}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text2)}
+.empty-icon{font-size:3rem;opacity:.15;margin-bottom:10px}
+.empty-text{font-size:.82rem;line-height:1.6;max-width:280px;margin:0 auto}
+/* MODAL */
+.m-wrap{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.m-wrap.on{display:flex}
+.m-box{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;width:100%;max-width:400px;overflow:hidden;animation:sup .2s ease}
+@keyframes sup{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.m-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+.m-title{font-weight:700;font-size:.95rem}
+.m-body{padding:16px}
+.m-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+.loading{text-align:center;padding:40px;color:var(--text2);font-size:.8rem}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+@media(max-width:600px){.new-cert-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="logo" href="/dashboard.html">
+    <div class="logo-badge">⚡</div>
+    <div class="logo-text">CertAI</div>
+  </a>
+  <div class="topbar-right">
+    <a class="btn btn-sec btn-sm" href="/settings.html">⚙️ Settings</a>
+    <div class="user-badge" onclick="showUserMenu()">
+      <div class="avatar" id="userAvatar">?</div>
+      <div>
+        <div class="user-name" id="userName">Loading...</div>
+        <div class="user-role" id="userRole"></div>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">Sign out</button>
+  </div>
+</div>
+
+<div class="content">
+  <!-- NEW CERT -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Certificates</div>
+      <div class="page-sub">Create and manage electrical certificates</div>
+    </div>
+  </div>
+
+  <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);margin-bottom:12px">Start New Certificate</div>
+  <div class="new-cert-grid">
+    <div class="new-cert-card" onclick="newCert('eicr')">
+      <div class="ncc-icon eicr">🔍</div>
+      <div>
+        <div class="ncc-name">EICR</div>
+        <div class="ncc-desc">Electrical Installation Condition Report — for inspection of existing installations</div>
+      </div>
+      <div class="ncc-badge eicr">Condition Report</div>
+    </div>
+    <div class="new-cert-card" onclick="newCert('eic')">
+      <div class="ncc-icon eic">⚡</div>
+      <div>
+        <div class="ncc-name">EIC</div>
+        <div class="ncc-desc">Electrical Installation Certificate — for new or altered installations</div>
+      </div>
+      <div class="ncc-badge eic">Installation Certificate</div>
+    </div>
+    <div class="new-cert-card" onclick="newCert('mwc')">
+      <div class="ncc-icon mwc">🔧</div>
+      <div>
+        <div class="ncc-name">Minor Works</div>
+        <div class="ncc-desc">Minor Works Certificate — for small additions or alterations</div>
+      </div>
+      <div class="ncc-badge mwc">Minor Works</div>
+    </div>
+  </div>
+
+  <!-- PREVIOUS CERTS -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text2)">Previous Certificates <span id="certCount" style="color:var(--blue);font-size:.7rem"></span></div>
+    <div id="adminToggle" style="display:none">
+      <label style="display:flex;align-items:center;gap:5px;font-size:.7rem;color:var(--text2);cursor:pointer">
+        <input type="checkbox" id="showAll" onchange="loadCerts()"> Show all users
+      </label>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('eicr',this)">EICR</button>
+    <button class="filter-btn" onclick="setFilter('eic',this)">EIC</button>
+    <button class="filter-btn" onclick="setFilter('mwc',this)">Minor Works</button>
+    <div class="search-box">
+      <span style="color:var(--text3)">🔍</span>
+      <input type="text" placeholder="Search by client or address..." oninput="renderCerts(this.value)">
+    </div>
+  </div>
+
+  <div id="certListWrap">
+    <div class="loading">Loading certificates...</div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="m-wrap" id="deleteModal">
+  <div class="m-box">
+    <div class="m-hdr"><div class="m-title">Delete Certificate</div><button class="btn btn-sec btn-sm" onclick="closeDeleteModal()">✕</button></div>
+    <div class="m-body"><div style="font-size:.8rem;line-height:1.6">Are you sure you want to delete this certificate? This cannot be undone.</div></div>
+    <div class="m-footer">
+      <button class="btn btn-sec" style="flex:1" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BASE = '';
+let token = localStorage.getItem('certai_token');
+let user = null;
+let allCerts = [];
+let currentFilter = 'all';
+let deletingId = null;
+
+function getToken() { return localStorage.getItem('certai_token'); }
+function authHeaders() { return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() }; }
+
+async function init() {
+  if (!token) { window.location.href = '/login.html'; return; }
+  try {
+    const r = await fetch(BASE + '/api/auth/me', { headers: authHeaders() });
+    if (!r.ok) { logout(); return; }
+    user = await r.json();
+    document.getElementById('userName').textContent = user.name;
+    document.getElementById('userRole').textContent = user.role === 'admin' ? 'Admin' : 'User';
+    if (user.profile?.logoUrl) {
+      document.getElementById('userAvatar').innerHTML = `<img src="${user.profile.logoUrl}">`;
+    } else {
+      document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+    }
+    if (user.role === 'admin') document.getElementById('adminToggle').style.display = 'block';
+    await loadCerts();
+  } catch(e) { logout(); }
+}
+
+async function loadCerts() {
+  const showAll = user?.role === 'admin' && document.getElementById('showAll')?.checked;
+  const url = BASE + '/api/cert/list' + (showAll ? '?all=true' : '');
+  try {
+    const r = await fetch(url, { headers: authHeaders() });
+    const d = await r.json();
+    allCerts = d.certs || [];
+    document.getElementById('certCount').textContent = `(${allCerts.length})`;
+    renderCerts('');
+  } catch(e) {
+    document.getElementById('certListWrap').innerHTML = '<div class="loading">Failed to load certificates</div>';
+  }
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCerts(document.querySelector('.search-box input')?.value || '');
+}
+
+function renderCerts(query) {
+  const q = (query || '').toLowerCase();
+  const filtered = allCerts.filter(c => {
+    if (currentFilter !== 'all' && c.type !== currentFilter) return false;
+    if (q && !((c.client||'').toLowerCase().includes(q) || (c.address||'').toLowerCase().includes(q) || (c.id||'').toLowerCase().includes(q))) return false;
+    return true;
+  });
+  const wrap = document.getElementById('certListWrap');
+  if (!filtered.length) {
+    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">${allCerts.length ? 'No certificates match your search' : 'No certificates yet. Start by creating one above.'}</div></div>`;
+    return;
+  }
+  const icons = { eicr: '🔍', eic: '⚡', mwc: '🔧' };
+  const labels = { eicr: 'EICR', eic: 'EIC', mwc: 'MWC' };
+  wrap.innerHTML = '<div class="cert-list">' + filtered.map(c => `
+    <div class="cert-item" onclick="openCert('${c.id}','${c.type}')">
+      <div class="cert-type-badge ${c.type}">${icons[c.type]||'📋'}</div>
+      <div class="cert-info">
+        <div class="cert-client">${c.client || 'No client name'}</div>
+        <div class="cert-address">${c.address || 'No address'}</div>
+      </div>
+      <div class="cert-meta">
+        <span class="cert-type-label ${c.type}">${labels[c.type]||c.type?.toUpperCase()}</span>
+        <span class="cert-date">${formatDate(c.inspDate || c.savedAt)}</span>
+        <span class="cert-id">${c.id}</span>
+      </div>
+      <div class="cert-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-sec btn-sm" onclick="openCert('${c.id}','${c.type}')">Open</button>
+        <button class="btn btn-danger btn-sm" onclick="askDelete('${c.id}')">🗑</button>
+      </div>
+    </div>`).join('') + '</div>';
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  try { return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }); }
+  catch { return d; }
+}
+
+function newCert(type) {
+  sessionStorage.setItem('certai_new_type', type);
+  sessionStorage.removeItem('certai_load_id');
+  window.location.href = '/index.html';
+}
+
+function openCert(id, type) {
+  sessionStorage.setItem('certai_load_id', id);
+  sessionStorage.setItem('certai_new_type', type || 'eicr');
+  window.location.href = '/index.html';
+}
+
+function askDelete(id) { deletingId = id; document.getElementById('deleteModal').classList.add('on'); }
+function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('on'); deletingId = null; }
+async function confirmDelete() {
+  if (!deletingId) return;
+  try {
+    await fetch(BASE + '/api/cert/' + deletingId, { method: 'DELETE', headers: authHeaders() });
+    closeDeleteModal();
+    await loadCerts();
+  } catch(e) {}
+}
+
+function logout() {
+  localStorage.removeItem('certai_token');
+  localStorage.removeItem('certai_user');
+  window.location.href = '/login.html';
+}
+
+init();
+</script>
+</body>
+</html>
