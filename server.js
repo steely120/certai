@@ -20,6 +20,15 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
  path.join(DATA_DIR,'logos')
 ].forEach(d=>{ if(!fs.existsSync(d)) fs.mkdirSync(d,{recursive:true}); });
 
+// Load persisted config (API keys etc)
+try {
+  const configFile = path.join(DATA_DIR, 'config.json');
+  if (fs.existsSync(configFile)) {
+    const cfg = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+    if (cfg.openAIKey) { process.env._OPENAI_KEY_PERSISTED = cfg.openAIKey; }
+  }
+} catch(e) {}
+
 const storage = multer.diskStorage({
   destination:(req,file,cb)=>cb(null, file.fieldname==='logo'?path.join(DATA_DIR,'logos'):path.join(DATA_DIR,'uploads')),
   filename:(req,file,cb)=>cb(null,Date.now()+'-'+Math.round(Math.random()*1e6)+path.extname(file.originalname))
@@ -178,11 +187,12 @@ app.post('/api/upload/logo',auth,upload.single('logo'),(req,res)=>{
 app.post('/api/vision/scan',auth,async(req,res)=>{
   const{image,mime,prompt}=req.body;
   if(!image)return res.status(400).json({error:'No image provided'});
-  if(!OPENAI_API_KEY)return res.status(500).json({error:'OPENAI_API_KEY not set in environment variables'});
+  const apiKey=runtimeOpenAIKey;
+  if(!apiKey)return res.status(500).json({error:'No OpenAI API key configured. Go to Settings → Connection to add your key.'});
   try{
     const r=await fetch('https://api.openai.com/v1/chat/completions',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+OPENAI_API_KEY},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
       body:JSON.stringify({
         model:'gpt-4o-mini',
         max_tokens:2048,
@@ -282,12 +292,19 @@ app.delete('/api/cert/:id',auth,(req,res)=>{
 
 
 // ── RUNTIME CONFIG (API keys set via UI) ──────────────────────────────────────
-let runtimeOpenAIKey = OPENAI_API_KEY; // start with env var if set
+let runtimeOpenAIKey = OPENAI_API_KEY || process.env._OPENAI_KEY_PERSISTED || ''; // env var > persisted > empty
 
 app.post('/api/config/openai-key', auth, (req, res) => {
   const { key } = req.body;
   if (!key || !key.startsWith('sk-')) return res.status(400).json({ error: 'Invalid API key format — should start with sk-' });
   runtimeOpenAIKey = key;
+  // Persist to disk so it survives restarts
+  try {
+    const configFile = require('path').join(DATA_DIR, 'config.json');
+    const existing = fs.existsSync(configFile) ? JSON.parse(fs.readFileSync(configFile,'utf8')) : {};
+    existing.openAIKey = key;
+    fs.writeFileSync(configFile, JSON.stringify(existing, null, 2));
+  } catch(e) { console.error('Could not persist config:', e.message); }
   res.json({ ok: true });
 });
 
