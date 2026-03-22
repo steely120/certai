@@ -1018,15 +1018,34 @@ const INSP=[
 
 // ══ SCAN PROMPTS ══════════════════════════════════════════════════════════════
 const SCAN_PROMPTS={
-  board:`Look at this consumer unit / fuse board photo. List every circuit breaker you can see.
-For each one write down: the label text exactly as written, amp rating, and type (B/C/D).
-Also note the board manufacturer, main switch rating, and supply type.
-Reply ONLY with a JSON object - no explanation, no markdown, nothing else:
-{"board_make":"Hager","board_rating":"100A","supply_type":"TN-C-S","main_switch_rating":"100A","phases":1,"board_condition":"Good","observations":"","confidence":"High","circuits":[{"position":"1","label":"Sockets","rating_amps":"32","mcb_type":"B","breaker_type":"MCB","is_rcbo":false},{"position":"2","label":"Lighting","rating_amps":"6","mcb_type":"B","breaker_type":"MCB","is_rcbo":false}]}`,
-  service:`Look at this electrical service head or meter photo. Note the supply type, earthing arrangement, any ratings visible.
-Reply ONLY with JSON: {"supply_type":"TN-C-S","earthing_type":"PME","supply_voltage":"230V","supply_phases":"Single phase","condition":"Good","notes":"","confidence":"High"}`,
-  sheet:`Look at this electrical circuit schedule or test results sheet. Extract all circuit data visible.
-Reply ONLY with JSON: {"circuits":[{"number":"1","description":"Sockets","mcb_type":"B","mcb_rating":"32","r1_plus_r2":"0.45","r2":"0.72","insulation_le":">200","insulation_ll":">200","polarity":"Pass","measured_zs":"0.52","max_zs":"1.37","result":"Pass"}],"confidence":"High"}`
+  board:`You are an expert UK electrical engineer. Carefully examine this consumer unit / fuse board photo.
+
+Your task: identify and list EVERY circuit breaker or fuse visible in the board.
+
+For each breaker, read the label text EXACTLY as written (do not guess or paraphrase), note the amp rating printed on it, the breaker type (B, C, or D), and whether it is an RCBO (combined RCD+MCB).
+
+Also note: the board manufacturer name (usually printed on the enclosure or breakers), the main switch rating, supply type if visible (TN-C-S/TN-S/TT), number of phases, and any visible damage or observations.
+
+Respond ONLY with a valid JSON object. No explanation, no markdown, no text outside the JSON.
+
+Example format:
+{"board_make":"Hager","board_rating":"100A","main_switch_rating":"100A","supply_type":"TN-C-S","phases":1,"board_condition":"Good","observations":"","confidence":"High","circuits":[{"position":"1","label":"Ring Final Sockets","rating_amps":"32","mcb_type":"B","breaker_type":"MCB","is_rcbo":false},{"position":"2","label":"Lighting","rating_amps":"6","mcb_type":"B","breaker_type":"MCB","is_rcbo":false},{"position":"3","label":"Cooker","rating_amps":"32","mcb_type":"C","breaker_type":"RCBO","is_rcbo":true}]}
+
+Now analyse the image and return the JSON:`,
+
+  service:`You are an expert UK electrical engineer. Examine this electrical service head, meter, or supply intake photo.
+
+Extract all visible information about the supply. Read any text labels precisely.
+
+Respond ONLY with valid JSON, no other text:
+{"supply_type":"TN-C-S","earthing_type":"PME","supply_voltage":"230V","supply_phases":"Single phase","meter_type":"Smart","pfc_label":"","any_labels":"copy any text visible","condition":"Good","notes":"","confidence":"High"}`,
+
+  sheet:`You are an expert UK electrical engineer. Examine this circuit schedule or electrical test results sheet photo.
+
+Read every circuit row carefully. Extract all data visible in each row.
+
+Respond ONLY with valid JSON, no other text:
+{"circuits":[{"number":"1","description":"Ring Final Sockets","mcb_type":"B","mcb_rating":"32","r1_plus_r2":"0.45","r2":"0.72","insulation_le":">200","insulation_ll":">200","polarity":"Pass","measured_zs":"0.52","max_zs":"1.37","rcd_type":"N/A","rcd_rating":"N/A","rcd_time":"N/A","result":"Pass"}],"confidence":"High"}`
 };
 
 // ══ UI HELPERS ════════════════════════════════════════════════════════════════
@@ -1072,17 +1091,45 @@ function clearSBImg(){sbImgB64=null;lastSBExtracted=null;document.getElementById
 async function openSidebarCam(){try{sbCamStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});document.getElementById('camFeed').srcObject=sbCamStream;document.getElementById('sbCamSec').style.display='block';}catch(e){showErr('Camera: '+e.message);}}
 function capSBPhoto(){const v=document.getElementById('camFeed'),c=document.getElementById('capCvs');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);const url=c.toDataURL('image/jpeg',.92);sbImgB64=url.split(',')[1];sbImgMime='image/jpeg';showSBPreview(url);closeSBCam();}
 function closeSBCam(){if(sbCamStream){sbCamStream.getTracks().forEach(t=>t.stop());sbCamStream=null;}document.getElementById('sbCamSec').style.display='none';}
+// ── CENTRAL VISION SCAN — uses GPT-4o mini via server proxy ─────────────────
+async function runVisionScan(imageB64, imageMime, prompt){
+  // Always use same-origin /api/vision/scan which forwards to GPT-4o mini
+  try{
+    const r=await aFetch('/api/vision/scan',{
+      method:'POST',
+      headers:authHdrs(),
+      body:JSON.stringify({image:imageB64,mime:imageMime||'image/jpeg',prompt})
+    });
+    const data=await r.json();
+    if(!r.ok)return{ok:false,error:data.error||'Scan API error'};
+    // Parse JSON from the response text
+    let raw=(data.response||'').trim();
+    // Strip any markdown code fences GPT might add
+    raw=raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+    let parsed;
+    try{
+      parsed=JSON.parse(raw);
+    }catch(e){
+      // Try to extract JSON object from response
+      const m=raw.match(/\{[\s\S]*\}/);
+      if(m){try{parsed=JSON.parse(m[0]);}catch(e2){return{ok:false,error:'Could not parse AI response as JSON. Raw: '+raw.substring(0,200)};}}
+      else return{ok:false,error:'AI did not return valid JSON. Response: '+raw.substring(0,300)};
+    }
+    return{ok:true,data:parsed,tokens:data.tokens_used};
+  }catch(e){
+    return{ok:false,error:'Network error: '+e.message};
+  }
+}
+
 async function doSBScan(){
   if(!sbImgB64){showErr('No image loaded.');return;}
   const url=getBase();if(!url){showErr('Enter proxy URL.');return;}
   const btn=document.getElementById('sbScanBtn'),ov=document.getElementById('sbScanOv');
   btn.disabled=true;btn.textContent='⏳';ov.classList.add('on');
   try{
-    const r=await aFetch(url+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:getVisModel(),prompt:SCAN_PROMPTS[scanMode],images:[sbImgB64],stream:false,options:{temperature:0.1,num_predict:2048}})});
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const data=await r.json();
-    const raw=(data.response||'').replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
-    let parsed;try{parsed=JSON.parse(raw);}catch{const m=raw.match(/\{[\s\S]*\}/);if(m)parsed=JSON.parse(m[0]);else throw new Error('Vision model returned invalid JSON');}
+    const scanResult=await runVisionScan(sbImgB64,sbImgMime,SCAN_PROMPTS[scanMode]);
+    if(!scanResult.ok)throw new Error(scanResult.error);
+    const parsed=scanResult.data;
     lastSBExtracted={mode:scanMode,data:parsed};
     renderSBExtracted(parsed);
   }catch(e){showErr('Scan failed: '+e.message);}
@@ -1204,14 +1251,10 @@ async function runImportScan(){
     :'AI is reading circuit information and test results from your image.';
   openM('m-import4');
   try{
-    const r=await aFetch(url+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:getVisModel(),prompt:SCAN_PROMPTS[importType],images:[importImgB64],stream:false,options:{temperature:0.1,num_predict:2048}})});
+    const scanResult=await runVisionScan(importImgB64,importImgMime,SCAN_PROMPTS[importType]);
     if(importAborted)return;
-    if(!r.ok)throw new Error('HTTP '+r.status+' from vision model');
-    const data=await r.json();
-    const raw=(data.response||'').replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
-    let parsed;
-    try{parsed=JSON.parse(raw);}
-    catch{const m=raw.match(/\{[\s\S]*\}/);if(m)parsed=JSON.parse(m[0]);else throw new Error('Vision model returned invalid JSON.\n\nMake sure a vision model like llava is installed:\nollama pull llava');}
+    if(!scanResult.ok)throw new Error(scanResult.error);
+    const parsed=scanResult.data;
     if(importAborted)return;
     lastSBExtracted={mode:importType,data:parsed};
     closeM('m-import4');
