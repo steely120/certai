@@ -1095,35 +1095,41 @@ function closeSBCam(){if(sbCamStream){sbCamStream.getTracks().forEach(t=>t.stop(
 async function runVisionScan(imageB64, imageMime, prompt){
   // Always use same-origin /api/vision/scan which forwards to GPT-4o mini
   try{
+    console.log('[CertAI] Starting vision scan, image size:', imageB64.length, 'chars');
     const r=await aFetch('/api/vision/scan',{
       method:'POST',
       headers:authHdrs(),
       body:JSON.stringify({image:imageB64,mime:imageMime||'image/jpeg',prompt})
     });
     const data=await r.json();
-    if(!r.ok)return{ok:false,error:data.error||'Scan API error'};
+    console.log('[CertAI] Scan response status:', r.status, 'data:', JSON.stringify(data).substring(0,300));
+    if(!r.ok)return{ok:false,error:data.error||'Scan API error (HTTP '+r.status+')'};
     // Parse JSON from the response text
     let raw=(data.response||'').trim();
+    console.log('[CertAI] Raw AI response:', raw.substring(0,500));
     // Strip any markdown code fences GPT might add
     raw=raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+    // Also handle GPT sometimes wrapping in a single outer fence
+    raw=raw.replace(/^```[a-z]*\n/,'').replace(/\n```$/,'').trim();
     let parsed;
     try{
       parsed=JSON.parse(raw);
     }catch(e){
-      // Try to extract JSON object from response
+      console.log('[CertAI] JSON parse failed, trying regex extract. Raw:', raw.substring(0,300));
       const m=raw.match(/\{[\s\S]*\}/);
-      if(m){try{parsed=JSON.parse(m[0]);}catch(e2){return{ok:false,error:'Could not parse AI response as JSON. Raw: '+raw.substring(0,200)};}}
-      else return{ok:false,error:'AI did not return valid JSON. Response: '+raw.substring(0,300)};
+      if(m){try{parsed=JSON.parse(m[0]);}catch(e2){return{ok:false,error:'AI response could not be parsed as JSON.\n\nAI said: '+raw.substring(0,400)};}}
+      else return{ok:false,error:'AI did not return JSON.\n\nAI said: '+raw.substring(0,400)};
     }
+    console.log('[CertAI] Parsed successfully, circuits:', parsed.circuits?.length||0);
     return{ok:true,data:parsed,tokens:data.tokens_used};
   }catch(e){
+    console.error('[CertAI] Scan network error:', e);
     return{ok:false,error:'Network error: '+e.message};
   }
 }
 
 async function doSBScan(){
   if(!sbImgB64){showErr('No image loaded.');return;}
-  const url=getBase();if(!url){showErr('Enter proxy URL.');return;}
   const btn=document.getElementById('sbScanBtn'),ov=document.getElementById('sbScanOv');
   btn.disabled=true;btn.textContent='⏳';ov.classList.add('on');
   try{
@@ -1243,7 +1249,6 @@ function clearImportFile(){importImgB64=null;importImgName='';goImport(2);}
 
 async function runImportScan(){
   if(!importImgB64){showErr('No image selected.');return;}
-  const url=getBase();if(!url){showErr('Enter proxy URL.');return;}
   importAborted=false;
   closeM('m-import3');
   document.getElementById('thinkingSub').textContent=importType==='board'
