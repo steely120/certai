@@ -358,6 +358,165 @@ app.get('/api/vision/test', auth, async (req, res) => {
 
 app.get('/health',(req,res)=>res.json({status:'ok',ollama:OLLAMA_URL,openai:runtimeOpenAIKey?'configured':'not set'}));
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// PASTE THIS BLOCK INTO server.js
+// Place it just before the app.listen() call at the bottom
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── LOCAL VISION SCAN (Ollama llama3.2-vision) ────────────────────────────────
+app.post('/api/vision/scan/local', auth, async (req, res) => {
+  const { image, mime } = req.body;
+  if (!image) return res.status(400).json({ error: 'No image provided' });
+  try {
+    const r = await fetch(OLLAMA_URL + '/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'llama3.2-vision:11b',
+        prompt: BOARD_SCAN_PROMPT,
+        images: [image],
+        stream: false,
+        options: { temperature: 0 }
+      })
+    });
+    if (!r.ok) return res.status(502).json({ error: 'Ollama error ' + r.status });
+    const d = await r.json();
+    res.json({ response: d.response || '', model: 'llama3.2-vision:11b', tokens_used: d.eval_count });
+  } catch (e) {
+    res.status(502).json({ error: 'Ollama request failed: ' + e.message });
+  }
+});
+
+// ── TRAINING DATA ─────────────────────────────────────────────────────────────
+const TRAINING_DIR = path.join(DATA_DIR, 'training');
+if (!fs.existsSync(TRAINING_DIR)) fs.mkdirSync(TRAINING_DIR, { recursive: true });
+
+// Save a labelled training pair (image + corrected JSON)
+app.post('/api/training/save', auth, async (req, res) => {
+  try {
+    const { image, mime, label, notes } = req.body;
+    if (!image || !label) return res.status(400).json({ error: 'image and label required' });
+
+    const id = 'td-' + Date.now();
+    const ext = (mime || 'image/jpeg').split('/')[1] || 'jpg';
+    const imgFile = id + '.' + ext;
+
+    // Save image to disk
+    const imgBuffer = Buffer.from(image, 'base64');
+    fs.writeFileSync(path.join(TRAINING_DIR, imgFile), imgBuffer);
+
+    // Save metadata + label
+    const meta = {
+      id,
+      imageFile: imgFile,
+      mime: mime || 'image/jpeg',
+      label,
+      notes: notes || '',
+      savedAt: new Date().toISOString(),
+      savedBy: req.user.email
+    };
+    fs.writeFileSync(path.join(TRAINING_DIR, id + '.json'), JSON.stringify(meta, null, 2));
+
+    res.json({ ok: true, id });
+  } catch (e) {
+    res.status(500).json({ error: 'Save failed: ' + e.message });
+  }
+});
+
+// List all training pairs (metadata only, no images)
+app.get('/api/training/list', auth, (req, res) => {
+  try {
+    const files = fs.readdirSync(TRAINING_DIR).filter(f => f.endsWith('.json'));
+    const pairs = files.map(f => {
+      try {
+        const meta = JSON.parse(fs.readFileSync(path.join(TRAINING_DIR, f), 'utf8'));
+        // Return summary only — no base64 image
+        return {
+          id: meta.id,
+          board_make: meta.label?.board_make || null,
+          board_rating: meta.label?.board_rating || null,
+          circuit_count: meta.label?.circuits?.length || 0,
+          notes: meta.notes || '',
+          savedAt: meta.savedAt,
+          thumbnail: '/api/training/' + meta.id + '/thumb'
+        };
+      } catch { return null; }
+    }).filter(Boolean);
+
+    pairs.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+    res.json({ pairs, total: pairs.length });
+  } catch (e) {
+    res.json({ pairs: [], total: 0 });
+  }
+});
+
+// Serve thumbnail for a training pair
+app.get('/api/training/:id/thumb', auth, (req, res) => {
+  try {
+    const metaFile = path.join(TRAINING_DIR, req.params.id + '.json');
+    if (!fs.existsSync(metaFile)) return res.status(404).end();
+    const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
+    const imgPath = path.join(TRAINING_DIR, meta.imageFile);
+    if (!fs.existsSync(imgPath)) return res.status(404).end();
+    res.setHeader('Content-Type', meta.mime || 'image/jpeg');
+    res.send(fs.readFileSync(imgPath));
+  } catch (e) {
+    res.status(500).end();
+  }
+});
+
+// Delete a training pair
+app.delete('/api/training/:id', auth, (req, res) => {
+  try {
+    const metaFile = path.join(TRAINING_DIR, req.params.id + '.json');
+    if (!fs.existsSync(metaFile)) return res.status(404).json({ error: 'Not found' });
+    const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
+    const imgPath = path.join(TRAINING_DIR, meta.imageFile);
+    if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+    fs.unlinkSync(metaFile);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Delete failed: ' + e.message });
+  }
+});
+
+// Export as JSONL (one training example per line — ready for fine-tuning)
+app.get('/api/training/export', auth, (req, res) => {
+  try {
+    const files = fs.readdirSync(TRAINING_DIR).filter(f => f.endsWith('.json'));
+    const lines = files.map(f => {
+      try {
+        const meta = JSON.parse(fs.readFileSync(path.join(TRAINING_DIR, f), 'utf8'));
+        const imgPath = path.join(TRAINING_DIR, meta.imageFile);
+        if (!fs.existsSync(imgPath)) return null;
+        const b64 = fs.readFileSync(imgPath).toString('base64');
+        // Alpaca-style format ready for LLaMA-Factory / Unsloth
+        return JSON.stringify({
+          id: meta.id,
+          image: b64,
+          mime: meta.mime,
+          conversations: [
+            { from: 'human', value: BOARD_SCAN_PROMPT },
+            { from: 'gpt', value: JSON.stringify(meta.label) }
+          ],
+          notes: meta.notes,
+          savedAt: meta.savedAt
+        });
+      } catch { return null; }
+    }).filter(Boolean);
+
+    res.setHeader('Content-Type', 'application/x-ndjson');
+    res.setHeader('Content-Disposition', 'attachment; filename="certai-training.jsonl"');
+    res.send(lines.join('\n'));
+  } catch (e) {
+    res.status(500).json({ error: 'Export failed: ' + e.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// END OF PASTE
+// ═══════════════════════════════════════════════════════════════════════════════
+
 app.listen(PORT,'0.0.0.0',()=>{
   console.log('CertAI on port '+PORT);
   console.log('Ollama: '+OLLAMA_URL);
