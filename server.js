@@ -184,8 +184,33 @@ app.post('/api/upload/logo',auth,upload.single('logo'),(req,res)=>{
 });
 
 // ── GPT-4o VISION SCAN ────────────────────────────────────────────────────────
+const BOARD_SCAN_PROMPT = `You are analysing a photo of a UK domestic electrical consumer unit (fuse board).
+
+STRICT RULES:
+- Only extract information that is CLEARLY VISIBLE and LEGIBLE in the image.
+- Do NOT guess, infer, or invent circuit labels, amperage, or breaker types.
+- If a label is unclear or missing, set it to null. Do not substitute a typical or common value.
+- Count the physical breakers you can actually see. Return exactly that many circuits — no more, no fewer.
+- If you cannot read the board make or rating, set those fields to null.
+- Do not add circuits that are not physically present in the image.
+
+Return ONLY valid JSON with no explanation, no markdown, no code fences — raw JSON only:
+{
+  "board_make": "string or null",
+  "board_rating": "string or null",
+  "circuits": [
+    {
+      "position": 1,
+      "label": "string or null",
+      "rating_amps": number or null,
+      "mcb_type": "string or null",
+      "is_rcbo": true or false
+    }
+  ]
+}`;
+
 app.post('/api/vision/scan',auth,async(req,res)=>{
-  const{image,mime,prompt}=req.body;
+  const{image,mime}=req.body;
   if(!image)return res.status(400).json({error:'No image provided'});
   const apiKey=runtimeOpenAIKey;
   if(!apiKey)return res.status(500).json({error:'No OpenAI API key configured. Go to Settings → Connection to add your key.'});
@@ -196,13 +221,20 @@ app.post('/api/vision/scan',auth,async(req,res)=>{
       body:JSON.stringify({
         model:'gpt-4o-mini',
         max_tokens:2048,
-        messages:[{
-          role:'user',
-          content:[
-            {type:'image_url',image_url:{url:'data:'+(mime||'image/jpeg')+';base64,'+image,detail:'high'}},
-            {type:'text',text:prompt}
-          ]
-        }]
+        temperature:0,
+        messages:[
+          {
+            role:'system',
+            content:'You are a precise electrical inspection assistant. You only report what you can clearly see. You never guess or invent data. You always respond with raw JSON only.'
+          },
+          {
+            role:'user',
+            content:[
+              {type:'image_url',image_url:{url:'data:'+(mime||'image/jpeg')+';base64,'+image,detail:'high'}},
+              {type:'text',text:BOARD_SCAN_PROMPT}
+            ]
+          }
+        ]
       })
     });
     if(!r.ok){const e=await r.json();return res.status(r.status).json({error:e.error?.message||'OpenAI error'});}
