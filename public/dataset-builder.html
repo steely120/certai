@@ -14,7 +14,6 @@
     --border: #2a2a3a;
     --accent: #00d4aa;
     --accent2: #7c6af7;
-    --warn: #f59e0b;
     --danger: #ef4444;
     --text: #e2e8f0;
     --muted: #64748b;
@@ -23,437 +22,130 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    padding: 0;
-  }
-
-  /* Header */
-  .header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .header-logo {
-    font-family: var(--mono);
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: -0.5px;
-  }
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .header-logo { font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--accent); }
   .header-logo span { color: var(--muted); }
   .header-nav { display: flex; gap: 8px; margin-left: auto; }
-  .header-nav a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13px;
-    padding: 6px 12px;
-    border-radius: 6px;
-    transition: all 0.15s;
-  }
+  .header-nav a { color: var(--muted); text-decoration: none; font-size: 13px; padding: 6px 12px; border-radius: 6px; transition: all 0.15s; }
   .header-nav a:hover { color: var(--text); background: var(--surface2); }
   .header-nav a.active { color: var(--accent); background: rgba(0,212,170,0.1); }
 
-  /* Stats bar */
-  .stats-bar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 10px 24px;
-    display: flex;
-    gap: 32px;
-    align-items: center;
-  }
+  .stats-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 24px; display: flex; gap: 32px; align-items: center; }
   .stat { display: flex; align-items: center; gap: 8px; }
-  .stat-val {
-    font-family: var(--mono);
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--accent);
-  }
+  .stat-val { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--accent); }
   .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
   .stat-divider { width: 1px; height: 28px; background: var(--border); }
-  .export-btn {
-    margin-left: auto;
-    padding: 7px 16px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+  .export-btn { margin-left: auto; padding: 7px 16px; background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--sans); font-size: 13px; cursor: pointer; transition: all 0.15s; }
   .export-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* Main layout */
-  .main {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    height: calc(100vh - 101px);
-  }
+  .main { display: grid; grid-template-columns: 1fr 1fr; height: calc(100vh - 101px); }
+  .panel { padding: 20px 24px; border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
+  .panel-right { border-right: none; background: var(--surface); }
 
-  /* Left panel — editor */
-  .panel {
-    padding: 24px;
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  .panel-right {
-    border-right: none;
-    background: var(--surface);
-  }
+  .section-label { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-  .section-label {
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* Drop zone */
-  .drop-zone {
-    border: 2px dashed var(--border);
-    border-radius: 10px;
-    padding: 32px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    background: var(--surface2);
-  }
-  .drop-zone:hover, .drop-zone.dragover {
-    border-color: var(--accent);
-    background: rgba(0,212,170,0.05);
-  }
-  .drop-zone input[type=file] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-    width: 100%;
-  }
-  .drop-icon { font-size: 32px; margin-bottom: 10px; }
-  .drop-text { font-size: 14px; color: var(--muted); }
+  .drop-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; background: var(--surface2); }
+  .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(0,212,170,0.05); }
+  .drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+  .drop-icon { font-size: 28px; margin-bottom: 8px; }
+  .drop-text { font-size: 13px; color: var(--muted); }
   .drop-text strong { color: var(--text); }
 
-  /* Image preview */
-  .img-preview {
-    border-radius: 8px;
-    overflow: hidden;
-    background: #000;
-    display: none;
-    position: relative;
-  }
-  .img-preview img {
-    width: 100%;
-    max-height: 300px;
-    object-fit: contain;
-    display: block;
-  }
-  .img-clear {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.7);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text);
-    font-size: 12px;
-    padding: 4px 8px;
-    cursor: pointer;
-    font-family: var(--mono);
-  }
+  .img-preview { border-radius: 8px; overflow: hidden; background: #000; display: none; position: relative; }
+  .img-preview img { width: 100%; max-height: 220px; object-fit: contain; display: block; }
+  .img-clear { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 12px; padding: 4px 8px; cursor: pointer; font-family: var(--mono); }
   .img-clear:hover { border-color: var(--danger); color: var(--danger); }
 
-  /* Scan buttons */
-  .scan-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .btn {
-    padding: 10px 16px;
-    border-radius: 7px;
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
+  .scan-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn { padding: 9px 14px; border-radius: 7px; font-family: var(--sans); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-local {
-    background: rgba(124,106,247,0.15);
-    border: 1px solid rgba(124,106,247,0.4);
-    color: #a89cf7;
-  }
-  .btn-local:hover:not(:disabled) {
-    background: rgba(124,106,247,0.25);
-    border-color: var(--accent2);
-  }
-  .btn-openai {
-    background: rgba(0,212,170,0.1);
-    border: 1px solid rgba(0,212,170,0.3);
-    color: var(--accent);
-  }
-  .btn-openai:hover:not(:disabled) {
-    background: rgba(0,212,170,0.2);
-    border-color: var(--accent);
-  }
-  .btn-save {
-    background: var(--accent);
-    color: #0a0a0f;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 12px;
-  }
+  .btn-local { background: rgba(124,106,247,0.15); border: 1px solid rgba(124,106,247,0.4); color: #a89cf7; }
+  .btn-local:hover:not(:disabled) { background: rgba(124,106,247,0.25); border-color: var(--accent2); }
+  .btn-openai { background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.3); color: var(--accent); }
+  .btn-openai:hover:not(:disabled) { background: rgba(0,212,170,0.2); border-color: var(--accent); }
+  .btn-save { background: var(--accent); color: #0a0a0f; font-weight: 700; font-size: 14px; padding: 12px; }
   .btn-save:hover:not(:disabled) { filter: brightness(1.1); }
   .btn-save:disabled { background: var(--border); color: var(--muted); }
 
-  /* JSON editor */
-  .json-editor {
-    flex: 1;
-    min-height: 280px;
-    background: #0d0d14;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--accent);
-    resize: vertical;
-    outline: none;
-    line-height: 1.6;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-  .json-editor:focus { border-color: var(--accent2); }
-  .json-editor.error { border-color: var(--danger); }
-  .json-editor.valid { border-color: var(--accent); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-field { display: flex; flex-direction: column; gap: 5px; }
+  .form-field label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-field input { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--text); font-family: var(--sans); font-size: 13px; outline: none; transition: border-color 0.15s; width: 100%; }
+  .form-field input:focus { border-color: var(--accent2); }
+  .form-field input::placeholder { color: var(--muted); }
 
-  .json-toolbar {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin-bottom: 6px;
-  }
-  .json-status {
-    font-family: var(--mono);
-    font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 4px;
-  }
-  .json-status.valid { background: rgba(0,212,170,0.15); color: var(--accent); }
-  .json-status.error { background: rgba(239,68,68,0.15); color: var(--danger); }
-  .json-status.empty { background: var(--surface2); color: var(--muted); }
-  .btn-format {
-    margin-left: auto;
-    padding: 3px 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 11px;
-    cursor: pointer;
-  }
-  .btn-format:hover { color: var(--text); border-color: var(--muted); }
+  /* Circuit table */
+  .circuit-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .circuit-table th { background: var(--surface2); color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; padding: 7px 6px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .circuit-table th:first-child { width: 32px; text-align: center; }
+  .circuit-table th.th-rcbo { width: 44px; text-align: center; }
+  .circuit-table th:last-child { width: 36px; }
 
-  /* Notes field */
-  .notes-field {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    padding: 10px 12px;
-    font-family: var(--sans);
-    font-size: 13px;
-    color: var(--text);
-    outline: none;
-    width: 100%;
-    resize: none;
-    height: 60px;
-    line-height: 1.5;
-  }
+  .circuit-row { border-bottom: 1px solid var(--border); }
+  .circuit-row:hover { background: rgba(255,255,255,0.02); }
+  .circuit-row td { padding: 3px 3px; vertical-align: middle; }
+  .circuit-row td:first-child { text-align: center; }
+
+  .pos-badge { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 5px; background: var(--surface2); border: 1px solid var(--border); font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+  .td-input { background: transparent; border: 1px solid transparent; border-radius: 5px; padding: 5px 6px; color: var(--text); font-family: var(--sans); font-size: 12px; outline: none; width: 100%; transition: all 0.15s; }
+  .td-input:hover { border-color: var(--border); background: var(--surface2); }
+  .td-input:focus { border-color: var(--accent2); background: var(--surface2); }
+  .td-input::placeholder { color: var(--muted); }
+
+  .td-select { background: transparent; border: 1px solid transparent; border-radius: 5px; padding: 5px 4px; color: var(--text); font-family: var(--sans); font-size: 12px; outline: none; width: 100%; transition: all 0.15s; cursor: pointer; }
+  .td-select:hover { border-color: var(--border); background: var(--surface2); }
+  .td-select:focus { border-color: var(--accent2); background: var(--surface2); }
+  .td-select option { background: #1a1a24; }
+
+  .rcbo-check { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); display: block; margin: auto; }
+
+  .btn-add { width: 100%; margin-top: 10px; padding: 8px; background: var(--surface2); border: 1px dashed var(--border); border-radius: 6px; color: var(--muted); font-family: var(--sans); font-size: 12px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn-add:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,212,170,0.05); }
+
+  .btn-rm { background: transparent; border: none; color: var(--muted); font-size: 14px; cursor: pointer; padding: 4px 6px; border-radius: 4px; line-height: 1; transition: color 0.15s; }
+  .btn-rm:hover { color: var(--danger); }
+
+  .notes-field { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; font-family: var(--sans); font-size: 13px; color: var(--text); outline: none; width: 100%; resize: none; height: 54px; line-height: 1.5; }
   .notes-field:focus { border-color: var(--accent2); }
   .notes-field::placeholder { color: var(--muted); }
 
-  /* Status message */
-  .status-msg {
-    padding: 10px 14px;
-    border-radius: 7px;
-    font-size: 13px;
-    font-family: var(--mono);
-    display: none;
-  }
+  .status-msg { padding: 10px 14px; border-radius: 7px; font-size: 13px; font-family: var(--mono); display: none; }
   .status-msg.success { background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.3); color: var(--accent); }
   .status-msg.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--danger); }
   .status-msg.info { background: rgba(124,106,247,0.1); border: 1px solid rgba(124,106,247,0.3); color: #a89cf7; }
 
-  /* Right panel — dataset */
-  .dataset-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .dataset-count {
-    background: rgba(0,212,170,0.15);
-    color: var(--accent);
-    font-family: var(--mono);
-    font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 20px;
-  }
-  .search-box {
-    margin-left: auto;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 10px;
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 12px;
-    outline: none;
-    width: 160px;
-  }
+  .dataset-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .dataset-count { background: rgba(0,212,170,0.15); color: var(--accent); font-family: var(--mono); font-size: 11px; padding: 3px 8px; border-radius: 20px; }
+  .search-box { margin-left: auto; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--text); font-family: var(--sans); font-size: 12px; outline: none; width: 150px; }
   .search-box:focus { border-color: var(--accent2); }
 
-  /* Dataset grid */
-  .dataset-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    padding-bottom: 20px;
-  }
-
-  .ds-card {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.15s;
-    position: relative;
-  }
+  .dataset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 20px; }
+  .ds-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; transition: all 0.15s; position: relative; }
   .ds-card:hover { border-color: var(--accent2); transform: translateY(-1px); }
   .ds-card.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-
-  .ds-thumb {
-    width: 100%;
-    height: 100px;
-    object-fit: cover;
-    display: block;
-    background: #000;
-  }
-  .ds-thumb-placeholder {
-    width: 100%;
-    height: 100px;
-    background: var(--surface);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-  }
-  .ds-info {
-    padding: 8px 10px;
-  }
-  .ds-id {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    margin-bottom: 3px;
-  }
-  .ds-make {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .ds-circuits {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
-  .ds-delete {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    background: rgba(0,0,0,0.75);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--muted);
-    font-size: 11px;
-    padding: 2px 6px;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.15s;
-    font-family: var(--mono);
-  }
+  .ds-thumb { width: 100%; height: 90px; object-fit: cover; display: block; }
+  .ds-thumb-placeholder { width: 100%; height: 90px; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .ds-info { padding: 8px 10px; }
+  .ds-id { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 2px; }
+  .ds-make { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ds-circuits { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .ds-delete { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.75); border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-size: 11px; padding: 2px 6px; cursor: pointer; opacity: 0; transition: opacity 0.15s; font-family: var(--mono); }
   .ds-card:hover .ds-delete { opacity: 1; }
   .ds-delete:hover { border-color: var(--danger); color: var(--danger); }
 
-  .empty-state {
-    grid-column: 1/-1;
-    text-align: center;
-    padding: 48px 24px;
-    color: var(--muted);
-  }
-  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state { grid-column: 1/-1; text-align: center; padding: 48px 24px; color: var(--muted); }
+  .empty-state .empty-icon { font-size: 36px; margin-bottom: 10px; }
   .empty-state p { font-size: 13px; line-height: 1.6; }
 
-  /* Spinner */
-  .spinner {
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    border: 2px solid transparent;
-    border-top-color: currentColor;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
+  .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 </style>
 </head>
 <body>
@@ -468,29 +160,18 @@
 </div>
 
 <div class="stats-bar">
-  <div class="stat">
-    <div class="stat-val" id="statTotal">0</div>
-    <div class="stat-label">Training Pairs</div>
-  </div>
+  <div class="stat"><div class="stat-val" id="statTotal">0</div><div class="stat-label">Training Pairs</div></div>
   <div class="stat-divider"></div>
-  <div class="stat">
-    <div class="stat-val" id="statBoards">0</div>
-    <div class="stat-label">Unique Makes</div>
-  </div>
+  <div class="stat"><div class="stat-val" id="statBoards">0</div><div class="stat-label">Unique Makes</div></div>
   <div class="stat-divider"></div>
-  <div class="stat">
-    <div class="stat-val" id="statCircuits">0</div>
-    <div class="stat-label">Total Circuits</div>
-  </div>
-  <button class="export-btn" onclick="exportDataset()">
-    ⬇ Export JSONL
-  </button>
+  <div class="stat"><div class="stat-val" id="statCircuits">0</div><div class="stat-label">Total Circuits</div></div>
+  <button class="export-btn" onclick="exportDataset()">⬇ Export JSONL</button>
 </div>
 
 <div class="main">
 
   <!-- LEFT: Editor -->
-  <div class="panel">
+  <div class="panel" id="editorPanel">
 
     <div>
       <div class="section-label">Board Image</div>
@@ -500,38 +181,55 @@
         <div class="drop-text"><strong>Click or drag</strong> a board photo here</div>
       </div>
       <div class="img-preview" id="imgPreview">
-        <img id="previewImg" src="" alt="Board preview">
-        <button class="img-clear" onclick="clearImage()">✕ Clear</button>
+        <img id="previewImg" src="" alt="">
+        <button class="img-clear" onclick="clearAll()">✕ Clear</button>
       </div>
     </div>
 
     <div>
-      <div class="section-label">Scan</div>
+      <div class="section-label">Auto-Scan</div>
       <div class="scan-row">
-        <button class="btn btn-local" id="btnLocal" onclick="runScan('local')" disabled>
-          🖥 Scan with Llama (Local)
-        </button>
-        <button class="btn btn-openai" id="btnOpenAI" onclick="runScan('openai')" disabled>
-          ✦ Scan with GPT-4o
-        </button>
+        <button class="btn btn-local" id="btnLocal" onclick="runScan('local')" disabled>🖥 Llama (Local)</button>
+        <button class="btn btn-openai" id="btnOpenAI" onclick="runScan('openai')" disabled>✦ GPT-4o Mini</button>
       </div>
     </div>
 
     <div>
-      <div class="section-label">JSON Output — Edit to Correct</div>
-      <div class="json-toolbar">
-        <span class="json-status empty" id="jsonStatus">empty</span>
-        <button class="btn-format" onclick="formatJSON()">Format</button>
+      <div class="section-label">Board Details</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Make / Manufacturer</label>
+          <input type="text" id="boardMake" placeholder="e.g. Hager, Wylex, MK" oninput="markDirty()">
+        </div>
+        <div class="form-field">
+          <label>Board Rating</label>
+          <input type="text" id="boardRating" placeholder="e.g. 100A" oninput="markDirty()">
+        </div>
       </div>
-      <textarea class="json-editor" id="jsonEditor" spellcheck="false"
-        placeholder='Scan a board above, or paste JSON manually...'
-        oninput="validateJSON()"></textarea>
+    </div>
+
+    <div>
+      <div class="section-label">Circuits</div>
+      <table class="circuit-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Label</th>
+            <th>Amps</th>
+            <th>Type</th>
+            <th>Cable</th>
+            <th class="th-rcbo">RCBO</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="circuitBody"></tbody>
+      </table>
+      <button class="btn-add" onclick="addCircuit()">+ Add Circuit</button>
     </div>
 
     <div>
       <div class="section-label">Notes (optional)</div>
-      <textarea class="notes-field" id="notesField"
-        placeholder="e.g. Hager 17th edition, circuits partially labelled, bathroom area dark..."></textarea>
+      <textarea class="notes-field" id="notesField" placeholder="e.g. Hager 17th ed, bathroom unlabelled, board under stairs..."></textarea>
     </div>
 
     <div id="statusMsg" class="status-msg"></div>
@@ -545,16 +243,11 @@
   <!-- RIGHT: Dataset -->
   <div class="panel panel-right">
     <div class="dataset-header">
-      <div class="section-label" style="margin:0">Dataset</div>
+      <div class="section-label" style="margin:0">Saved Pairs</div>
       <span class="dataset-count" id="datasetCountBadge">0 pairs</span>
-      <input class="search-box" type="text" placeholder="Search make..." oninput="filterDataset(this.value)">
+      <input class="search-box" type="text" placeholder="Search..." oninput="filterDataset(this.value)">
     </div>
-    <div class="dataset-grid" id="datasetGrid">
-      <div class="empty-state">
-        <div class="empty-icon">🗂️</div>
-        <p>No training pairs yet.<br>Scan and save boards to build your dataset.</p>
-      </div>
-    </div>
+    <div class="dataset-grid" id="datasetGrid"></div>
   </div>
 
 </div>
@@ -562,243 +255,268 @@
 <script>
 const API = '';
 let token = localStorage.getItem('certai_token') || '';
-let currentImageB64 = null;
-let currentMime = 'image/jpeg';
-let allPairs = [];
+if (!token) window.location.href = '/login.html';
+function authHeaders() { return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }; }
 
-// ── AUTH CHECK ────────────────────────────────────────────────────────────────
-if (!token) { window.location.href = '/login.html'; }
+let currentImageB64 = null, currentMime = 'image/jpeg', allPairs = [], editingId = null;
 
-function authHeaders() {
-  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+// Cable inference
+const CABLE_MAP = { 6:'1.0mm²', 10:'1.5mm²', 16:'2.5mm²', 20:'2.5mm²', 32:'6.0mm²', 40:'10.0mm²', 45:'16.0mm²', 50:'16.0mm²' };
+const RING_KW = ['socket','ring','upstairs','downstairs','kitchen','lounge','bedroom','living','dining','hall','landing','study','office','garage','utility'];
+
+function inferCable(amps, label) {
+  const a = parseInt(amps);
+  if (!a) return '';
+  if (a === 32) return RING_KW.some(k => (label||'').toLowerCase().includes(k)) ? '2.5mm²' : '6.0mm²';
+  return CABLE_MAP[a] || '';
 }
 
-// ── FILE HANDLING ─────────────────────────────────────────────────────────────
+// Drop zone
 const dropZone = document.getElementById('dropZone');
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('dragover');
-  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-});
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
 
 function handleFile(file) {
   if (!file || !file.type.startsWith('image/')) return;
   currentMime = file.type;
   const reader = new FileReader();
   reader.onload = e => {
-    const b64 = e.target.result.split(',')[1];
-    currentImageB64 = b64;
+    currentImageB64 = e.target.result.split(',')[1];
     document.getElementById('previewImg').src = e.target.result;
     document.getElementById('imgPreview').style.display = 'block';
     dropZone.style.display = 'none';
     document.getElementById('btnLocal').disabled = false;
     document.getElementById('btnOpenAI').disabled = false;
-    showStatus('');
+    markDirty();
   };
   reader.readAsDataURL(file);
 }
 
-function clearImage() {
-  currentImageB64 = null;
+function clearAll() {
+  currentImageB64 = null; editingId = null;
   document.getElementById('imgPreview').style.display = 'none';
   document.getElementById('dropZone').style.display = 'block';
   document.getElementById('previewImg').src = '';
   document.getElementById('fileInput').value = '';
-  document.getElementById('btnLocal').disabled = true;
-  document.getElementById('btnOpenAI').disabled = true;
-  document.getElementById('jsonEditor').value = '';
+  ['btnLocal','btnOpenAI'].forEach(id => document.getElementById(id).disabled = true);
+  document.getElementById('boardMake').value = '';
+  document.getElementById('boardRating').value = '';
+  document.getElementById('notesField').value = '';
+  document.getElementById('circuitBody').innerHTML = '';
   document.getElementById('btnSave').disabled = true;
-  setJsonStatus('empty');
+  showStatus('');
+  document.querySelectorAll('.ds-card').forEach(c => c.classList.remove('selected'));
 }
 
-// ── SCAN ──────────────────────────────────────────────────────────────────────
+function markDirty() { document.getElementById('btnSave').disabled = !currentImageB64; }
+
+// Scan
 async function runScan(mode) {
   if (!currentImageB64) return;
-  const btnId = mode === 'local' ? 'btnLocal' : 'btnOpenAI';
-  const btn = document.getElementById(btnId);
+  const btn = document.getElementById(mode === 'local' ? 'btnLocal' : 'btnOpenAI');
   const orig = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Scanning...';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Scanning...';
   showStatus('Scanning board...', 'info');
-
-  const endpoint = mode === 'local' ? '/api/vision/scan/local' : '/api/vision/scan';
-
   try {
-    const r = await fetch(API + endpoint, {
-      method: 'POST',
-      headers: authHeaders(),
+    const r = await fetch(API + (mode === 'local' ? '/api/vision/scan/local' : '/api/vision/scan'), {
+      method: 'POST', headers: authHeaders(),
       body: JSON.stringify({ image: currentImageB64, mime: currentMime })
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || 'Scan failed');
-
-    let raw = d.response || '';
-    // Strip markdown fences if present
-    raw = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-
-    document.getElementById('jsonEditor').value = raw;
-    validateJSON();
-    showStatus(`✓ Scanned with ${d.model} — ${d.tokens_used || '?'} tokens. Review and correct the JSON below.`, 'success');
+    let raw = (d.response||'').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    populateFromScan(JSON.parse(raw));
+    showStatus(`✓ Scanned — ${d.tokens_used||'?'} tokens. Review and correct below.`, 'success');
   } catch(e) {
     showStatus('✗ ' + e.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = orig;
+  } finally { btn.disabled = false; btn.innerHTML = orig; }
+}
+
+function populateFromScan(data) {
+  document.getElementById('boardMake').value = data.board_make || '';
+  document.getElementById('boardRating').value = data.board_rating || '';
+  document.getElementById('circuitBody').innerHTML = '';
+  (data.circuits||[]).forEach(c => addCircuit(c));
+  markDirty();
+}
+
+// Circuit row
+function addCircuit(data) {
+  const d = data || {};
+  const tbody = document.getElementById('circuitBody');
+  const pos = tbody.rows.length + 1;
+  const cable = d.csa_mm2 || inferCable(d.rating_amps, d.label) || '';
+
+  const tr = document.createElement('tr');
+  tr.className = 'circuit-row';
+  tr.innerHTML = `
+    <td><span class="pos-badge">${pos}</span></td>
+    <td style="min-width:90px"><input class="td-input" placeholder="Sockets, Lights…" value="${esc(d.label||'')}" oninput="onLabelChange(this)"></td>
+    <td style="width:64px">
+      <select class="td-select" onchange="onAmpsChange(this)">
+        <option value="">—</option>
+        ${[6,10,16,20,32,40,45,50].map(a=>`<option value="${a}"${d.rating_amps==a?' selected':''}>${a}A</option>`).join('')}
+      </select>
+    </td>
+    <td style="width:54px">
+      <select class="td-select">
+        <option value="">—</option>
+        ${['B','C','D'].map(t=>`<option value="${t}"${d.mcb_type===t?' selected':''}>${t}</option>`).join('')}
+      </select>
+    </td>
+    <td style="width:78px">
+      <select class="td-select">
+        <option value="">—</option>
+        ${['1.0mm²','1.5mm²','2.5mm²','4.0mm²','6.0mm²','10.0mm²','16.0mm²'].map(s=>`<option value="${s}"${cable===s?' selected':''}>${s}</option>`).join('')}
+      </select>
+    </td>
+    <td style="text-align:center;width:44px"><input type="checkbox" class="rcbo-check"${d.is_rcbo?' checked':''}></td>
+    <td><button class="btn-rm" onclick="removeCircuit(this)" title="Remove">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+  markDirty();
+}
+
+function onLabelChange(input) {
+  const row = input.closest('tr');
+  const ampsVal = row.querySelectorAll('select')[0].value;
+  if (ampsVal == 32) {
+    const cableSelect = row.querySelectorAll('select')[2];
+    const inferred = inferCable(32, input.value);
+    if (inferred) cableSelect.value = inferred;
   }
+  markDirty();
 }
 
-// ── JSON VALIDATION ───────────────────────────────────────────────────────────
-function validateJSON() {
-  const val = document.getElementById('jsonEditor').value.trim();
-  const editor = document.getElementById('jsonEditor');
-  if (!val) {
-    setJsonStatus('empty');
-    editor.className = 'json-editor';
-    document.getElementById('btnSave').disabled = true;
-    return false;
-  }
-  try {
-    const parsed = JSON.parse(val);
-    if (!parsed.circuits || !Array.isArray(parsed.circuits)) throw new Error('Missing circuits array');
-    setJsonStatus(`valid — ${parsed.circuits.length} circuits`);
-    editor.className = 'json-editor valid';
-    document.getElementById('btnSave').disabled = !currentImageB64;
-    return true;
-  } catch(e) {
-    setJsonStatus('invalid JSON');
-    editor.className = 'json-editor error';
-    document.getElementById('btnSave').disabled = true;
-    return false;
-  }
+function onAmpsChange(select) {
+  const row = select.closest('tr');
+  const label = row.querySelector('.td-input').value;
+  const cableSelect = row.querySelectorAll('select')[2];
+  const inferred = inferCable(select.value, label);
+  if (inferred) cableSelect.value = inferred;
+  markDirty();
 }
 
-function setJsonStatus(msg) {
-  const el = document.getElementById('jsonStatus');
-  el.textContent = msg;
-  el.className = 'json-status ' + (msg === 'empty' ? 'empty' : msg === 'invalid JSON' ? 'error' : 'valid');
+function removeCircuit(btn) {
+  btn.closest('tr').remove();
+  document.querySelectorAll('#circuitBody tr').forEach((tr, i) => {
+    tr.querySelector('.pos-badge').textContent = i + 1;
+  });
+  markDirty();
 }
 
-function formatJSON() {
-  const val = document.getElementById('jsonEditor').value.trim();
-  try {
-    document.getElementById('jsonEditor').value = JSON.stringify(JSON.parse(val), null, 2);
-    validateJSON();
-  } catch(e) {}
-}
+function esc(s) { return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
-// ── SAVE TO DATASET ───────────────────────────────────────────────────────────
-async function saveToDataset() {
-  if (!validateJSON() || !currentImageB64) return;
-  const btn = document.getElementById('btnSave');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Saving...';
-
-  const payload = {
-    image: currentImageB64,
-    mime: currentMime,
-    label: JSON.parse(document.getElementById('jsonEditor').value),
-    notes: document.getElementById('notesField').value.trim()
+function buildLabel() {
+  const circuits = [];
+  document.querySelectorAll('#circuitBody tr').forEach((tr, i) => {
+    const label = tr.querySelector('.td-input').value.trim() || null;
+    const sels = tr.querySelectorAll('select');
+    const amps = sels[0].value ? parseInt(sels[0].value) : null;
+    const mcb_type = sels[1].value || null;
+    const csa_mm2 = sels[2].value || null;
+    const is_rcbo = tr.querySelector('.rcbo-check').checked;
+    circuits.push({ position: i+1, label, rating_amps: amps, mcb_type, is_rcbo, bs_number: is_rcbo?'BS EN 61009-1':'BS EN 60898-1', csa_mm2 });
+  });
+  return {
+    board_make: document.getElementById('boardMake').value.trim()||null,
+    board_rating: document.getElementById('boardRating').value.trim()||null,
+    circuits
   };
+}
 
+// Save
+async function saveToDataset() {
+  if (!currentImageB64) return showStatus('No image loaded', 'error');
+  if (!document.querySelectorAll('#circuitBody tr').length) return showStatus('Add at least one circuit', 'error');
+  const btn = document.getElementById('btnSave');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...';
   try {
     const r = await fetch(API + '/api/training/save', {
-      method: 'POST',
-      headers: authHeaders(),
-      body: JSON.stringify(payload)
+      method: 'POST', headers: authHeaders(),
+      body: JSON.stringify({ image: currentImageB64, mime: currentMime, label: buildLabel(), notes: document.getElementById('notesField').value.trim(), ...(editingId?{replaceId:editingId}:{}) })
     });
     const d = await r.json();
-    if (!r.ok) throw new Error(d.error || 'Save failed');
+    if (!r.ok) throw new Error(d.error||'Save failed');
     showStatus('✓ Saved as ' + d.id, 'success');
-    clearImage();
-    document.getElementById('jsonEditor').value = '';
-    document.getElementById('notesField').value = '';
-    loadDataset();
+    clearAll(); loadDataset();
   } catch(e) {
     showStatus('✗ ' + e.message, 'error');
     btn.disabled = false;
-  } finally {
-    btn.innerHTML = 'Save to Training Dataset';
-  }
+  } finally { btn.innerHTML = 'Save to Training Dataset'; }
 }
 
-// ── LOAD DATASET ──────────────────────────────────────────────────────────────
+// Dataset
 async function loadDataset() {
   try {
     const r = await fetch(API + '/api/training/list', { headers: authHeaders() });
     const d = await r.json();
     allPairs = d.pairs || [];
-    renderDataset(allPairs);
-    updateStats(allPairs);
-  } catch(e) {
-    console.error('Could not load dataset', e);
-  }
+    renderDataset(allPairs); updateStats(allPairs);
+  } catch(e) {}
 }
 
 function updateStats(pairs) {
-  const total = pairs.length;
-  const makes = new Set(pairs.map(p => p.board_make).filter(Boolean)).size;
-  const circuits = pairs.reduce((s, p) => s + (p.circuit_count || 0), 0);
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statBoards').textContent = makes;
-  document.getElementById('statCircuits').textContent = circuits;
-  document.getElementById('datasetCountBadge').textContent = total + ' pair' + (total !== 1 ? 's' : '');
+  document.getElementById('statTotal').textContent = pairs.length;
+  document.getElementById('statBoards').textContent = new Set(pairs.map(p=>p.board_make).filter(Boolean)).size;
+  document.getElementById('statCircuits').textContent = pairs.reduce((s,p)=>s+(p.circuit_count||0),0);
+  document.getElementById('datasetCountBadge').textContent = pairs.length + ' pair'+(pairs.length!==1?'s':'');
 }
 
 function renderDataset(pairs) {
   const grid = document.getElementById('datasetGrid');
   if (!pairs.length) {
-    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🗂️</div><p>No training pairs yet.<br>Scan and save boards to build your dataset.</p></div>`;
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🗂️</div><p>No training pairs yet.<br>Scan a board and save it to start building.</p></div>`;
     return;
   }
   grid.innerHTML = pairs.map(p => `
-    <div class="ds-card" onclick="loadPair('${p.id}')">
-      ${p.thumbnail
-        ? `<img class="ds-thumb" src="${p.thumbnail}" alt="board">`
-        : `<div class="ds-thumb-placeholder">⚡</div>`}
+    <div class="ds-card" id="card-${p.id}" onclick="loadPair('${p.id}')">
+      ${p.thumbnail?`<img class="ds-thumb" src="${p.thumbnail}" alt="">` : `<div class="ds-thumb-placeholder">⚡</div>`}
       <div class="ds-info">
         <div class="ds-id">${p.id}</div>
-        <div class="ds-make">${p.board_make || 'Unknown make'} ${p.board_rating ? '· ' + p.board_rating : ''}</div>
-        <div class="ds-circuits">${p.circuit_count || 0} circuits${p.notes ? ' · ' + p.notes.substring(0,30) : ''}</div>
+        <div class="ds-make">${p.board_make||'Unknown make'}${p.board_rating?' · '+p.board_rating:''}</div>
+        <div class="ds-circuits">${p.circuit_count||0} circuits${p.notes?' · '+p.notes.substring(0,28):''}</div>
       </div>
       <button class="ds-delete" onclick="deletePair(event,'${p.id}')">✕</button>
     </div>
   `).join('');
 }
 
-function filterDataset(query) {
-  const q = query.toLowerCase();
-  const filtered = allPairs.filter(p =>
-    !q ||
-    (p.board_make || '').toLowerCase().includes(q) ||
-    (p.notes || '').toLowerCase().includes(q) ||
-    p.id.includes(q)
-  );
-  renderDataset(filtered);
+function filterDataset(q) {
+  const lq = q.toLowerCase();
+  renderDataset(allPairs.filter(p => !lq || (p.board_make||'').toLowerCase().includes(lq) || (p.notes||'').toLowerCase().includes(lq) || p.id.includes(lq)));
+}
+
+async function loadPair(id) {
+  try {
+    const r = await fetch(API + '/api/training/' + id + '/detail', { headers: authHeaders() });
+    const meta = await r.json();
+    if (!r.ok) throw new Error(meta.error||'Load failed');
+    currentImageB64 = meta.image; currentMime = meta.mime||'image/jpeg';
+    document.getElementById('previewImg').src = 'data:'+currentMime+';base64,'+meta.image;
+    document.getElementById('imgPreview').style.display = 'block';
+    document.getElementById('dropZone').style.display = 'none';
+    ['btnLocal','btnOpenAI'].forEach(id => document.getElementById(id).disabled = false);
+    populateFromScan(meta.label);
+    document.getElementById('notesField').value = meta.notes||'';
+    editingId = id;
+    document.getElementById('btnSave').disabled = false;
+    document.querySelectorAll('.ds-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('card-'+id)?.classList.add('selected');
+    showStatus('Loaded '+id+' — edit and re-save to update.', 'info');
+    document.getElementById('editorPanel').scrollTop = 0;
+  } catch(e) { showStatus('✗ ' + e.message, 'error'); }
 }
 
 async function deletePair(e, id) {
   e.stopPropagation();
-  if (!confirm('Delete training pair ' + id + '?')) return;
-  try {
-    await fetch(API + '/api/training/' + id, { method: 'DELETE', headers: authHeaders() });
-    loadDataset();
-  } catch(e) { alert('Delete failed'); }
+  if (!confirm('Delete pair '+id+'?')) return;
+  await fetch(API + '/api/training/' + id, { method: 'DELETE', headers: authHeaders() });
+  if (editingId === id) clearAll();
+  loadDataset();
 }
 
-async function loadPair(id) {
-  const pair = allPairs.find(p => p.id === id);
-  if (!pair) return;
-  document.getElementById('jsonEditor').value = JSON.stringify(pair.label, null, 2);
-  document.getElementById('notesField').value = pair.notes || '';
-  validateJSON();
-  showStatus('Loaded pair ' + id + ' for review — make edits and re-save if needed.', 'info');
-  document.querySelectorAll('.ds-card').forEach(c => c.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
-}
-
-// ── EXPORT ────────────────────────────────────────────────────────────────────
 async function exportDataset() {
   showStatus('Preparing export...', 'info');
   try {
@@ -806,27 +524,22 @@ async function exportDataset() {
     if (!r.ok) throw new Error('Export failed');
     const blob = await r.blob();
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'certai-training-' + new Date().toISOString().split('T')[0] + '.jsonl';
-    a.click();
-    URL.revokeObjectURL(url);
-    showStatus('✓ Exported successfully', 'success');
-  } catch(e) {
-    showStatus('✗ ' + e.message, 'error');
-  }
+    const a = document.createElement('a'); a.href = url;
+    a.download = 'certai-training-'+new Date().toISOString().split('T')[0]+'.jsonl';
+    a.click(); URL.revokeObjectURL(url);
+    showStatus('✓ Exported', 'success');
+  } catch(e) { showStatus('✗ '+e.message, 'error'); }
 }
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
 function showStatus(msg, type) {
   const el = document.getElementById('statusMsg');
   if (!msg) { el.style.display = 'none'; return; }
-  el.textContent = msg;
-  el.className = 'status-msg ' + (type || 'info');
-  el.style.display = 'block';
+  el.textContent = msg; el.className = 'status-msg '+(type||'info'); el.style.display = 'block';
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+// Need a detail endpoint on server — add to server-training-additions.js
+// GET /api/training/:id/detail — returns full meta including base64 image
+
 loadDataset();
 </script>
 </body>
