@@ -184,17 +184,54 @@ app.post('/api/upload/logo',auth,upload.single('logo'),(req,res)=>{
 });
 
 // ── GPT-4o VISION SCAN ────────────────────────────────────────────────────────
-const BOARD_SCAN_PROMPT = `You are analysing a photo of a UK domestic electrical consumer unit (fuse board).
+const BOARD_SCAN_PROMPT = `You are a skilled electrical inspector analysing a photo of a UK domestic consumer unit (fuse board).
+
+Your job is to extract circuit data using VISUAL RECOGNITION of the physical components — not just reading text labels. Many boards have no circuit labels at all. That is fine. Use what you can see.
+
+WHAT TO LOOK FOR — IN ORDER OF PRIORITY:
+
+1. BREAKER FACE MARKINGS (always present):
+   - Every MCB and RCBO has its amp rating printed or embossed on the face: e.g. "6", "10", "16", "20", "32", "40"
+   - The type letter B, C or D is also on the face, often combined: "32B", "16C", "40D"
+   - Read these directly. This is your most reliable data source.
+
+2. RCBO vs MCB IDENTIFICATION (visual, not text):
+   - RCBOs are visually distinct: they have a small TEST button on the face (labelled "T" or "TEST")
+   - RCBOs are typically wider than standard MCBs, or have a binocular/double-window appearance
+   - MCBs have no test button and a single rectangular face
+   - Set is_rcbo: true if you can see a test button or the distinctive RCBO profile
+
+3. CIRCUIT LABELS (present on some boards, absent on others):
+   - If a label strip exists, read it — position labels to match the breaker they describe
+   - If no labels exist, set label to null — do not invent a label
+
+4. CABLE SIZE (visual estimation):
+   - Look at cable diameter entering each breaker
+   - Thin cables (~1.5mm): lighting circuits, typically 6A or 10A breakers
+   - Medium cables (~2.5mm): socket ring finals, typically 32A breakers
+   - Thick cables (~6mm+): cooker, shower, EV — typically 32A-45A radials
+   - Use the breaker rating to confirm: cross-reference with standard UK practice:
+     6A=1.0mm², 10A=1.5mm², 16A=2.5mm², 20A=2.5mm²
+     32A sockets/ring=2.5mm², 32A radial=6.0mm²
+     40A=10.0mm², 45A=16.0mm², 50A=16.0mm²
+
+5. BOARD MAKE AND RATING:
+   - Look for manufacturer name on the board enclosure or main switch
+   - Look for the main switch amp rating (63A, 80A, 100A are common)
+   - If not visible, set to null
+
+CIRCUIT ORDERING — CRITICAL:
+   - Position 1 is always the breaker physically closest to the main switch/incomer
+   - Count outward from the main switch along each row
+   - Left-to-right on top row, then left-to-right on bottom row for twin-row boards
 
 STRICT RULES:
-- Only extract information that is CLEARLY VISIBLE and LEGIBLE in the image.
-- Do NOT guess, infer, or invent circuit labels, amperage, or breaker types.
-- If a label is unclear or missing, set it to null. Do not substitute a typical or common value.
-- Count the physical breakers you can actually see. Return exactly that many circuits — no more, no fewer.
-- If you cannot read the board make or rating, set those fields to null.
-- Do not add circuits that are not physically present in the image.
+   - Count the physical breakers you can see. Return exactly that many — no more, no fewer.
+   - Never invent circuits. If you can see 8 breakers, return 8 circuits.
+   - If a value is genuinely unreadable, set it to null. Do not substitute a guess.
+   - is_rcbo must be based on visual evidence (test button / shape), not assumption.
 
-Return ONLY valid JSON with no explanation, no markdown, no code fences — raw JSON only:
+Return ONLY raw valid JSON — no markdown, no explanation, no code fences:
 {
   "board_make": "string or null",
   "board_rating": "string or null",
@@ -203,8 +240,10 @@ Return ONLY valid JSON with no explanation, no markdown, no code fences — raw 
       "position": 1,
       "label": "string or null",
       "rating_amps": number or null,
-      "mcb_type": "string or null",
-      "is_rcbo": true or false
+      "mcb_type": "B" or "C" or "D" or null,
+      "is_rcbo": true or false,
+      "bs_number": "BS EN 61009-1" or "BS EN 60898-1",
+      "csa_mm2": "string or null"
     }
   ]
 }`;
@@ -219,7 +258,7 @@ app.post('/api/vision/scan',auth,async(req,res)=>{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
       body:JSON.stringify({
-        model:'gpt-4o-mini',
+        model:'gpt-4o',
         max_tokens:2048,
         temperature:0,
         messages:[
