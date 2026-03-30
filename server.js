@@ -184,66 +184,108 @@ app.post('/api/upload/logo',auth,upload.single('logo'),(req,res)=>{
 });
 
 // ── GPT-4o VISION SCAN ────────────────────────────────────────────────────────
-const BOARD_SCAN_PROMPT = `You are a skilled electrical inspector analysing a photo of a UK domestic consumer unit (fuse board).
+const BOARD_SCAN_PROMPT = `You are a skilled electrical inspector analysing a photo of a UK domestic or commercial consumer unit for a BS 7671 Schedule of Circuit Details and Test Results.
 
-Your job is to extract circuit data using VISUAL RECOGNITION of the physical components — not just reading text labels. Many boards have no circuit labels at all. That is fine. Use what you can see.
+━━━ BOARD TYPE ━━━
+First identify the board type from visual inspection:
+- Single phase (L + N + E): standard domestic board, single busbar
+- Three phase (L1 + L2 + L3 + N + E): three busbars visible, TP&N incomer/main switch
+- Split load: two RCD sections visible
+Note the board type in board_phases: 1 or 3.
 
-WHAT TO LOOK FOR — IN ORDER OF PRIORITY:
+━━━ MAIN SWITCH / INCOMER ━━━
+Always identify the main switch as a separate entry BEFORE the MCBs/RCBOs.
+- It is the largest switching device, usually on the far left or top
+- On single phase boards: typically a 100A or 63A double pole switch
+- On three phase boards: typically a 125A or 100A TP switch or MCCB
+- Read its amp rating from the face
+- Set position: 0, label: "Main Switch", is_main_switch: true
+- If you cannot see it clearly, still include it with rating_amps: null
 
-1. BREAKER FACE MARKINGS (always present):
-   - Every MCB and RCBO has its amp rating printed or embossed on the face: e.g. "6", "10", "16", "20", "32", "40"
-   - The type letter B, C or D is also on the face, often combined: "32B", "16C", "40D"
-   - Read these directly. This is your most reliable data source.
+━━━ READING BREAKER FACES ━━━
+Every MCB, RCBO and MCCB has its rating printed or embossed on the face:
+- Amp rating: a number e.g. "6", "10", "16", "20", "32", "40", "63"
+- Type letter: B, C or D — often combined e.g. "32B", "16C"
+- On 3-phase boards, MCCBs may show three poles — note as 3-phase circuit
+- Read these directly from the image. This is your primary data source.
 
-2. RCBO vs MCB IDENTIFICATION (visual, not text):
-   - RCBOs are visually distinct: they have a small TEST button on the face (labelled "T" or "TEST")
-   - RCBOs are typically wider than standard MCBs, or have a binocular/double-window appearance
-   - MCBs have no test button and a single rectangular face
-   - Set is_rcbo: true if you can see a test button or the distinctive RCBO profile
+━━━ RCBO vs MCB IDENTIFICATION ━━━
+Visual identification only — do not assume from context:
+- RCBO (BS EN 61009-1): has a visible TEST button on the face marked "T" or "TEST". Often wider or has a binocular profile
+- MCB (BS EN 60898-1): no test button, single rectangular face
+- RCD block (BS EN 61008-1): wide device with TEST button, no overcurrent rating — this is an RCD not an RCBO
+- Set is_rcbo: true only if you can see the test button on an individual breaker
 
-3. CIRCUIT LABELS (present on some boards, absent on others):
-   - If a label strip exists, read it — position labels to match the breaker they describe
-   - If no labels exist, set label to null — do not invent a label
+━━━ CABLE CSA — VISUAL INSPECTION ━━━
+Look at the physical cables entering each breaker. Do not default — actually look:
+- If cables are visible: estimate diameter visually
+  Very thin (< 2mm diameter): 1.0mm² or 1.5mm²
+  Medium (~ 3mm diameter): 2.5mm²
+  Thick (~ 4-5mm diameter): 4.0mm² or 6.0mm²
+  Very thick (> 5mm diameter): 10.0mm² or 16.0mm²
+- Look for separate CPC (earth) conductor size — often smaller than live
+- If cables are hidden in trunking or behind the board: set csa_live to null, csa_cpc to null — do NOT default
+- If only partially visible: make your best visual estimate and note uncertainty
 
-4. CABLE SIZE (visual estimation):
-   - Look at cable diameter entering each breaker
-   - Thin cables (~1.5mm): lighting circuits, typically 6A or 10A breakers
-   - Medium cables (~2.5mm): socket ring finals, typically 32A breakers
-   - Thick cables (~6mm+): cooker, shower, EV — typically 32A-45A radials
-   - Use the breaker rating to confirm: cross-reference with standard UK practice:
-     6A=1.0mm², 10A=1.5mm², 16A=2.5mm², 20A=2.5mm²
-     32A sockets/ring=2.5mm², 32A radial=6.0mm²
-     40A=10.0mm², 45A=16.0mm², 50A=16.0mm²
+━━━ WIRING TYPE ━━━
+Identify cable type if visible:
+- "Flat twin & earth" — grey or white flat cable (most common domestic)
+- "Singles" — individual colour-coded conductors in conduit
+- "SWA" — steel wire armoured, metal outer sheath
+- "T&E" — twin and earth shorthand
+- If not visible: null
 
-5. BOARD MAKE AND RATING:
-   - Look for manufacturer name on the board enclosure or main switch
-   - Look for the main switch amp rating (63A, 80A, 100A are common)
-   - If not visible, set to null
+━━━ THREE PHASE CIRCUITS ━━━
+On 3-phase boards:
+- Note which circuits are single-phase (one MCB pole) vs 3-phase (MCCB spanning 3 poles)
+- Set phases: 1 or 3 per circuit
+- For single phase circuits on a TP board, note which phase: "L1", "L2" or "L3" if identifiable from busbar position
 
-CIRCUIT ORDERING — CRITICAL:
-   - Position 1 is always the breaker physically closest to the main switch/incomer
-   - Count outward from the main switch along each row
-   - Left-to-right on top row, then left-to-right on bottom row for twin-row boards
+━━━ CIRCUIT ORDERING ━━━
+- Position 0: Main switch (always)
+- Position 1: first MCB/RCBO closest to main switch
+- Count outward from main switch along each row
+- Left-to-right top row, then left-to-right bottom row on twin-row boards
 
-STRICT RULES:
-   - Count the physical breakers you can see. Return exactly that many — no more, no fewer.
-   - Never invent circuits. If you can see 8 breakers, return 8 circuits.
-   - If a value is genuinely unreadable, set it to null. Do not substitute a guess.
-   - is_rcbo must be based on visual evidence (test button / shape), not assumption.
+━━━ STRICT RULES ━━━
+- Count physical breakers visible. Return exactly that many circuits plus the main switch
+- Never invent circuits or labels
+- If a label strip is present, read it — match labels to their breaker by position
+- If no label strip: set label to null
+- Do not default cable sizes — return null if cables are not visible or measurable
+- Return bs_number derived from is_rcbo visual check only
 
 Return ONLY raw valid JSON — no markdown, no explanation, no code fences:
 {
   "board_make": "string or null",
   "board_rating": "string or null",
+  "board_phases": 1 or 3,
   "circuits": [
+    {
+      "position": 0,
+      "label": "Main Switch",
+      "is_main_switch": true,
+      "rating_amps": number or null,
+      "phases": 1 or 3,
+      "mcb_type": null,
+      "is_rcbo": false,
+      "bs_number": null,
+      "wiring_type": "string or null",
+      "csa_live": "string or null",
+      "csa_cpc": "string or null"
+    },
     {
       "position": 1,
       "label": "string or null",
+      "is_main_switch": false,
       "rating_amps": number or null,
+      "phases": 1 or 3,
       "mcb_type": "B" or "C" or "D" or null,
       "is_rcbo": true or false,
       "bs_number": "BS EN 61009-1" or "BS EN 60898-1",
-      "csa_mm2": "string or null"
+      "wiring_type": "string or null",
+      "csa_live": "string or null",
+      "csa_cpc": "string or null"
     }
   ]
 }`;
