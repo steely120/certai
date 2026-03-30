@@ -480,6 +480,20 @@ app.delete('/api/training/:id', auth, (req, res) => {
   }
 });
 
+// Get full detail for a training pair (includes base64 image for editing)
+app.get('/api/training/:id/detail', auth, (req, res) => {
+  try {
+    const metaFile = path.join(TRAINING_DIR, req.params.id + '.json');
+    if (!fs.existsSync(metaFile)) return res.status(404).json({ error: 'Not found' });
+    const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
+    const imgPath = path.join(TRAINING_DIR, meta.imageFile);
+    const image = fs.existsSync(imgPath) ? fs.readFileSync(imgPath).toString('base64') : null;
+    res.json({ ...meta, image });
+  } catch (e) {
+    res.status(500).json({ error: 'Load failed: ' + e.message });
+  }
+});
+
 // Export as JSONL (one training example per line — ready for fine-tuning)
 app.get('/api/training/export', auth, (req, res) => {
   try {
@@ -516,7 +530,6 @@ app.get('/api/training/export', auth, (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 // END OF PASTE
 // ═══════════════════════════════════════════════════════════════════════════════
-
 app.listen(PORT,'0.0.0.0',()=>{
   console.log('CertAI on port '+PORT);
   console.log('Ollama: '+OLLAMA_URL);
