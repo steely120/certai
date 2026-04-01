@@ -14,14 +14,14 @@
   --border: #252830;
   --border2: #2e3240;
   --accent: #f0c040;
-  --accent-dim: rgba(240,192,64,0.12);
-  --accent-border: rgba(240,192,64,0.35);
+  --accent-dim: rgba(240,192,64,0.1);
+  --accent-border: rgba(240,192,64,0.3);
   --green: #4ade80;
   --green-dim: rgba(74,222,128,0.1);
   --red: #f87171;
   --red-dim: rgba(248,113,113,0.1);
   --amber: #fb923c;
-  --amber-dim: rgba(251,146,60,0.12);
+  --amber-dim: rgba(251,146,60,0.1);
   --blue: #60a5fa;
   --text: #d4d8e2;
   --text2: #8b90a0;
@@ -34,283 +34,156 @@
 html, body { height: 100%; overflow: hidden; }
 body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 13px; }
 
-/* ── LAYOUT ── */
 .app { display: grid; grid-template-rows: 44px 1fr; height: 100vh; }
-.body { display: grid; grid-template-columns: 280px 1fr; overflow: hidden; }
+.body { display: grid; grid-template-columns: 260px 1fr; overflow: hidden; }
 
-/* ── TOPBAR ── */
-.topbar {
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 20px;
-}
-.topbar-logo { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: 0.5px; white-space: nowrap; }
+/* TOPBAR */
+.topbar { background: var(--panel); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 20px; }
+.topbar-logo { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
 .topbar-logo span { color: var(--text3); }
-.topbar-stats { display: flex; gap: 16px; margin-left: 16px; }
-.tstat { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; }
+.topbar-stats { display: flex; gap: 16px; margin-left: 12px; }
+.tstat { display: flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 11px; }
 .tstat-n { color: var(--accent); font-weight: 600; }
 .tstat-l { color: var(--text3); }
 .topbar-keys { display: flex; gap: 8px; margin-left: auto; align-items: center; }
-.key { background: var(--panel2); border: 1px solid var(--border2); border-radius: 3px; padding: 2px 6px; font-family: var(--mono); font-size: 10px; color: var(--text2); white-space: nowrap; }
+.key { background: var(--panel2); border: 1px solid var(--border2); border-radius: 3px; padding: 2px 6px; font-family: var(--mono); font-size: 10px; color: var(--text2); }
 .key-label { font-size: 10px; color: var(--text3); }
-.topbar-nav { display: flex; gap: 4px; margin-left: 16px; }
+.topbar-nav { display: flex; gap: 4px; margin-left: 12px; }
 .topbar-nav a { color: var(--text3); text-decoration: none; font-size: 12px; padding: 4px 10px; border-radius: 4px; transition: all 0.15s; }
 .topbar-nav a:hover { color: var(--text); background: var(--panel2); }
 .topbar-nav a.active { color: var(--accent); }
 
-/* ── LEFT QUEUE PANEL ── */
-.queue-panel {
-  background: var(--panel);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.queue-header {
-  padding: 12px 14px 10px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.queue-title { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; }
+/* QUEUE SIDEBAR */
+.queue-panel { background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.queue-header { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.queue-title { font-family: var(--mono); font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; }
 .queue-badge { margin-left: auto; background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent); font-family: var(--mono); font-size: 10px; padding: 1px 7px; border-radius: 10px; }
 
-.drop-zone {
-  margin: 10px 12px;
-  border: 1px dashed var(--border2);
-  border-radius: 6px;
-  padding: 14px 10px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-  flex-shrink: 0;
-}
+.drop-zone { margin: 8px 10px; border: 1px dashed var(--border2); border-radius: 5px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; flex-shrink: 0; }
 .drop-zone:hover, .drop-zone.over { border-color: var(--accent); background: var(--accent-dim); }
 .drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
-.drop-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+.drop-icon { font-size: 18px; display: block; margin-bottom: 3px; }
 .drop-text { font-size: 11px; color: var(--text3); line-height: 1.4; }
 .drop-text strong { color: var(--text2); }
 
-.queue-list { flex: 1; overflow-y: auto; padding: 6px 8px; display: flex; flex-direction: column; gap: 3px; }
+.progress-bar { height: 2px; background: var(--border); flex-shrink: 0; }
+.progress-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
 
-.q-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 8px;
-  border-radius: 5px;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.12s;
-  position: relative;
-}
+.queue-list { flex: 1; overflow-y: auto; padding: 4px 6px; display: flex; flex-direction: column; gap: 2px; }
+
+.q-item { display: flex; align-items: center; gap: 7px; padding: 6px 7px; border-radius: 4px; cursor: pointer; border: 1px solid transparent; transition: all 0.12s; }
 .q-item:hover { background: var(--panel2); border-color: var(--border); }
 .q-item.active { background: var(--accent-dim); border-color: var(--accent-border); }
-.q-item.done { opacity: 0.55; }
+.q-item.done { opacity: 0.5; }
 .q-item.done.active { opacity: 1; }
-
-.q-thumb { width: 36px; height: 28px; border-radius: 3px; object-fit: cover; background: var(--bg); flex-shrink: 0; border: 1px solid var(--border); }
+.q-thumb { width: 34px; height: 26px; border-radius: 3px; object-fit: cover; background: var(--bg); flex-shrink: 0; border: 1px solid var(--border); }
+.q-thumb-ph { width: 34px; height: 26px; border-radius: 3px; background: var(--panel2); border: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
 .q-info { flex: 1; min-width: 0; }
 .q-name { font-size: 11px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--mono); }
 .q-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
-
-.q-status { flex-shrink: 0; }
-.pill { font-size: 9px; font-family: var(--mono); font-weight: 600; padding: 2px 6px; border-radius: 10px; letter-spacing: 0.3px; text-transform: uppercase; }
+.pill { font-size: 9px; font-family: var(--mono); font-weight: 600; padding: 2px 5px; border-radius: 8px; text-transform: uppercase; white-space: nowrap; }
 .pill-wait { background: var(--panel2); color: var(--text3); border: 1px solid var(--border); }
 .pill-scan { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(251,146,60,0.3); animation: pulse 1.2s ease-in-out infinite; }
 .pill-ready { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(251,146,60,0.3); }
 .pill-done { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
 .pill-err { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.5} }
 
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-
-.queue-footer {
-  padding: 10px 12px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  gap: 6px;
-}
-.btn-sm {
-  flex: 1; padding: 6px 8px; border-radius: 4px; font-family: var(--sans); font-size: 11px;
-  font-weight: 600; cursor: pointer; transition: all 0.15s; border: 1px solid var(--border2);
-  background: var(--panel2); color: var(--text2); display: flex; align-items: center; justify-content: center; gap: 4px;
-}
-.btn-sm:hover { border-color: var(--text2); color: var(--text); }
+.queue-footer { padding: 8px 10px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
+.btn-sm { flex: 1; padding: 6px 8px; border-radius: 4px; font-family: var(--sans); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: 1px solid var(--border2); background: var(--panel2); color: var(--text2); display: flex; align-items: center; justify-content: center; gap: 4px; }
+.btn-sm:hover:not(:disabled) { border-color: var(--text2); color: var(--text); }
 .btn-sm:disabled { opacity: 0.3; cursor: not-allowed; }
 .btn-sm.primary { background: var(--accent); color: #0d0e11; border-color: var(--accent); font-weight: 700; }
 .btn-sm.primary:hover { filter: brightness(1.1); }
 .btn-sm.green { background: var(--green-dim); border-color: rgba(74,222,128,0.3); color: var(--green); }
-.btn-sm.green:hover { background: rgba(74,222,128,0.2); }
 
-/* ── MAIN PANEL ── */
-.main-panel {
-  display: grid;
-  grid-template-columns: 340px 1fr;
-  overflow: hidden;
-}
+/* MAIN */
+.main-panel { display: grid; grid-template-columns: 320px 1fr; overflow: hidden; }
 
-/* image pane */
-.img-pane {
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--bg);
-}
-.img-pane-header { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.img-pane { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+.pane-header { padding: 8px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .pane-title { font-family: var(--mono); font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; }
-.img-wrap {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #080a0d;
-  position: relative;
-}
+
+.img-wrap { flex: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #080a0d; min-height: 0; }
 .board-img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
-.img-empty { color: var(--text3); font-size: 12px; text-align: center; }
-.img-empty .big { font-size: 36px; display: block; margin-bottom: 8px; }
 
-.board-meta { padding: 12px 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
-.meta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.meta-field { display: flex; flex-direction: column; gap: 3px; }
-.meta-label { font-family: var(--mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.7px; }
-.meta-input {
-  background: var(--panel2); border: 1px solid var(--border2); border-radius: 4px;
-  padding: 5px 8px; color: var(--text); font-family: var(--sans); font-size: 12px;
-  outline: none; transition: border-color 0.15s; width: 100%;
-}
-.meta-input:focus { border-color: var(--accent); }
-.meta-input::placeholder { color: var(--text3); }
+/* Board meta form */
+.board-meta { padding: 10px 12px; border-top: 1px solid var(--border); flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
+.meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.meta-grid-3 { display: grid; grid-template-columns: 1fr 1fr 80px; gap: 7px; }
+.mf { display: flex; flex-direction: column; gap: 3px; }
+.mf label { font-family: var(--mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; }
+.mi { background: var(--panel2); border: 1px solid var(--border2); border-radius: 4px; padding: 5px 7px; color: var(--text); font-family: var(--sans); font-size: 12px; outline: none; transition: border-color 0.15s; width: 100%; }
+.mi:focus { border-color: var(--accent); }
+.mi::placeholder { color: var(--text3); }
+select.mi { cursor: pointer; }
+select.mi option { background: #1a1d24; }
 
-/* circuit editor pane */
+/* EDIT PANE */
 .edit-pane { display: flex; flex-direction: column; overflow: hidden; }
-.edit-header {
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-.circuit-count { font-family: var(--mono); font-size: 11px; color: var(--text3); }
-.edit-header-actions { margin-left: auto; display: flex; gap: 6px; }
+.edit-header { padding: 8px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.circuit-count { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+.edit-actions { margin-left: auto; display: flex; gap: 5px; }
 
-.circuit-scroll { flex: 1; overflow-y: auto; }
-
-/* circuit table */
+/* CIRCUIT TABLE */
+.circuit-scroll { flex: 1; overflow-y: auto; min-height: 0; }
 .ctable { width: 100%; border-collapse: collapse; }
 .ctable thead th {
-  background: var(--panel);
-  color: var(--text3);
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.7px;
-  padding: 7px 8px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  white-space: nowrap;
+  background: var(--panel); color: var(--text3); font-family: var(--mono);
+  font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px;
+  padding: 6px 5px; text-align: left; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 5; white-space: nowrap;
 }
-.ctable thead th:first-child { width: 30px; text-align: center; padding-left: 14px; }
-.ctable thead th.th-amps { width: 62px; }
-.ctable thead th.th-type { width: 52px; }
-.ctable thead th.th-cable { width: 82px; }
-.ctable thead th.th-rcbo { width: 44px; text-align: center; }
-.ctable thead th:last-child { width: 32px; }
+.ctable thead th:first-child { width: 28px; text-align: center; padding-left: 12px; }
+.th-amps  { width: 58px; }
+.th-type  { width: 48px; }
+.th-ph    { width: 44px; }
+.th-wt    { width: 90px; }
+.th-live  { width: 80px; }
+.th-cpc   { width: 80px; }
+.th-rcbo  { width: 40px; text-align: center; }
+.th-del   { width: 28px; }
 
-.crow {
-  border-bottom: 1px solid var(--border);
-  transition: background 0.1s;
-}
-.crow:hover { background: rgba(255,255,255,0.018); }
+.crow { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+.crow:hover { background: rgba(255,255,255,0.015); }
+.crow.main-sw { background: rgba(96,165,250,0.05); }
+.crow.main-sw:hover { background: rgba(96,165,250,0.08); }
 .crow.uncertain { background: rgba(251,146,60,0.04); }
-.crow.uncertain:hover { background: rgba(251,146,60,0.07); }
-.crow td { padding: 2px 4px; vertical-align: middle; }
+.crow td { padding: 2px 3px; vertical-align: middle; }
 .crow td:first-child { text-align: center; padding-left: 10px; }
 
-.pos-n {
-  font-family: var(--mono); font-size: 10px; color: var(--text3);
-  width: 22px; height: 20px; display: inline-flex; align-items: center; justify-content: center;
-  border: 1px solid var(--border); border-radius: 3px; background: var(--panel);
-}
+.pos-n { font-family: var(--mono); font-size: 10px; color: var(--text3); width: 20px; height: 18px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 3px; background: var(--panel); }
+.pos-n.is-main { color: var(--blue); border-color: rgba(96,165,250,0.3); background: rgba(96,165,250,0.08); font-size: 8px; }
 
-.ci {
-  background: transparent; border: 1px solid transparent; border-radius: 3px;
-  padding: 4px 6px; color: var(--text); font-family: var(--sans); font-size: 12px;
-  outline: none; width: 100%; transition: all 0.12s;
-}
+.ci { background: transparent; border: 1px solid transparent; border-radius: 3px; padding: 3px 5px; color: var(--text); font-family: var(--sans); font-size: 11px; outline: none; width: 100%; transition: all 0.12s; }
 .ci:hover { border-color: var(--border2); background: var(--panel2); }
 .ci:focus { border-color: var(--accent); background: var(--panel2); }
 .ci::placeholder { color: var(--text3); }
-.ci.uncertain-field { border-color: rgba(251,146,60,0.4) !important; background: var(--amber-dim) !important; }
+.ci.uf { border-color: rgba(251,146,60,0.4) !important; background: var(--amber-dim) !important; }
 select.ci { cursor: pointer; }
 select.ci option { background: #1a1d24; }
+.rcbo-cb { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); display: block; margin: auto; }
+.btn-rm { background: transparent; border: none; color: var(--text3); font-size: 12px; cursor: pointer; padding: 3px 5px; border-radius: 3px; transition: color 0.12s; }
+.btn-rm:hover { color: var(--red); }
 
-.rcbo-cb { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent); display: block; margin: auto; }
-
-.btn-rm-row { background: transparent; border: none; color: var(--text3); font-size: 13px; cursor: pointer; padding: 3px 6px; border-radius: 3px; line-height: 1; transition: color 0.12s; }
-.btn-rm-row:hover { color: var(--red); }
-
-.add-row-btn {
-  width: 100%; padding: 8px; background: transparent; border: none; border-top: 1px solid var(--border);
-  color: var(--text3); font-family: var(--sans); font-size: 11px; cursor: pointer;
-  transition: all 0.15s; text-align: center;
-}
+.add-row-btn { width: 100%; padding: 7px; background: transparent; border: none; border-top: 1px solid var(--border); color: var(--text3); font-family: var(--sans); font-size: 11px; cursor: pointer; transition: all 0.15s; }
 .add-row-btn:hover { color: var(--accent); background: var(--accent-dim); }
 
-/* save bar */
-.save-bar {
-  border-top: 1px solid var(--border);
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-  background: var(--panel);
-}
-.save-bar-info { font-family: var(--mono); font-size: 10px; color: var(--text3); flex: 1; }
-.save-bar-info span { color: var(--amber); }
-.btn-save-board {
-  padding: 8px 20px; background: var(--accent); color: #0d0e11; border: none;
-  border-radius: 4px; font-family: var(--sans); font-size: 13px; font-weight: 700;
-  cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px;
-}
-.btn-save-board:hover { filter: brightness(1.1); }
-.btn-save-board:disabled { background: var(--border2); color: var(--text3); cursor: not-allowed; filter: none; }
-.btn-skip { padding: 8px 14px; background: transparent; border: 1px solid var(--border2); border-radius: 4px; color: var(--text2); font-family: var(--sans); font-size: 12px; cursor: pointer; transition: all 0.15s; }
+/* SAVE BAR */
+.save-bar { border-top: 1px solid var(--border); padding: 8px 14px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; background: var(--panel); }
+.save-info { font-family: var(--mono); font-size: 10px; color: var(--text3); flex: 1; }
+.save-info .uf-count { color: var(--amber); }
+.btn-save { padding: 7px 18px; background: var(--accent); color: #0d0e11; border: none; border-radius: 4px; font-family: var(--sans); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 5px; }
+.btn-save:hover:not(:disabled) { filter: brightness(1.1); }
+.btn-save:disabled { background: var(--border2); color: var(--text3); cursor: not-allowed; filter: none; }
+.btn-skip { padding: 7px 12px; background: transparent; border: 1px solid var(--border2); border-radius: 4px; color: var(--text2); font-family: var(--sans); font-size: 12px; cursor: pointer; transition: all 0.15s; }
 .btn-skip:hover { border-color: var(--red); color: var(--red); }
 
-/* notes */
-.notes-row { padding: 0 16px 10px; flex-shrink: 0; }
-.notes-input {
-  width: 100%; background: var(--panel2); border: 1px solid var(--border); border-radius: 4px;
-  padding: 6px 10px; color: var(--text2); font-family: var(--sans); font-size: 11px;
-  outline: none; resize: none; height: 36px; line-height: 1.4;
-}
-.notes-input:focus { border-color: var(--accent); color: var(--text); }
-.notes-input::placeholder { color: var(--text3); }
-
-/* empty state */
-.empty-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text3); gap: 10px; }
-.empty-main .big { font-size: 40px; }
+/* EMPTY */
+.empty-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text3); gap: 10px; grid-column: 1/-1; }
+.empty-main .big { font-size: 36px; }
 .empty-main p { font-size: 12px; text-align: center; line-height: 1.6; }
 
-/* progress bar */
-.progress-bar { height: 2px; background: var(--border); position: relative; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
-
-/* spinner */
 .spin { display: inline-block; width: 11px; height: 11px; border: 1.5px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: rot 0.6s linear infinite; }
 @keyframes rot { to { transform: rotate(360deg); } }
 
@@ -322,7 +195,6 @@ select.ci option { background: #1a1d24; }
 <body>
 <div class="app">
 
-  <!-- TOPBAR -->
   <div class="topbar">
     <div class="topbar-logo">⚡ CertAI <span>/ Batch Trainer</span></div>
     <div class="topbar-stats">
@@ -344,70 +216,73 @@ select.ci option { background: #1a1d24; }
 
   <div class="body">
 
-    <!-- QUEUE SIDEBAR -->
+    <!-- QUEUE -->
     <div class="queue-panel">
       <div class="queue-header">
         <span class="queue-title">Queue</span>
         <span class="queue-badge" id="qBadge">0</span>
       </div>
-
       <div class="drop-zone" id="dropZone">
         <input type="file" id="fileInput" accept="image/*" multiple onchange="addFiles(this.files)">
         <span class="drop-icon">📁</span>
-        <div class="drop-text"><strong>Drop board photos here</strong><br>or click to select multiple</div>
+        <div class="drop-text"><strong>Drop board photos</strong><br>or click to select multiple</div>
       </div>
-
       <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-
       <div class="queue-list" id="queueList"></div>
-
       <div class="queue-footer">
-        <button class="btn-sm" id="btnScanAll" onclick="scanAll()" disabled>▶ Scan All</button>
+        <button class="btn-sm primary" id="btnScanAll" onclick="scanAll()" disabled>▶ Scan All</button>
         <button class="btn-sm green" onclick="exportDataset()">⬇ Export</button>
       </div>
     </div>
 
     <!-- MAIN -->
     <div class="main-panel" id="mainPanel">
-      <div class="empty-main" id="emptyMain" style="grid-column:1/-1">
+      <div class="empty-main" id="emptyMain">
         <span class="big">📷</span>
-        <p>Drop board photos into the queue<br>to start building training data.</p>
+        <p>Drop board photos into the queue<br>then hit Scan All to begin.</p>
       </div>
 
-      <!-- IMAGE PANE (hidden until item selected) -->
       <div class="img-pane" id="imgPane" style="display:none">
-        <div class="img-pane-header">
-          <span class="pane-title" id="imgPaneTitle">Board Image</span>
+        <div class="pane-header">
+          <span class="pane-title" id="imgPaneTitle">Board</span>
+          <span id="boardPhaseTag" style="margin-left:6px;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;background:var(--panel2);color:var(--text3);border:1px solid var(--border2);">1Ø</span>
         </div>
         <div class="img-wrap">
           <img class="board-img" id="boardImg" src="" alt="">
         </div>
         <div class="board-meta">
-          <div class="meta-row">
-            <div class="meta-field">
-              <span class="meta-label">Make / Manufacturer</span>
-              <input class="meta-input" id="boardMake" placeholder="Hager, Wylex, MK…" oninput="markDirty()">
+          <div class="meta-grid-3">
+            <div class="mf">
+              <label>Make</label>
+              <input class="mi" id="boardMake" placeholder="Hager, Wylex…" oninput="markDirty()">
             </div>
-            <div class="meta-field">
-              <span class="meta-label">Board Rating</span>
-              <input class="meta-input" id="boardRating" placeholder="100A" oninput="markDirty()">
+            <div class="mf">
+              <label>Rating</label>
+              <input class="mi" id="boardRating" placeholder="100A" oninput="markDirty()">
+            </div>
+            <div class="mf">
+              <label>Phases</label>
+              <select class="mi" id="boardPhases" onchange="updatePhaseTag()">
+                <option value="1">1Ø Single</option>
+                <option value="3">3Ø Three</option>
+              </select>
             </div>
           </div>
-          <div class="meta-field">
-            <span class="meta-label">Notes</span>
-            <textarea class="notes-input" id="notesField" placeholder="Partially labelled, board under stairs, 17th ed…"></textarea>
+          <div class="mf">
+            <label>Notes</label>
+            <input class="mi" id="notesField" placeholder="Partially labelled, under stairs, 17th ed split load…">
           </div>
         </div>
       </div>
 
-      <!-- EDIT PANE (hidden until item selected) -->
       <div class="edit-pane" id="editPane" style="display:none">
         <div class="edit-header">
-          <span class="pane-title">Circuits</span>
+          <span class="pane-title">Schedule of Circuits</span>
           <span class="circuit-count" id="circuitCount">0 circuits</span>
-          <div class="edit-header-actions">
-            <button class="btn-sm" onclick="addCircuit()">+ Row</button>
-            <button class="btn-sm" onclick="rescan()" id="btnRescan">↺ Re-scan</button>
+          <div class="edit-actions">
+            <button class="btn-sm" onclick="addCircuitRow()">+ Row</button>
+            <button class="btn-sm" onclick="addMainSwitch()">+ Main SW</button>
+            <button class="btn-sm" id="btnRescan" onclick="rescan()">↺ Re-scan</button>
           </div>
         </div>
 
@@ -416,25 +291,26 @@ select.ci option { background: #1a1d24; }
             <thead>
               <tr>
                 <th>#</th>
-                <th>Label</th>
-                <th class="th-amps">Amps</th>
+                <th>Description</th>
+                <th class="th-amps">Rating</th>
                 <th class="th-type">Type</th>
-                <th class="th-cable">Cable</th>
+                <th class="th-ph">Phase</th>
+                <th class="th-wt">Wiring</th>
+                <th class="th-live">CSA Live</th>
+                <th class="th-cpc">CSA CPC</th>
                 <th class="th-rcbo">RCBO</th>
-                <th></th>
+                <th class="th-del"></th>
               </tr>
             </thead>
             <tbody id="circuitBody"></tbody>
           </table>
-          <button class="add-row-btn" onclick="addCircuit()">+ Add Circuit Row</button>
+          <button class="add-row-btn" onclick="addCircuitRow()">+ Add Circuit Row</button>
         </div>
 
         <div class="save-bar">
-          <div class="save-bar-info" id="saveBarInfo"></div>
+          <div class="save-info" id="saveInfo"></div>
           <button class="btn-skip" onclick="skipCurrent()">Skip ✕</button>
-          <button class="btn-save-board" id="btnSaveBoard" onclick="saveCurrent()">
-            Save &amp; Next →
-          </button>
+          <button class="btn-save" id="btnSave" onclick="saveCurrent()">Save &amp; Next →</button>
         </div>
       </div>
     </div>
@@ -448,39 +324,30 @@ const token = localStorage.getItem('certai_token') || '';
 if (!token) window.location.href = '/login.html';
 const H = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
 
-// ── STATE ──────────────────────────────────────────────────────────────────────
-const queue = []; // { id, file, name, thumb, status, data, label, notes }
-let currentIdx = -1;
-let totalSaved = 0, totalCircuits = 0;
+const queue = [];
+let currentIdx = -1, totalSaved = 0, totalCircuits = 0;
 
-// ── CABLE INFERENCE ───────────────────────────────────────────────────────────
-const CABLE_MAP = {6:'1.0mm²',10:'1.5mm²',16:'2.5mm²',20:'2.5mm²',32:'6.0mm²',40:'10.0mm²',45:'16.0mm²',50:'16.0mm²'};
-const RING_KW = ['socket','ring','upstairs','downstairs','kitchen','lounge','bedroom','living','dining','hall','landing','study','office','garage','utility'];
-function inferCable(amps, label) {
-  const a = parseInt(amps);
-  if (!a) return '';
-  if (a === 32) return RING_KW.some(k => (label||'').toLowerCase().includes(k)) ? '2.5mm²' : '6.0mm²';
-  return CABLE_MAP[a] || '';
-}
+// ── CABLE CSA OPTIONS ────────────────────────────────────────────────────────
+const CSA_OPTS = ['1.0mm²','1.5mm²','2.5mm²','4.0mm²','6.0mm²','10.0mm²','16.0mm²','25.0mm²'];
+const WIRING_OPTS = ['Flat T&E','Singles','SWA','Flex','MI cable'];
+const PHASE_OPTS = [1,2,3];
 
-// ── FILE HANDLING ─────────────────────────────────────────────────────────────
-const dropZone = document.getElementById('dropZone');
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('over'); addFiles(e.dataTransfer.files); });
+// ── FILE HANDLING ────────────────────────────────────────────────────────────
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); addFiles(e.dataTransfer.files); });
 
 function addFiles(files) {
   Array.from(files).forEach(file => {
     if (!file.type.startsWith('image/')) return;
     const id = 'q' + Date.now() + Math.random().toString(36).slice(2,5);
-    const item = { id, file, name: file.name, thumb: null, status: 'wait', data: null, label: null, notes: '' };
+    const item = { id, file, name: file.name, thumb: null, b64: null, mime: file.type, status: 'wait', data: null, label: null, notes: '' };
     queue.push(item);
-    // Generate thumbnail
     const reader = new FileReader();
     reader.onload = e => {
       item.thumb = e.target.result;
       item.b64 = e.target.result.split(',')[1];
-      item.mime = file.type;
       renderQueue();
     };
     reader.readAsDataURL(file);
@@ -488,60 +355,49 @@ function addFiles(files) {
   renderQueue();
   updateTopStats();
   document.getElementById('btnScanAll').disabled = false;
-  // Auto-select first if nothing selected
   if (currentIdx === -1) selectItem(0);
 }
 
-// ── QUEUE RENDER ──────────────────────────────────────────────────────────────
+// ── QUEUE ────────────────────────────────────────────────────────────────────
 function renderQueue() {
-  const list = document.getElementById('queueList');
   document.getElementById('qBadge').textContent = queue.length;
-  list.innerHTML = queue.map((item, i) => `
-    <div class="q-item${i===currentIdx?' active':''}${item.status==='done'?' done':''}" onclick="selectItem(${i})" id="qi-${item.id}">
-      ${item.thumb ? `<img class="q-thumb" src="${item.thumb}" alt="">` : `<div class="q-thumb" style="display:flex;align-items:center;justify-content:center;font-size:16px;">📷</div>`}
+  document.getElementById('queueList').innerHTML = queue.map((item, i) => `
+    <div class="q-item${i===currentIdx?' active':''}${item.status==='done'?' done':''}" onclick="selectItem(${i})">
+      ${item.thumb
+        ? `<img class="q-thumb" src="${item.thumb}">`
+        : `<div class="q-thumb-ph">📷</div>`}
       <div class="q-info">
-        <div class="q-name">${item.name.replace(/\.[^.]+$/,'').substring(0,24)}</div>
-        <div class="q-sub">${item.status==='done'?(item.label?.circuits?.length||0)+' circuits':(item.status==='ready'?'needs review':'...')}</div>
+        <div class="q-name">${item.name.replace(/\.[^.]+$/,'').substring(0,22)}</div>
+        <div class="q-sub">${item.status==='done'?(item.label?.circuits?.length||0)+' circuits':item.status==='ready'?'needs review':item.status==='error'?item.errorMsg?.substring(0,20)||'error':'...'}</div>
       </div>
-      <div class="q-status">${statusPill(item.status)}</div>
+      <span class="pill pill-${item.status}">${{wait:'Wait',scan:'Scan',ready:'Review',done:'Done',error:'Err'}[item.status]||item.status}</span>
     </div>
   `).join('');
-
-  // Progress bar
   const done = queue.filter(i=>i.status==='done').length;
-  const pct = queue.length ? (done/queue.length)*100 : 0;
-  document.getElementById('progressFill').style.width = pct + '%';
-}
-
-function statusPill(s) {
-  const map = { wait:'<span class="pill pill-wait">Wait</span>', scan:'<span class="pill pill-scan">Scanning</span>', ready:'<span class="pill pill-ready">Review</span>', done:'<span class="pill pill-done">Done</span>', error:'<span class="pill pill-err">Error</span>' };
-  return map[s] || '';
+  document.getElementById('progressFill').style.width = (queue.length ? (done/queue.length)*100 : 0) + '%';
 }
 
 function selectItem(idx) {
   if (idx < 0 || idx >= queue.length) return;
   currentIdx = idx;
   renderQueue();
-  loadItemIntoEditor(queue[idx]);
+  loadEditor(queue[idx]);
 }
 
-// ── SCAN ALL ──────────────────────────────────────────────────────────────────
+// ── SCAN ─────────────────────────────────────────────────────────────────────
 async function scanAll() {
   const toScan = queue.filter(i => i.status === 'wait' && i.b64);
   document.getElementById('btnScanAll').disabled = true;
-  // Scan concurrently in batches of 3
   for (let i = 0; i < toScan.length; i += 3) {
     await Promise.all(toScan.slice(i, i+3).map(scanItem));
   }
   document.getElementById('btnScanAll').disabled = false;
-  // Select first ready item
   const firstReady = queue.findIndex(i => i.status === 'ready');
   if (firstReady >= 0) selectItem(firstReady);
 }
 
 async function scanItem(item) {
-  item.status = 'scan';
-  renderQueue();
+  item.status = 'scan'; renderQueue();
   try {
     const r = await fetch(API + '/api/vision/scan', {
       method: 'POST', headers: H,
@@ -553,173 +409,201 @@ async function scanItem(item) {
     item.data = JSON.parse(raw);
     item.status = 'ready';
   } catch(e) {
-    item.status = 'error';
-    item.errorMsg = e.message;
+    item.status = 'error'; item.errorMsg = e.message;
   }
   renderQueue();
-  if (currentIdx >= 0 && queue[currentIdx] === item) loadItemIntoEditor(item);
+  if (currentIdx >= 0 && queue[currentIdx] === item) loadEditor(item);
 }
 
 async function rescan() {
   if (currentIdx < 0) return;
-  const item = queue[currentIdx];
-  await scanItem(item);
+  await scanItem(queue[currentIdx]);
 }
 
-// ── EDITOR ────────────────────────────────────────────────────────────────────
-function loadItemIntoEditor(item) {
+// ── EDITOR ───────────────────────────────────────────────────────────────────
+function loadEditor(item) {
   document.getElementById('emptyMain').style.display = 'none';
   document.getElementById('imgPane').style.display = 'flex';
   document.getElementById('imgPane').style.flexDirection = 'column';
   document.getElementById('editPane').style.display = 'flex';
 
-  document.getElementById('imgPaneTitle').textContent = item.name;
+  const src = item.label || item.data || {};
+  document.getElementById('imgPaneTitle').textContent = item.name.replace(/\.[^.]+$/,'').substring(0,30);
   document.getElementById('boardImg').src = item.thumb || '';
-  document.getElementById('boardMake').value = item.data?.board_make || item.label?.board_make || '';
-  document.getElementById('boardRating').value = item.data?.board_rating || item.label?.board_rating || '';
+  document.getElementById('boardMake').value = src.board_make || '';
+  document.getElementById('boardRating').value = src.board_rating || '';
+  document.getElementById('boardPhases').value = src.board_phases || 1;
   document.getElementById('notesField').value = item.notes || '';
+  updatePhaseTag();
 
-  // Populate circuits
-  const circuits = item.label?.circuits || item.data?.circuits || [];
   document.getElementById('circuitBody').innerHTML = '';
-  circuits.forEach(c => addCircuit(c));
-  updateCircuitCount();
-  updateSaveBar(item);
+  (src.circuits || []).forEach(c => addCircuitRow(c));
+  updateCount();
+  updateSaveInfo(item);
 }
 
-function updateSaveBar(item) {
-  const uncertain = document.querySelectorAll('.uncertain-field').length;
-  const info = document.getElementById('saveBarInfo');
-  if (item.status === 'scan') {
-    info.innerHTML = '<span class="spin"></span> scanning...';
-  } else if (uncertain > 0) {
-    info.innerHTML = `<span>${uncertain} uncertain field${uncertain>1?'s':''} — check highlighted cells</span>`;
-  } else if (item.status === 'ready') {
-    info.textContent = 'Review complete — save when happy';
-  } else if (item.status === 'done') {
-    info.textContent = 'Already saved — re-save to update';
-  } else {
-    info.textContent = '';
-  }
+function updatePhaseTag() {
+  const v = document.getElementById('boardPhases').value;
+  const tag = document.getElementById('boardPhaseTag');
+  tag.textContent = v == 3 ? '3Ø' : '1Ø';
+  tag.style.color = v == 3 ? 'var(--blue)' : 'var(--text3)';
+  tag.style.borderColor = v == 3 ? 'rgba(96,165,250,0.3)' : 'var(--border2)';
+  tag.style.background = v == 3 ? 'rgba(96,165,250,0.08)' : 'var(--panel2)';
 }
 
-function markDirty() { /* just triggers save button availability */ }
+function markDirty() {}
 
-// ── CIRCUIT TABLE ─────────────────────────────────────────────────────────────
-function addCircuit(data) {
+function updateSaveInfo(item) {
+  const uf = document.querySelectorAll('.uf').length;
+  const el = document.getElementById('saveInfo');
+  if (item && item.status === 'scan') { el.innerHTML = '<span class="spin"></span> scanning…'; return; }
+  if (uf > 0) el.innerHTML = `<span class="uf-count">${uf} uncertain field${uf>1?'s':''} — check amber cells</span>`;
+  else if (item && item.status === 'done') el.textContent = 'Already saved — re-save to update';
+  else el.textContent = 'Review complete — save when ready';
+}
+
+// ── CIRCUIT ROW ──────────────────────────────────────────────────────────────
+function addMainSwitch() {
+  addCircuitRow({ position: 0, label: 'Main Switch', is_main_switch: true, rating_amps: null, phases: 1, mcb_type: null, is_rcbo: false, bs_number: null, wiring_type: null, csa_live: null, csa_cpc: null });
+}
+
+function addCircuitRow(data) {
   const d = data || {};
   const tbody = document.getElementById('circuitBody');
-  const pos = tbody.rows.length + 1;
-  const cable = d.csa_mm2 || inferCable(d.rating_amps, d.label) || '';
+  const isMain = !!d.is_main_switch;
+  const pos = isMain ? 0 : tbody.rows.length + 1;
 
-  // Mark uncertain fields — nulls from scan
-  const labelU = data && d.label === null;
-  const ampsU = data && d.rating_amps === null;
-  const cableU = data && !d.csa_mm2 && !cable;
+  // Uncertain = came from scan and is null
+  const fromScan = !!data;
+  const uLabel = fromScan && d.label === null && !isMain;
+  const uAmps  = fromScan && d.rating_amps === null;
+  const uLive  = fromScan && d.csa_live === null;
+  const uCpc   = fromScan && d.csa_cpc === null;
+
+  const csaOpts = ['<option value="">—</option>', ...CSA_OPTS.map(s => `<option value="${s}">${s}</option>`)].join('');
+  const wtOpts  = ['<option value="">—</option>', ...WIRING_OPTS.map(s => `<option value="${s}">${s}</option>`)].join('');
+  const phOpts  = PHASE_OPTS.map(p => `<option value="${p}"${(d.phases||1)==p?' selected':''}>${p}Ø</option>`).join('');
 
   const tr = document.createElement('tr');
-  tr.className = 'crow' + ((labelU||ampsU||cableU) ? ' uncertain' : '');
+  tr.className = 'crow' + (isMain ? ' main-sw' : '') + ((uLabel||uAmps||uLive||uCpc)?' uncertain':'');
+  tr.dataset.isMain = isMain ? '1' : '0';
+
   tr.innerHTML = `
-    <td><span class="pos-n">${pos}</span></td>
-    <td><input class="ci${labelU?' uncertain-field':''}" placeholder="Label…" value="${esc(d.label||'')}" oninput="onLabelChange(this)" tabindex="${pos*10+1}"></td>
-    <td>
-      <select class="ci${ampsU?' uncertain-field':''}" onchange="onAmpsChange(this)" tabindex="${pos*10+2}">
-        <option value="">—</option>
-        ${[6,10,16,20,32,40,45,50].map(a=>`<option value="${a}"${d.rating_amps==a?' selected':''}>${a}A</option>`).join('')}
-      </select>
-    </td>
-    <td>
-      <select class="ci" tabindex="${pos*10+3}">
-        <option value="">—</option>
-        ${['B','C','D'].map(t=>`<option value="${t}"${d.mcb_type===t?' selected':''}>${t}</option>`).join('')}
-      </select>
-    </td>
-    <td>
-      <select class="ci${cableU?' uncertain-field':''}" tabindex="${pos*10+4}">
-        <option value="">—</option>
-        ${['1.0mm²','1.5mm²','2.5mm²','4.0mm²','6.0mm²','10.0mm²','16.0mm²'].map(s=>`<option value="${s}"${cable===s||d.csa_mm2===s?' selected':''}>${s}</option>`).join('')}
-      </select>
-    </td>
-    <td><input type="checkbox" class="rcbo-cb"${d.is_rcbo?' checked':''} tabindex="${pos*10+5}"></td>
-    <td><button class="btn-rm-row" onclick="removeCircuit(this)" tabindex="-1">✕</button></td>
+    <td><span class="pos-n${isMain?' is-main':''}">${isMain?'MS':pos}</span></td>
+    <td><input class="ci${uLabel?' uf':''}" placeholder="${isMain?'Main Switch':'Description…'}" value="${esc(d.label||'')}" oninput="clearUf(this)"></td>
+    <td><select class="ci${uAmps?' uf':''}" onchange="clearUf(this)">
+      <option value="">—</option>
+      ${[6,10,16,20,32,40,45,50,63,80,100,125].map(a=>`<option value="${a}"${d.rating_amps==a?' selected':''}>${a}A</option>`).join('')}
+    </select></td>
+    <td><select class="ci" ${isMain?'disabled':''}>
+      <option value="">—</option>
+      ${['B','C','D'].map(t=>`<option value="${t}"${d.mcb_type===t?' selected':''}>${t}</option>`).join('')}
+    </select></td>
+    <td><select class="ci">${phOpts}</select></td>
+    <td><select class="ci">${wtOpts}</select></td>
+    <td><select class="ci${uLive?' uf':''}" onchange="clearUf(this)">${csaOpts}</select></td>
+    <td><select class="ci${uCpc?' uf':''}"  onchange="clearUf(this)">${csaOpts}</select></td>
+    <td><input type="checkbox" class="rcbo-cb" ${d.is_rcbo?' checked':''} ${isMain?'disabled':''}></td>
+    <td><button class="btn-rm" onclick="removeRow(this)">✕</button></td>
   `;
+
+  // Set select values after insert
+  const sels = tr.querySelectorAll('select');
+  if (d.wiring_type)  sels[3].value = d.wiring_type;
+  if (d.csa_live)     sels[4].value = d.csa_live;
+  if (d.csa_cpc)      sels[5].value = d.csa_cpc;
+
   tbody.appendChild(tr);
-  updateCircuitCount();
-
-  // After adding, recheck uncertain
-  checkUncertain();
+  updateCount();
+  recheckUncertain();
 }
 
-function onLabelChange(input) {
-  const row = input.closest('tr');
-  const ampsVal = row.querySelectorAll('select')[0].value;
-  if (ampsVal == 32) {
-    const cs = row.querySelectorAll('select')[2];
-    const inf = inferCable(32, input.value);
-    if (inf) { cs.value = inf; cs.classList.remove('uncertain-field'); }
-  }
-  input.classList.remove('uncertain-field');
-  checkUncertain();
+function clearUf(el) {
+  el.classList.remove('uf');
+  recheckUncertain();
 }
 
-function onAmpsChange(sel) {
-  const row = sel.closest('tr');
-  const label = row.querySelector('input[type=text],.ci:not(select)').value;
-  const cs = row.querySelectorAll('select')[2];
-  const inf = inferCable(sel.value, label);
-  if (inf) { cs.value = inf; cs.classList.remove('uncertain-field'); }
-  sel.classList.remove('uncertain-field');
-  checkUncertain();
-}
-
-function removeCircuit(btn) {
+function removeRow(btn) {
   btn.closest('tr').remove();
-  document.querySelectorAll('#circuitBody tr').forEach((tr,i) => tr.querySelector('.pos-n').textContent = i+1);
-  updateCircuitCount();
+  renumber();
+  updateCount();
 }
 
-function updateCircuitCount() {
+function renumber() {
+  let n = 1;
+  document.querySelectorAll('#circuitBody tr').forEach(tr => {
+    const badge = tr.querySelector('.pos-n');
+    if (tr.dataset.isMain === '1') { badge.textContent = 'MS'; return; }
+    badge.textContent = n++;
+  });
+}
+
+function updateCount() {
   const n = document.querySelectorAll('#circuitBody tr').length;
-  document.getElementById('circuitCount').textContent = n + ' circuit' + (n!==1?'s':'');
+  document.getElementById('circuitCount').textContent = n + ' row' + (n!==1?'s':'');
 }
 
-function checkUncertain() {
-  const n = document.querySelectorAll('.uncertain-field').length;
-  const item = queue[currentIdx];
-  if (item) updateSaveBar(item);
+function recheckUncertain() {
+  const item = currentIdx >= 0 ? queue[currentIdx] : null;
+  if (item) updateSaveInfo(item);
 }
 
-function esc(s) { return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function esc(s) { return String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
-// ── BUILD LABEL FROM FORM ─────────────────────────────────────────────────────
+// ── BUILD LABEL ───────────────────────────────────────────────────────────────
 function buildLabel() {
   const circuits = [];
   document.querySelectorAll('#circuitBody tr').forEach((tr, i) => {
-    const labelEl = tr.querySelector('input[type=text], input:not([type=checkbox])');
+    const isMain = tr.dataset.isMain === '1';
+    const inputs = tr.querySelectorAll('input[type=text], input:not([type=checkbox]):not([type=button])');
+    const labelEl = tr.querySelector('input.ci');
     const label = labelEl ? labelEl.value.trim() || null : null;
     const sels = tr.querySelectorAll('select');
     const amps = sels[0]?.value ? parseInt(sels[0].value) : null;
-    const mcb = sels[1]?.value || null;
-    const csa = sels[2]?.value || null;
-    const is_rcbo = tr.querySelector('.rcbo-cb')?.checked || false;
-    circuits.push({ position:i+1, label, rating_amps:amps, mcb_type:mcb, is_rcbo, bs_number:is_rcbo?'BS EN 61009-1':'BS EN 60898-1', csa_mm2:csa });
+    const mcb   = !isMain ? (sels[1]?.value || null) : null;
+    const phases = parseInt(sels[2]?.value) || 1;
+    const wiring = sels[3]?.value || null;
+    const csa_live = sels[4]?.value || null;
+    const csa_cpc  = sels[5]?.value || null;
+    const is_rcbo  = !isMain && (tr.querySelector('.rcbo-cb')?.checked || false);
+
+    circuits.push({
+      position: isMain ? 0 : i,
+      label,
+      is_main_switch: isMain,
+      rating_amps: amps,
+      phases,
+      mcb_type: mcb,
+      is_rcbo,
+      bs_number: isMain ? null : (is_rcbo ? 'BS EN 61009-1' : 'BS EN 60898-1'),
+      wiring_type: wiring,
+      csa_live,
+      csa_cpc
+    });
   });
+
+  // Sort: main switch first, then by position
+  circuits.sort((a,b) => a.is_main_switch ? -1 : b.is_main_switch ? 1 : a.position - b.position);
+  // Renumber non-main circuits 1..n
+  let n = 1;
+  circuits.forEach(c => { if (!c.is_main_switch) c.position = n++; });
+
   return {
-    board_make: document.getElementById('boardMake').value.trim()||null,
-    board_rating: document.getElementById('boardRating').value.trim()||null,
+    board_make: document.getElementById('boardMake').value.trim() || null,
+    board_rating: document.getElementById('boardRating').value.trim() || null,
+    board_phases: parseInt(document.getElementById('boardPhases').value) || 1,
     circuits
   };
 }
 
-// ── SAVE CURRENT ──────────────────────────────────────────────────────────────
+// ── SAVE ──────────────────────────────────────────────────────────────────────
 async function saveCurrent() {
   if (currentIdx < 0) return;
   const item = queue[currentIdx];
-  if (!item.b64) return;
+  if (!item?.b64) return;
 
-  const btn = document.getElementById('btnSaveBoard');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span> Saving…';
+  const btn = document.getElementById('btnSave');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Saving…';
 
   const label = buildLabel();
   item.label = label;
@@ -731,43 +615,29 @@ async function saveCurrent() {
       body: JSON.stringify({ image: item.b64, mime: item.mime, label, notes: item.notes })
     });
     const d = await r.json();
-    if (!r.ok) throw new Error(d.error||'Save failed');
+    if (!r.ok) throw new Error(d.error || 'Save failed');
     item.status = 'done';
     totalSaved++;
-    totalCircuits += label.circuits.length;
+    totalCircuits += label.circuits.filter(c=>!c.is_main_switch).length;
     updateTopStats();
     renderQueue();
-    // Move to next non-done item
     nextItem();
   } catch(e) {
     alert('Save failed: ' + e.message);
-  } finally {
     btn.disabled = false;
+  } finally {
     btn.innerHTML = 'Save &amp; Next →';
   }
 }
 
-function skipCurrent() {
-  nextItem();
-}
+function skipCurrent() { nextItem(); }
 
 function nextItem() {
-  // Find next item that isn't done, after current
   let next = -1;
-  for (let i = currentIdx+1; i < queue.length; i++) {
-    if (queue[i].status !== 'done') { next = i; break; }
-  }
-  if (next === -1) {
-    // Wrap around from start
-    for (let i = 0; i < currentIdx; i++) {
-      if (queue[i].status !== 'done') { next = i; break; }
-    }
-  }
+  for (let i = currentIdx+1; i < queue.length; i++) { if (queue[i].status !== 'done') { next = i; break; } }
+  if (next === -1) { for (let i = 0; i < currentIdx; i++) { if (queue[i].status !== 'done') { next = i; break; } } }
   if (next >= 0) selectItem(next);
-  else {
-    // All done
-    document.getElementById('saveBarInfo').textContent = '✓ All boards reviewed!';
-  }
+  else document.getElementById('saveInfo').textContent = '✓ All boards reviewed!';
 }
 
 function updateTopStats() {
@@ -784,18 +654,15 @@ async function exportDataset() {
     const blob = await r.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url;
-    a.download = 'certai-training-'+new Date().toISOString().split('T')[0]+'.jsonl';
+    a.download = 'certai-training-' + new Date().toISOString().split('T')[0] + '.jsonl';
     a.click(); URL.revokeObjectURL(url);
   } catch(e) { alert(e.message); }
 }
 
-// ── KEYBOARD SHORTCUTS ────────────────────────────────────────────────────────
+// ── KEYBOARD ──────────────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
-  // Ctrl+Enter = save & next
   if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); saveCurrent(); }
-  // Ctrl+Right = skip
   if (e.ctrlKey && e.key === 'ArrowRight') { e.preventDefault(); skipCurrent(); }
-  // Ctrl+S = save without moving
   if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveCurrent(); }
 });
 </script>
